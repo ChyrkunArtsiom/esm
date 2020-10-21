@@ -3,6 +3,7 @@ package com.epam.esm.entity;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+
 public class GiftCertificate {
     private Integer id;
     private String name;
