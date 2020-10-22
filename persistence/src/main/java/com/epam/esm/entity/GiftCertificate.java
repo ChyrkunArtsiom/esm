@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 
-public class GiftCertificate {
+public class GiftCertificate extends Entity {
     private Integer id;
     private String name;
     private String description;
