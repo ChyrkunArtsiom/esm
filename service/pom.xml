@@ -13,6 +13,8 @@
 
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -21,7 +23,6 @@
             <artifactId>persistence</artifactId>
             <version>1.0</version>
         </dependency>
-
     </dependencies>
 
 </project>

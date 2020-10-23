@@ -1,10 +1,9 @@
-package com.epam.esm.entity;
+package com.epam.esm.dto;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-
-public class GiftCertificate extends AbstractEntity {
+public class GiftCertificateDTO extends AbstractDTO {
     private Integer id;
     private String name;
     private String description;
@@ -12,20 +11,6 @@ public class GiftCertificate extends AbstractEntity {
     private LocalDateTime createDate;
     private LocalDateTime lastUpdateDate;
     private Integer duration;
-
-    public GiftCertificate() {
-    }
-
-    public GiftCertificate(Integer id, String name, String description, Float price,
-                           LocalDateTime createDate, LocalDateTime lastUpdateDate, Integer duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.createDate = createDate;
-        this.lastUpdateDate = lastUpdateDate;
-        this.duration = duration;
-    }
 
     public Integer getId() {
         return id;
@@ -96,7 +81,7 @@ public class GiftCertificate extends AbstractEntity {
         if(obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        GiftCertificate certificate = (GiftCertificate) obj;
+        GiftCertificateDTO certificate = (GiftCertificateDTO) obj;
         return id.equals(certificate.id) && name.equals(certificate.name) && description.equals(certificate.description)
                 && price.equals(certificate.price) && createDate.equals(certificate.createDate)
                 && lastUpdateDate.equals(certificate.lastUpdateDate) && duration.equals(certificate.duration);

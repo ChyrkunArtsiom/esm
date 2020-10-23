@@ -1,16 +1,16 @@
-package com.epam.esm.entity;
+package com.epam.esm.dto;
 
 import java.util.Objects;
 
-public class Tag extends AbstractEntity {
+public class TagDTO extends AbstractDTO {
     private Integer id;
     private String name;
 
-    public Tag() {
+    public TagDTO() {
 
     }
 
-    public Tag(Integer id, String name) {
+    public TagDTO(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -44,7 +44,7 @@ public class Tag extends AbstractEntity {
         if(obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Tag tag = (Tag) obj;
+        TagDTO tag = (TagDTO) obj;
         return id.equals(tag.id) && name.equals(tag.name);
     }
 

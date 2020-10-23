@@ -1,8 +1,10 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.PostgresqlDAO;
+import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@ComponentScan(basePackageClasses = HikariCPDataSource.class)
 public class TagDAO implements PostgresqlDAO<Tag> {
 
     private final static String SQL_INSERT_TAG = "INSERT INTO esm_module2.tags (name) VALUES (?)";
