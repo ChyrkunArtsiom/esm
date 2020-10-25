@@ -1,16 +1,29 @@
 package com.epam.esm.dto;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class GiftCertificateDTO extends AbstractDTO {
     private Integer id;
     private String name;
     private String description;
-    private Float price;
-    private LocalDateTime createDate;
-    private LocalDateTime lastUpdateDate;
+    private Double price;
+    private String createDate;
+    private String lastUpdateDate;
     private Integer duration;
+
+    public GiftCertificateDTO() {
+    }
+
+    public GiftCertificateDTO(Integer id, String name, String description, Double price, String createDate,
+                              String lastUpdateDate, Integer duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.createDate = createDate;
+        this.lastUpdateDate = lastUpdateDate;
+        this.duration = duration;
+    }
 
     public Integer getId() {
         return id;
@@ -36,27 +49,27 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.description = description;
     }
 
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public LocalDateTime getCreateDate() {
+    public String getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(LocalDateTime createDate) {
+    public void setCreateDate(String createDate) {
         this.createDate = createDate;
     }
 
-    public LocalDateTime getLastUpdateDate() {
+    public String getLastUpdateDate() {
         return lastUpdateDate;
     }
 
-    public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
+    public void setLastUpdateDate(String lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
     }
 

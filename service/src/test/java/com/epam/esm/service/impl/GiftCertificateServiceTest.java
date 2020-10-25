@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = GiftCertificateService.class)
@@ -23,8 +23,8 @@ class GiftCertificateServiceTest {
     @Test
     void create() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1f, LocalDateTime.now(), LocalDateTime.now(), 1);
-        assertTrue(service.create(certificate));
+                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
+        assertTrue(service.create(certificate) > 0);
     }
 
     @Test
@@ -36,7 +36,7 @@ class GiftCertificateServiceTest {
     @Test
     void update() {
         GiftCertificate certificate = new GiftCertificate(3, "testR", "test",
-                1f, LocalDateTime.now(), LocalDateTime.now(), 1);
+                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
         Optional<GiftCertificate> oldCertificate = service.update(certificate);
         assertTrue(oldCertificate.isPresent());
     }
@@ -44,7 +44,7 @@ class GiftCertificateServiceTest {
     @Test
     void delete() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1f, LocalDateTime.now(), LocalDateTime.now(), 1);
+                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
         assertTrue(service.delete(certificate));
     }
 

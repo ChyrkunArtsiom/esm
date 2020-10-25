@@ -1,6 +1,6 @@
 package com.epam.esm.entity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 
@@ -8,16 +8,16 @@ public class GiftCertificate extends AbstractEntity {
     private Integer id;
     private String name;
     private String description;
-    private Float price;
-    private LocalDateTime createDate;
-    private LocalDateTime lastUpdateDate;
+    private Double price;
+    private OffsetDateTime createDate;
+    private OffsetDateTime lastUpdateDate;
     private Integer duration;
 
     public GiftCertificate() {
     }
 
-    public GiftCertificate(Integer id, String name, String description, Float price,
-                           LocalDateTime createDate, LocalDateTime lastUpdateDate, Integer duration) {
+    public GiftCertificate(Integer id, String name, String description, Double price,
+                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -51,27 +51,27 @@ public class GiftCertificate extends AbstractEntity {
         this.description = description;
     }
 
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public LocalDateTime getCreateDate() {
+    public OffsetDateTime getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(LocalDateTime createDate) {
+    public void setCreateDate(OffsetDateTime createDate) {
         this.createDate = createDate;
     }
 
-    public LocalDateTime getLastUpdateDate() {
+    public OffsetDateTime getLastUpdateDate() {
         return lastUpdateDate;
     }
 
-    public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
+    public void setLastUpdateDate(OffsetDateTime lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
     }
 

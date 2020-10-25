@@ -6,11 +6,11 @@ import com.epam.esm.entity.Tag;
 public class TagMapper implements ItemMapper<TagDTO, Tag> {
     @Override
     public Tag toEntity(TagDTO dto) {
-        return null;
+        return new Tag(dto.getId(), dto.getName());
     }
 
     @Override
     public TagDTO toDto(Tag entity) {
-        return null;
+        return new TagDTO(entity.getId(), entity.getName());
     }
 }

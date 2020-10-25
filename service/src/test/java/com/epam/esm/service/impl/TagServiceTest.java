@@ -10,7 +10,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TagService.class)
@@ -28,7 +29,7 @@ class TagServiceTest {
     @Test
     void testCreate() {
         Tag tag = new Tag(0, "testtag");
-        assertTrue(service.create(tag));
+        assertTrue(service.create(tag) > 0);
     }
 
     @Test

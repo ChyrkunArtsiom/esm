@@ -22,7 +22,7 @@ public class TagService implements PostgresqlService<Tag> {
     }
 
     @Override
-    public boolean create(Tag tag) {
+    public int create(Tag tag) {
         return dao.create(tag);
     }
 

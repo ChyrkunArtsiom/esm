@@ -5,11 +5,16 @@ import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +28,8 @@ public class TagDAO implements PostgresqlDAO<Tag> {
 
     private final static String SQL_READ_TAG = "SELECT id, name FROM esm_module2.tags WHERE id = (?)";
 
+    private final static String SQL_READ_TAG_BY_NAME = "SELECT id, name FROM esm_module2.tags WHERE name = (?)";
+
     private final static String SQL_READ_ALL = "SELECT id, name FROM esm_module2.tags";
 
     private final static String SQL_DELETE_TAG = "DELETE FROM esm_module2.tags WHERE id = (?)";
@@ -35,17 +42,36 @@ public class TagDAO implements PostgresqlDAO<Tag> {
     }
 
     @Override
-    public boolean create(Tag tag) {
-        Object[] params = new Object[] {tag.getName()};
-        int[] types = new int[] {Types.VARCHAR};
-
-       return template.update(SQL_INSERT_TAG, params, types) > 0;
+    public int create(Tag tag) {
+        KeyHolder key = new GeneratedKeyHolder();
+        try {
+            template.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(SQL_INSERT_TAG, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, tag.getName());
+                return ps;
+                }, key);
+        } catch (DuplicateKeyException e) {
+            //throw new
+        }
+        if (key.getKeys() != null) {
+            return (int)key.getKeys().get("id");
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public Optional<Tag> read(int id) {
+        return readByParam(id, SQL_READ_TAG);
+    }
+
+    public Optional<Tag> read(String name) {
+        return readByParam(name, SQL_READ_TAG_BY_NAME);
+    }
+
+    private Optional<Tag> readByParam(Object param, String query) {
         Tag tag;
-        Object[] params = new Object[] {id};
+        Object[] params = new Object[] {param};
 
         RowMapper<Tag> rowMapper = (rs, rowNum) -> {
             Tag row = new Tag();
@@ -55,7 +81,7 @@ public class TagDAO implements PostgresqlDAO<Tag> {
         };
 
         try {
-            tag = template.queryForObject(SQL_READ_TAG, params, rowMapper);
+            tag = template.queryForObject(query, params, rowMapper);
             if (tag == null) {
                 return Optional.empty();
             } else {

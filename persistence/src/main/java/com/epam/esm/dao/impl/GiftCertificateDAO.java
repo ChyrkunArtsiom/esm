@@ -5,15 +5,18 @@ import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.ZoneId;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,15 +48,29 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
     }
 
     @Override
-    public boolean create(GiftCertificate giftCertificate) {
-        ZoneId zone = ZoneId.of("Europe/Moscow");
-        Object[] params = new Object[] {giftCertificate.getName(), giftCertificate.getDescription(),
-                giftCertificate.getPrice(), giftCertificate.getCreateDate().atZone(zone).toOffsetDateTime(),
-                giftCertificate.getLastUpdateDate().atZone(zone).toOffsetDateTime(), giftCertificate.getDuration()};
-        int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE,
-                Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER};
-
-        return template.update(SQL_INSERT_CERTIFICATE, params, types) > 0;
+    public int create(GiftCertificate giftCertificate) {
+        KeyHolder key = new GeneratedKeyHolder();
+        try {
+            template.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(SQL_INSERT_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, giftCertificate.getName());
+                ps.setString(2, giftCertificate.getDescription());
+                ps.setDouble(3, giftCertificate.getPrice());
+                ps.setTimestamp(4, Timestamp.valueOf(
+                        LocalDateTime.ofInstant(giftCertificate.getCreateDate().toInstant(), ZoneOffset.UTC)));
+                ps.setTimestamp(5, Timestamp.valueOf(
+                        LocalDateTime.ofInstant(giftCertificate.getLastUpdateDate().toInstant(), ZoneOffset.UTC)));
+                ps.setInt(6, giftCertificate.getDuration());
+                return ps;
+            }, key);
+        } catch (DuplicateKeyException e) {
+            e.printStackTrace();
+        }
+        if (key.getKeys() != null) {
+            return (int)key.getKeys().get("id");
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -78,10 +95,9 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
     public Optional<GiftCertificate> update(GiftCertificate giftCertificate) {
         Optional<GiftCertificate> oldCertificate = read(giftCertificate.getId());
         if (oldCertificate.isPresent()) {
-            ZoneId zone = ZoneId.of("Europe/Moscow");
             Object[] params = new Object[] {giftCertificate.getName(), giftCertificate.getDescription(),
-                    giftCertificate.getPrice(), giftCertificate.getCreateDate().atZone(zone).toOffsetDateTime(),
-                    giftCertificate.getLastUpdateDate().atZone(zone).toOffsetDateTime(), giftCertificate.getDuration(),
+                    giftCertificate.getPrice(), giftCertificate.getCreateDate(),
+                    giftCertificate.getLastUpdateDate(), giftCertificate.getDuration(),
                     giftCertificate.getId()};
             int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE,
                     Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER, Types.INTEGER};
@@ -127,9 +143,9 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
         certificate.setId(rs.getInt("id"));
         certificate.setName(rs.getString("name"));
         certificate.setDescription(rs.getString("description"));
-        certificate.setPrice(rs.getFloat("price"));
-        certificate.setCreateDate(rs.getTimestamp("create_date").toLocalDateTime());
-        certificate.setLastUpdateDate(rs.getTimestamp("last_update_date").toLocalDateTime());
+        certificate.setPrice(rs.getDouble("price"));
+        certificate.setCreateDate(rs.getObject("create_date", OffsetDateTime.class));
+        certificate.setLastUpdateDate(rs.getObject("last_update_date", OffsetDateTime.class));
         certificate.setDuration(rs.getInt("duration"));
         return certificate;
     }

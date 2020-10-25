@@ -29,7 +29,7 @@ public class GiftCertificateService implements PostgresqlService<GiftCertificate
     }
 
     @Override
-    public boolean create(GiftCertificate certificate) {
+    public int create(GiftCertificate certificate) {
         return dao.create(certificate);
     }
 

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostgresqlDAO<T extends AbstractEntity> {
-    boolean create(T entity);
+    int create(T entity);
     Optional<T> read(int id);
     Optional<T> update(T entity);
     boolean delete(T entity);

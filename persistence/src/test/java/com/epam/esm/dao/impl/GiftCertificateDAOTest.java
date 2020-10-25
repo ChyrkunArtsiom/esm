@@ -1,20 +1,17 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = GiftCertificateDAO.class)
@@ -26,8 +23,8 @@ class GiftCertificateDAOTest {
     @Test
     void testCreate() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1f, LocalDateTime.now(), LocalDateTime.now(), 1);
-        assertTrue(dao.create(certificate));
+                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
+        assertTrue(dao.create(certificate) > 0);
     }
 
     @Test
@@ -38,8 +35,8 @@ class GiftCertificateDAOTest {
 
     @Test
     void testUpdate() {
-        GiftCertificate certificate = new GiftCertificate(3, "testR", "test",
-                1f, LocalDateTime.now(), LocalDateTime.now(), 1);
+        GiftCertificate certificate = new GiftCertificate(5, "testR", "test",
+                1.0, OffsetDateTime.now().plusDays(1), OffsetDateTime.now(), 1);
         Optional<GiftCertificate> oldCertificate = dao.update(certificate);
         assertTrue(oldCertificate.isPresent());
     }
@@ -47,7 +44,7 @@ class GiftCertificateDAOTest {
     @Test
     void testDelete() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1f, LocalDateTime.now(), LocalDateTime.now(), 1);
+                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
         assertTrue(dao.delete(certificate));
     }
 
