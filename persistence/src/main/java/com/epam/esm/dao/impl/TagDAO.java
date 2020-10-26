@@ -3,6 +3,8 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.PostgresqlDAO;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.DAOException;
+import com.epam.esm.exception.ExceptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
@@ -61,15 +63,15 @@ public class TagDAO implements PostgresqlDAO<Tag> {
     }
 
     @Override
-    public Optional<Tag> read(int id) {
+    public Optional<Tag> read(int id) throws DAOException{
         return readByParam(id, SQL_READ_TAG);
     }
 
-    public Optional<Tag> read(String name) {
+    public Optional<Tag> read(String name) throws DAOException{
         return readByParam(name, SQL_READ_TAG_BY_NAME);
     }
 
-    private Optional<Tag> readByParam(Object param, String query) {
+    private Optional<Tag> readByParam(Object param, String query) throws DAOException{
         Tag tag;
         Object[] params = new Object[] {param};
 
@@ -88,7 +90,7 @@ public class TagDAO implements PostgresqlDAO<Tag> {
                 return Optional.of(tag);
             }
         } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
+            throw new DAOException(ExceptionType.TAG_DOESNT_EXIST);
         }
     }
 

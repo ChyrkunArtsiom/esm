@@ -1,7 +1,9 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.TagDAO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.PostgresqlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -12,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @ComponentScan(basePackageClasses = TagDAO.class)
-public class TagService implements PostgresqlService<Tag> {
+public class TagService implements PostgresqlService<Tag, TagDTO> {
 
     private TagDAO dao;
 
@@ -27,8 +29,10 @@ public class TagService implements PostgresqlService<Tag> {
     }
 
     @Override
-    public Optional<Tag> read(int id) {
-        return dao.read(id);
+    public TagDTO read(int id) {
+        Optional<Tag> optionalTag = dao.read(id);
+        //Exception or Optional.empty?
+        return optionalTag.map(TagMapper::toDto).orElse(null);
     }
 
     @Override

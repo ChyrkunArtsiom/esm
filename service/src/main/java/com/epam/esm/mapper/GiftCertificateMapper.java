@@ -6,9 +6,9 @@ import com.epam.esm.entity.GiftCertificate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class GiftCertificateMapper implements ItemMapper<GiftCertificateDTO, GiftCertificate> {
-    @Override
-    public GiftCertificate toEntity(GiftCertificateDTO dto) {
+public class GiftCertificateMapper {
+
+    public static GiftCertificate toEntity(GiftCertificateDTO dto) {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setId(dto.getId());
         certificate.setName(dto.getName());
@@ -20,8 +20,7 @@ public class GiftCertificateMapper implements ItemMapper<GiftCertificateDTO, Gif
         return certificate;
     }
 
-    @Override
-    public GiftCertificateDTO toDto(GiftCertificate entity) {
+    public static GiftCertificateDTO toDto(GiftCertificate entity) {
         GiftCertificateDTO dto = new GiftCertificateDTO();
         dto.setId(entity.getId());
         dto.setName(entity.getName());

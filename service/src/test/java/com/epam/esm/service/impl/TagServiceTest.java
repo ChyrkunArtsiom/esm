@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +35,8 @@ class TagServiceTest {
 
     @Test
     void testRead() {
-        Optional<Tag> optionalTag = service.read(4);
-        assertFalse(optionalTag.isPresent());
+        TagDTO tag = service.read(4);
+        assertFalse(tag.getName().isEmpty());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,8 +30,8 @@ class GiftCertificateServiceTest {
 
     @Test
     void read() {
-        Optional<GiftCertificate> certificate = service.read(1);
-        assertTrue(certificate.isPresent());
+        GiftCertificateDTO certificate = service.read(1);
+        assertTrue(certificate.getName().isEmpty());
     }
 
     @Test

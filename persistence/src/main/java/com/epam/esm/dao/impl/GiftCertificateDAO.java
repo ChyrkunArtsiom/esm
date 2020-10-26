@@ -3,6 +3,8 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.PostgresqlDAO;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.exception.DAOException;
+import com.epam.esm.exception.ExceptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
@@ -74,7 +76,7 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
     }
 
     @Override
-    public Optional<GiftCertificate> read(int id) {
+    public Optional<GiftCertificate> read(int id) throws DAOException{
         GiftCertificate certificate;
         Object[] params = new Object[] {id};
         RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> certificateMapper(rs);
@@ -87,7 +89,7 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
                 return Optional.of(certificate);
             }
         } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
+            throw new DAOException(ExceptionType.CERTIFICATE_DOESNT_EXIST);
         }
     }
 
