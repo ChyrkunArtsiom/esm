@@ -4,4 +4,4 @@
 persistence/target
 service/target
 web/target
-web/site
+out/

@@ -21,7 +21,7 @@ class TagControllerTest {
     private TagController controller;
 
     @Test
-    void testRead() throws Exception{
+    void testRead() throws Exception {
         TagDTO expectedTag = new TagDTO(1, "rest");
 
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -29,5 +29,13 @@ class TagControllerTest {
                 andExpect(view().name("tags/tag")).
                 andExpect(model().attributeExists("tag")).
                 andExpect(model().attribute("tag", expectedTag));
+    }
+
+    @Test
+    void testReadForMissing() throws Exception {
+
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc.perform(get("/tags/tag/100")).
+                andExpect(view().name("error/404"));
     }
 }

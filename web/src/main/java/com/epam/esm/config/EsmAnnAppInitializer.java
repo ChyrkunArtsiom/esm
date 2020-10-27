@@ -1,18 +1,16 @@
-package com.epam.esm.servlet;
+package com.epam.esm.config;
 
-import com.epam.esm.config.RootConfig;
-import com.epam.esm.config.WebConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-public class EsmWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+public class EsmAnnAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class[] {RootConfig.class};
+        return new Class[0];
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[] { WebConfig.class};
+        return new Class[] {AppConfig.class};
     }
 
     @Override

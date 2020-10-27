@@ -3,6 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.impl.GiftCertificateDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.exception.DAOException;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.PostgresqlService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class GiftCertificateService implements PostgresqlService<GiftCertificate
     }
 
     @Override
-    public GiftCertificateDTO read(int id) {
+    public GiftCertificateDTO read(int id) throws DAOException {
         Optional<GiftCertificate> certificate = dao.read(id);
         //Exception or Optional.empty?
         return certificate.map(GiftCertificateMapper::toDto).orElse(null);
