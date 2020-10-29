@@ -11,7 +11,6 @@ class TagMapperTest {
 
     private static TagDTO dto;
     private static Tag entity;
-    private static TagMapper mapper = new TagMapper();
 
     @BeforeAll
     static void setUp() {
@@ -21,13 +20,13 @@ class TagMapperTest {
 
     @Test
     void testToEntity() {
-        Tag converted = mapper.toEntity(dto);
+        Tag converted = TagMapper.toEntity(dto);
         assertEquals(entity, converted);
     }
 
     @Test
     void testToDto() {
-        TagDTO converted = mapper.toDto(entity);
+        TagDTO converted = TagMapper.toDto(entity);
         assertEquals(dto, converted);
     }
 }

@@ -3,7 +3,7 @@ package com.epam.esm.validator;
 import com.epam.esm.dto.TagDTO;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TagDTOValidatorTest {
 

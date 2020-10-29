@@ -1,12 +1,16 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.dao.PostgresqlDAO;
+import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.DAOException;
 import com.epam.esm.exception.ExceptionType;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,7 +28,7 @@ import java.util.Optional;
 
 @Repository
 @ComponentScan(basePackageClasses = HikariCPDataSource.class)
-public class TagDAO implements PostgresqlDAO<Tag> {
+public class TagDAO implements AbstractDAO<Tag> {
 
     private final static String SQL_INSERT_TAG = "INSERT INTO esm_module2.tags (name) VALUES (?)";
 
@@ -34,7 +38,9 @@ public class TagDAO implements PostgresqlDAO<Tag> {
 
     private final static String SQL_READ_ALL = "SELECT id, name FROM esm_module2.tags";
 
-    private final static String SQL_DELETE_TAG = "DELETE FROM esm_module2.tags WHERE id = (?)";
+    private final static String SQL_DELETE_TAG = "DELETE FROM esm_module2.tags WHERE name = (?)";
+
+    private final static Logger LOGGER = LogManager.getLogger(TagDAO.class);
 
     private JdbcTemplate template;
 
@@ -44,7 +50,7 @@ public class TagDAO implements PostgresqlDAO<Tag> {
     }
 
     @Override
-    public int create(Tag tag) {
+    public Tag create(Tag tag) throws DAOException{
         KeyHolder key = new GeneratedKeyHolder();
         try {
             template.update(connection -> {
@@ -52,26 +58,41 @@ public class TagDAO implements PostgresqlDAO<Tag> {
                 ps.setString(1, tag.getName());
                 return ps;
                 }, key);
-        } catch (DuplicateKeyException e) {
-            //throw new
+        } catch (DuplicateKeyException ex) {
+            LOGGER.log(Level.ERROR, String.format("Tag with name = {%s} already exists.", tag.getName()), ex);
+            throw new DAOException(String.format("Tag with name = {%s} already exists.", tag.getName()), ex,
+                    ExceptionType.DUPLICATE_ENTITY, 0, tag.getName());
         }
         if (key.getKeys() != null) {
-            return (int)key.getKeys().get("id");
+            tag.setId((int)key.getKeys().get("id"));
+            return tag;
         } else {
-            return 0;
+            return null;
         }
     }
 
     @Override
     public Optional<Tag> read(int id) throws DAOException{
-        return readByParam(id, SQL_READ_TAG);
+        try {
+            return readByParam(id, SQL_READ_TAG);
+        } catch (EmptyResultDataAccessException ex) {
+            LOGGER.log(Level.INFO, String.format("Tag with id = {%d} doesn't exist.", id), ex);
+            throw new DAOException(String.format("Tag with id = {%d} doesn't exist.", id), ex,
+                    ExceptionType.TAG_DOESNT_EXIST, id, "");
+        }
     }
 
     public Optional<Tag> read(String name) throws DAOException{
-        return readByParam(name, SQL_READ_TAG_BY_NAME);
+        try {
+            return readByParam(name, SQL_READ_TAG_BY_NAME);
+        } catch (Exception ex) {
+            LOGGER.log(Level.ERROR, String.format("Tag with name = {%s} doesn't exist.", name), ex);
+            throw new DAOException(String.format("Tag with name = {%s} doesn't exist.", name), ex,
+                    ExceptionType.TAG_DOESNT_EXIST, 0, name);
+        }
     }
 
-    private Optional<Tag> readByParam(Object param, String query) throws DAOException{
+    private Optional<Tag> readByParam(Object param, String query) {
         Tag tag;
         Object[] params = new Object[] {param};
 
@@ -81,16 +102,11 @@ public class TagDAO implements PostgresqlDAO<Tag> {
             row.setName(rs.getString("name"));
             return row;
         };
-
-        try {
-            tag = template.queryForObject(query, params, rowMapper);
-            if (tag == null) {
-                return Optional.empty();
-            } else {
-                return Optional.of(tag);
-            }
-        } catch (EmptyResultDataAccessException e) {
-            throw new DAOException(ExceptionType.TAG_DOESNT_EXIST);
+        tag = template.queryForObject(query, params, rowMapper);
+        if (tag == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(tag);
         }
     }
 
@@ -101,8 +117,8 @@ public class TagDAO implements PostgresqlDAO<Tag> {
 
     @Override
     public boolean delete(Tag tag) {
-        Object[] params = new Object[] {tag.getId()};
-        int[] types = new int[] {Types.INTEGER};
+        Object[] params = new Object[] {tag.getName()};
+        int[] types = new int[] {Types.VARCHAR};
 
         return template.update(SQL_DELETE_TAG, params, types) > 0;
     }

@@ -7,10 +7,10 @@ import com.epam.esm.exception.DAOException;
 import java.util.List;
 import java.util.Optional;
 
-public interface PostgresqlService<T extends AbstractEntity, U extends AbstractDTO> {
-    int create(T entity);
+public interface AbstractService<T extends AbstractEntity, U extends AbstractDTO> {
+    U create(U entity);
     U read(int id) throws DAOException;
-    Optional<T> update(T entity);
-    boolean delete(T entity);
-    List<T> readAll();
+    Optional<U> update(U entity);
+    boolean delete(U dto);
+    List<U> readAll();
 }

@@ -3,7 +3,6 @@ package com.epam.esm.mapper;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class GiftCertificateMapper {
@@ -14,8 +13,6 @@ public class GiftCertificateMapper {
         certificate.setName(dto.getName());
         certificate.setDescription(dto.getDescription());
         certificate.setPrice(dto.getPrice());
-        certificate.setCreateDate(OffsetDateTime.parse(dto.getCreateDate()));
-        certificate.setLastUpdateDate(OffsetDateTime.parse(dto.getLastUpdateDate()));
         certificate.setDuration(dto.getDuration());
         return certificate;
     }

@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class GiftCertificateMapperTest {
     private static GiftCertificateDTO dto;
     private static GiftCertificate entity;
-    private static GiftCertificateMapper mapper = new GiftCertificateMapper();
 
     @BeforeAll
     static void setUp() {
@@ -29,13 +28,13 @@ class GiftCertificateMapperTest {
 
     @Test
     void testToEntity() {
-        GiftCertificate converted = mapper.toEntity(dto);
+        GiftCertificate converted = GiftCertificateMapper.toEntity(dto);
         assertEquals(entity, converted);
     }
 
     @Test
     void testToDto() {
-        GiftCertificateDTO converted = mapper.toDto(entity);
+        GiftCertificateDTO converted = GiftCertificateMapper.toDto(entity);
         assertEquals(dto, converted);
     }
 }

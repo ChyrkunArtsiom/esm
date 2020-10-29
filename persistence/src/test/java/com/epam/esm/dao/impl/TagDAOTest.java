@@ -24,7 +24,7 @@ class TagDAOTest {
     @Test
     void testCreate() {
         Tag tag = new Tag(0, "testtag");
-        assertTrue(dao.create(tag) > 0);
+        assertTrue(dao.create(tag) != null);
     }
 
     @Test

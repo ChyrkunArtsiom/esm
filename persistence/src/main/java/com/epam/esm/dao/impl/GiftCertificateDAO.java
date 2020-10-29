@@ -1,6 +1,6 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.dao.PostgresqlDAO;
+import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.DAOException;
@@ -25,10 +25,10 @@ import java.util.Optional;
 
 @Repository
 @ComponentScan(basePackageClasses = HikariCPDataSource.class)
-public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
+public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     private final static String SQL_INSERT_CERTIFICATE = "INSERT INTO esm_module2.certificates (name, description," +
-            "price, create_date, last_update_date, duration) VALUES (?,?,?,?,?,?)";
+            "price, create_date, duration) VALUES (?,?,?,?,?)";
 
     private final static String SQL_READ_CERTIFICATE = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
@@ -38,9 +38,9 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates";
 
     private final static String SQL_UPDATE_CERTIFICATE = "UPDATE esm_module2.certificates SET name = (?)," +
-            "description = (?), price = (?), create_date = (?), last_update_date = (?), duration = (?) WHERE id = (?)";
+            "description = (?), price = (?), last_update_date = (?), duration = (?) WHERE id = (?)";
 
-    private final static String SQL_DELETE_CERTIFICATE = "DELETE FROM esm_module2.certificates WHERE id = (?)";
+    private final static String SQL_DELETE_CERTIFICATE = "DELETE FROM esm_module2.certificates WHERE name = (?)";
 
     private JdbcTemplate template;
 
@@ -50,28 +50,30 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
     }
 
     @Override
-    public int create(GiftCertificate giftCertificate) {
+    public GiftCertificate create(GiftCertificate giftCertificate) {
         KeyHolder key = new GeneratedKeyHolder();
         try {
             template.update(connection -> {
+                connection.setAutoCommit(false);
                 PreparedStatement ps = connection.prepareStatement(SQL_INSERT_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, giftCertificate.getName());
                 ps.setString(2, giftCertificate.getDescription());
                 ps.setDouble(3, giftCertificate.getPrice());
+                //Setting up current datetime
                 ps.setTimestamp(4, Timestamp.valueOf(
-                        LocalDateTime.ofInstant(giftCertificate.getCreateDate().toInstant(), ZoneOffset.UTC)));
-                ps.setTimestamp(5, Timestamp.valueOf(
-                        LocalDateTime.ofInstant(giftCertificate.getLastUpdateDate().toInstant(), ZoneOffset.UTC)));
-                ps.setInt(6, giftCertificate.getDuration());
+                        LocalDateTime.ofInstant(OffsetDateTime.now().toInstant(), ZoneOffset.UTC)));
+                ps.setInt(5, giftCertificate.getDuration());
+                connection.commit();
                 return ps;
             }, key);
         } catch (DuplicateKeyException e) {
             e.printStackTrace();
         }
         if (key.getKeys() != null) {
-            return (int)key.getKeys().get("id");
+            giftCertificate.setId((int)key.getKeys().get("id"));
+            return giftCertificate;
         } else {
-            return 0;
+            return null;
         }
     }
 
@@ -98,11 +100,10 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
         Optional<GiftCertificate> oldCertificate = read(giftCertificate.getId());
         if (oldCertificate.isPresent()) {
             Object[] params = new Object[] {giftCertificate.getName(), giftCertificate.getDescription(),
-                    giftCertificate.getPrice(), giftCertificate.getCreateDate(),
-                    giftCertificate.getLastUpdateDate(), giftCertificate.getDuration(),
+                    giftCertificate.getPrice(), OffsetDateTime.now(), giftCertificate.getDuration(),
                     giftCertificate.getId()};
             int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE,
-                    Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER, Types.INTEGER};
+                    Types.INTEGER, Types.INTEGER};
 
             if (template.update(SQL_UPDATE_CERTIFICATE, params, types) > 0) {
                 return oldCertificate;
@@ -113,8 +114,8 @@ public class GiftCertificateDAO implements PostgresqlDAO<GiftCertificate> {
 
     @Override
     public boolean delete(GiftCertificate certificate) {
-        Object[] params = new Object[] {certificate.getId()};
-        int[] types = new int[] {Types.INTEGER};
+        Object[] params = new Object[] {certificate.getName()};
+        int[] types = new int[] {Types.VARCHAR};
 
         return template.update(SQL_DELETE_CERTIFICATE, params, types) > 0;
     }

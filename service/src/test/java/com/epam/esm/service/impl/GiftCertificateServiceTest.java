@@ -2,13 +2,13 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.service.AbstractService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GiftCertificateServiceTest {
 
     @Autowired
-    private GiftCertificateService service;
+    private AbstractService<GiftCertificate, GiftCertificateDTO> service;
 
     @Test
     void create() {
-        GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
-        assertTrue(service.create(certificate) > 0);
+        GiftCertificateDTO dto = new GiftCertificateDTO(4, "test", "test",
+                1.0, 1);
+        assertTrue(service.create(dto) != null);
     }
 
     @Test
@@ -36,22 +36,22 @@ class GiftCertificateServiceTest {
 
     @Test
     void update() {
-        GiftCertificate certificate = new GiftCertificate(3, "testR", "test",
-                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
-        Optional<GiftCertificate> oldCertificate = service.update(certificate);
+        GiftCertificateDTO certificate = new GiftCertificateDTO(3, "testR", "test",
+                1.0, 1);
+        Optional<GiftCertificateDTO> oldCertificate = service.update(certificate);
         assertTrue(oldCertificate.isPresent());
     }
 
     @Test
     void delete() {
-        GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
+        GiftCertificateDTO certificate = new GiftCertificateDTO(4, "test", "test",
+                1.0, 1);
         assertTrue(service.delete(certificate));
     }
 
     @Test
     void readAll() {
-        List<GiftCertificate> tags = service.readAll();
+        List<GiftCertificateDTO> tags = service.readAll();
         assertTrue(tags.size() > 0);
     }
 }

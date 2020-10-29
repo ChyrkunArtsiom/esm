@@ -5,17 +5,19 @@ import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.DAOException;
 import com.epam.esm.mapper.GiftCertificateMapper;
-import com.epam.esm.service.PostgresqlService;
+import com.epam.esm.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @ComponentScan(basePackageClasses = {GiftCertificateDAO.class, TagService.class})
-public class GiftCertificateService implements PostgresqlService<GiftCertificate, GiftCertificateDTO> {
+public class GiftCertificateService implements AbstractService<GiftCertificate, GiftCertificateDTO> {
 
     private GiftCertificateDAO dao;
 
@@ -32,8 +34,11 @@ public class GiftCertificateService implements PostgresqlService<GiftCertificate
     }
 
     @Override
-    public int create(GiftCertificate certificate) {
-        return dao.create(certificate);
+    @Transactional
+    public GiftCertificateDTO create(GiftCertificateDTO dto) {
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        entity = dao.create(entity);
+        return GiftCertificateMapper.toDto(entity);
     }
 
     @Override
@@ -44,17 +49,32 @@ public class GiftCertificateService implements PostgresqlService<GiftCertificate
     }
 
     @Override
-    public Optional<GiftCertificate> update(GiftCertificate certificate) {
-        return dao.update(certificate);
+    @Transactional
+    public Optional<GiftCertificateDTO> update(GiftCertificateDTO dto) {
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        Optional<GiftCertificate> optionalGiftCertificate = dao.update(entity);
+        if (optionalGiftCertificate.isPresent()) {
+            entity = optionalGiftCertificate.get();
+            return Optional.of(GiftCertificateMapper.toDto(entity));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
-    public boolean delete(GiftCertificate certificate) {
-        return dao.delete(certificate);
+    public boolean delete(GiftCertificateDTO dto) {
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        return dao.delete(entity);
     }
 
     @Override
-    public List<GiftCertificate> readAll() {
-        return dao.readAll();
+    public List<GiftCertificateDTO> readAll() {
+        List<GiftCertificateDTO> dtos = new ArrayList<>();
+        List<GiftCertificate> certificates = dao.readAll();
+
+        for (GiftCertificate c : certificates) {
+            dtos.add(GiftCertificateMapper.toDto(c));
+        }
+        return dtos;
     }
 }

@@ -24,7 +24,7 @@ class GiftCertificateDAOTest {
     void testCreate() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
                 1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
-        assertTrue(dao.create(certificate) > 0);
+        assertTrue(dao.create(certificate) != null);
     }
 
     @Test

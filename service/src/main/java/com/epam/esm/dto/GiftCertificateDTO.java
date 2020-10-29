@@ -1,17 +1,25 @@
 package com.epam.esm.dto;
 
+import java.util.List;
 import java.util.Objects;
 
 public class GiftCertificateDTO extends AbstractDTO {
-    private Integer id;
-    private String name;
     private String description;
     private Double price;
     private String createDate;
     private String lastUpdateDate;
     private Integer duration;
+    private List<String> tags;
 
     public GiftCertificateDTO() {
+    }
+
+    public GiftCertificateDTO(Integer id, String name, String description, Double price, Integer duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
     }
 
     public GiftCertificateDTO(Integer id, String name, String description, Double price, String createDate,
@@ -23,22 +31,6 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {
