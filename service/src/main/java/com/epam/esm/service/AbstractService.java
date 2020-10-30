@@ -5,12 +5,11 @@ import com.epam.esm.entity.AbstractEntity;
 import com.epam.esm.exception.DAOException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface AbstractService<T extends AbstractEntity, U extends AbstractDTO> {
     U create(U entity);
     U read(int id) throws DAOException;
-    Optional<U> update(U entity);
+    U update(U entity);
     boolean delete(U dto);
     List<U> readAll();
 }

@@ -2,62 +2,36 @@ package com.epam.esm.exception;
 
 public class DAOException extends RuntimeException {
 
-    private ExceptionType type;
-    private Integer id;
     private String name;
+    private int errorCode;
 
-    public DAOException(ExceptionType type) {
-        this.type = type;
-    }
-
-    public DAOException(ExceptionType type, Integer id, String name) {
-        this.type = type;
-        this.id = id;
+    public DAOException(String name, int errorCode) {
         this.name = name;
+        this.errorCode = errorCode;
     }
 
-    public DAOException(String message, ExceptionType type, Integer id, String name) {
+    public DAOException(String message, String name, int errorCode) {
         super(message);
-        this.type = type;
-        this.id = id;
         this.name = name;
+        this.errorCode = errorCode;
     }
 
-    public DAOException(String message, Throwable cause, ExceptionType type, Integer id, String name) {
+    public DAOException(String message, Throwable cause, String name, int errorCode) {
         super(message, cause);
-        this.type = type;
-        this.id = id;
         this.name = name;
+        this.errorCode = errorCode;
     }
 
-    public DAOException(Throwable cause, ExceptionType type, Integer id, String name) {
+    public DAOException(Throwable cause, String name, int errorCode) {
         super(cause);
-        this.type = type;
-        this.id = id;
         this.name = name;
+        this.errorCode = errorCode;
     }
 
-    public DAOException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, ExceptionType type, Integer id, String name) {
+    public DAOException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String name, int errorCode) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.type = type;
-        this.id = id;
         this.name = name;
-    }
-
-    public ExceptionType getType() {
-        return type;
-    }
-
-    public void setType(ExceptionType type) {
-        this.type = type;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        this.errorCode = errorCode;
     }
 
     public String getName() {
@@ -66,5 +40,13 @@ public class DAOException extends RuntimeException {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
     }
 }

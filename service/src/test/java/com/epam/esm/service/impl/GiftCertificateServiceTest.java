@@ -10,8 +10,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
-import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -25,7 +25,7 @@ class GiftCertificateServiceTest {
     void create() {
         GiftCertificateDTO dto = new GiftCertificateDTO(4, "test", "test",
                 1.0, 1);
-        assertTrue(service.create(dto) != null);
+        assertNotNull(service.create(dto));
     }
 
     @Test
@@ -38,8 +38,8 @@ class GiftCertificateServiceTest {
     void update() {
         GiftCertificateDTO certificate = new GiftCertificateDTO(3, "testR", "test",
                 1.0, 1);
-        Optional<GiftCertificateDTO> oldCertificate = service.update(certificate);
-        assertTrue(oldCertificate.isPresent());
+        GiftCertificateDTO oldCertificate = service.update(certificate);
+        assertNotNull(oldCertificate);
     }
 
     @Test

@@ -3,14 +3,13 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.service.AbstractService;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.esm.mapper.TagMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
@@ -27,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(classes = TagService.class)
 class TagServiceTest {
 
-    @Autowired
-    private TagService service;
-
-    @Autowired
+    @Mock
     private TagDAO dao;
+
+    @InjectMocks
+    private TagService service;
 
     @Test
     void testReadAll() {
@@ -45,19 +44,23 @@ class TagServiceTest {
 
     @Test
     void testCreate() {
-        TagDTO dto = new TagDTO(0, "testtag3");
-        assertTrue(service.create(dto) != null);
+        TagDTO dto = new TagDTO(1, "testtag");
+        Mockito.when(dao.create(Mockito.any(Tag.class))).thenReturn(TagMapper.toEntity(dto));
+        assertEquals(dto, service.create(dto));
     }
 
     @Test
     void testRead() {
-        TagDTO tag = (TagDTO)service.read(4);
-        assertFalse(tag.getName().isEmpty());
+        TagDTO dto = new TagDTO(1, "testtag");
+        Mockito.when(dao.read(Mockito.anyInt())).thenReturn(TagMapper.toEntity(dto));
+        TagDTO tag = service.read(4);
+        assertEquals(dto, tag);
     }
 
     @Test
     void testDelete() {
-        TagDTO tag = new TagDTO(4, "delete");
+        TagDTO tag = new TagDTO(1, "tagtodelete");
+        Mockito.when(dao.delete(Mockito.any(Tag.class))).thenReturn(true);
         assertTrue(service.delete(tag));
     }
 }

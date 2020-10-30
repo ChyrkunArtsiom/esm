@@ -2,8 +2,8 @@ package com.epam.esm.controller;
 
 import com.epam.esm.config.AppConfig;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exception.DAOException;
-import com.epam.esm.exception.ExceptionType;
+import com.epam.esm.exception.DuplicateTagException;
+import com.epam.esm.exception.NoTagException;
 import com.epam.esm.service.impl.TagService;
 import com.epam.esm.util.ErrorMessageManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +67,7 @@ class TagControllerTest {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
-        DAOException ex = new DAOException(ExceptionType.DUPLICATE_ENTITY, tagDTO.getId(), tagDTO.getName());
+        DuplicateTagException ex = new DuplicateTagException(tagDTO.getName(), 40901);
         Mockito.when(service.create(Mockito.any(TagDTO.class))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
@@ -105,11 +105,11 @@ class TagControllerTest {
     @Test
     void testReadMissingTag() throws Exception {
         TagDTO tagDTO = new TagDTO(100, "testingname");
-        DAOException ex = new DAOException(ExceptionType.TAG_DOESNT_EXIST, tagDTO.getId(), tagDTO.getName());
+        NoTagException ex = new NoTagException(tagDTO.getName(), 40401);
         Mockito.when(service.read(tagDTO.getId())).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
-        String errorMessage = String.format(manager.getMessage("tagDoesntExist"), ex.getId());
+        String errorMessage = String.format(manager.getMessage("tagDoesntExist"), ex.getName());
 
         mockMvc.perform(get(TAGS_PATH + "/100"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

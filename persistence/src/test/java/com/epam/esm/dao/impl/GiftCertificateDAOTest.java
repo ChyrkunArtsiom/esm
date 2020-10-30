@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -23,28 +23,28 @@ class GiftCertificateDAOTest {
     @Test
     void testCreate() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
-        assertTrue(dao.create(certificate) != null);
+                1.0, null, null, 1);
+        assertNotNull(dao.create(certificate));
     }
 
     @Test
     void testRead() {
-        Optional<GiftCertificate> certificate = dao.read(1);
-        assertTrue(certificate.isPresent());
+        GiftCertificate certificate = dao.read(1);
+        assertNotNull(certificate);
     }
 
     @Test
     void testUpdate() {
         GiftCertificate certificate = new GiftCertificate(5, "testR", "test",
-                1.0, OffsetDateTime.now().plusDays(1), OffsetDateTime.now(), 1);
-        Optional<GiftCertificate> oldCertificate = dao.update(certificate);
-        assertTrue(oldCertificate.isPresent());
+                1.0, null, null, 1);
+        GiftCertificate oldCertificate = dao.update(certificate);
+        assertNotNull(oldCertificate);
     }
 
     @Test
     void testDelete() {
         GiftCertificate certificate = new GiftCertificate(4, "test", "test",
-                1.0, OffsetDateTime.now(), OffsetDateTime.now(), 1);
+                1.0, null, null, 1);
         assertTrue(dao.delete(certificate));
     }
 

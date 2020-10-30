@@ -1,8 +1,17 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.exception.ValidationMessageManager;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
-public class TagDTO extends AbstractDTO {
+public class TagDTO extends AbstractDTO{
+
+    private Integer id;
+    @NotBlank(message = ValidationMessageManager.BLANK_TAG)
+    @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_WRONG_SIZE)
+    private String name;
 
     public TagDTO() {
 
@@ -10,6 +19,22 @@ public class TagDTO extends AbstractDTO {
 
     public TagDTO(Integer id, String name) {
         this.id = id;
+        this.name = name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
     }
 

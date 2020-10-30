@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @ComponentScan(basePackageClasses = {GiftCertificateDAO.class, TagService.class})
@@ -43,22 +42,16 @@ public class GiftCertificateService implements AbstractService<GiftCertificate, 
 
     @Override
     public GiftCertificateDTO read(int id) throws DAOException {
-        Optional<GiftCertificate> certificate = dao.read(id);
-        //Exception or Optional.empty?
-        return certificate.map(GiftCertificateMapper::toDto).orElse(null);
+        GiftCertificate certificate = dao.read(id);
+        return GiftCertificateMapper.toDto(certificate);
     }
 
     @Override
     @Transactional
-    public Optional<GiftCertificateDTO> update(GiftCertificateDTO dto) {
+    public GiftCertificateDTO update(GiftCertificateDTO dto) {
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
-        Optional<GiftCertificate> optionalGiftCertificate = dao.update(entity);
-        if (optionalGiftCertificate.isPresent()) {
-            entity = optionalGiftCertificate.get();
-            return Optional.of(GiftCertificateMapper.toDto(entity));
-        } else {
-            return Optional.empty();
-        }
+        entity = dao.update(entity);
+        return GiftCertificateMapper.toDto(entity);
     }
 
     @Override

@@ -8,9 +8,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -24,19 +23,19 @@ class TagDAOTest {
     @Test
     void testCreate() {
         Tag tag = new Tag(0, "testtag");
-        assertTrue(dao.create(tag) != null);
+        assertNotNull(dao.create(tag));
     }
 
     @Test
     void testReadById() {
-        Optional<Tag> optionalTag = dao.read(3);
-        assertFalse(optionalTag.isPresent());
+        Tag tag = dao.read(3);
+        assertNotNull(tag);
     }
 
     @Test
     void testReadByName() {
-        Optional<Tag> optionalTag = dao.read("test");
-        assertFalse(optionalTag.isPresent());
+        Tag tag = dao.read("test");
+        assertNotNull(tag);
     }
 
     @Test

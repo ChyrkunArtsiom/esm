@@ -4,7 +4,12 @@ import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.DAOException;
-import com.epam.esm.exception.ExceptionType;
+import com.epam.esm.exception.DuplicateCertificateException;
+import com.epam.esm.exception.ErrorCodesManager;
+import com.epam.esm.exception.NoCertificateException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
@@ -21,7 +26,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @ComponentScan(basePackageClasses = HikariCPDataSource.class)
@@ -42,6 +46,8 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     private final static String SQL_DELETE_CERTIFICATE = "DELETE FROM esm_module2.certificates WHERE name = (?)";
 
+    private final static Logger LOGGER = LogManager.getLogger(GiftCertificateDAO.class);
+
     private JdbcTemplate template;
 
     @Autowired
@@ -50,7 +56,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     }
 
     @Override
-    public GiftCertificate create(GiftCertificate giftCertificate) {
+    public GiftCertificate create(GiftCertificate giftCertificate) throws DAOException {
         KeyHolder key = new GeneratedKeyHolder();
         try {
             template.update(connection -> {
@@ -66,19 +72,27 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 connection.commit();
                 return ps;
             }, key);
-        } catch (DuplicateKeyException e) {
-            e.printStackTrace();
+        } catch (DuplicateKeyException ex) {
+            LOGGER.log(Level.ERROR, String.format(
+                    "Certificate with name = {%s} already exists.", giftCertificate.getName()), ex);
+            throw new DuplicateCertificateException(
+                    String.format("Certificate with name = {%s} already exists.", giftCertificate.getName()), ex,
+                    giftCertificate.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE);
         }
         if (key.getKeys() != null) {
             giftCertificate.setId((int)key.getKeys().get("id"));
             return giftCertificate;
         } else {
-            return null;
+            LOGGER.log(Level.ERROR,
+                    String.format("Cannot create certificate with name = {%s}.", giftCertificate.getName()));
+            throw new DAOException(
+                    String.format("Cannot create certificate with name = {%s}.", giftCertificate.getName()),
+                    giftCertificate.getName(), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
         }
     }
 
     @Override
-    public Optional<GiftCertificate> read(int id) throws DAOException{
+    public GiftCertificate read(int id) throws NoCertificateException{
         GiftCertificate certificate;
         Object[] params = new Object[] {id};
         RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> certificateMapper(rs);
@@ -86,19 +100,22 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         try {
             certificate = template.queryForObject(SQL_READ_CERTIFICATE, params, rowMapper);
             if (certificate == null) {
-                return Optional.empty();
+                return null; //Throw an exception
             } else {
-                return Optional.of(certificate);
+                return certificate;
             }
-        } catch (EmptyResultDataAccessException e) {
-            throw new DAOException(ExceptionType.CERTIFICATE_DOESNT_EXIST);
+        } catch (EmptyResultDataAccessException ex) {
+            LOGGER.log(Level.ERROR, String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex);
+            throw new NoCertificateException(
+                    String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex,
+                    String.valueOf(id), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
         }
     }
 
     @Override
-    public Optional<GiftCertificate> update(GiftCertificate giftCertificate) {
-        Optional<GiftCertificate> oldCertificate = read(giftCertificate.getId());
-        if (oldCertificate.isPresent()) {
+    public GiftCertificate update(GiftCertificate giftCertificate) {
+        GiftCertificate oldCertificate = read(giftCertificate.getId());
+        if (oldCertificate != null) {
             Object[] params = new Object[] {giftCertificate.getName(), giftCertificate.getDescription(),
                     giftCertificate.getPrice(), OffsetDateTime.now(), giftCertificate.getDuration(),
                     giftCertificate.getId()};
@@ -109,7 +126,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 return oldCertificate;
             }
         }
-        return Optional.empty();
+        return null; //Throw an exception
     }
 
     @Override
