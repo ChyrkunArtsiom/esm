@@ -1,57 +1,95 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dao.impl.GiftCertificateDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.AbstractService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @ContextConfiguration(classes = GiftCertificateService.class)
 class GiftCertificateServiceTest {
 
-    @Autowired
-    private AbstractService<GiftCertificate, GiftCertificateDTO> service;
+    @Mock
+    private GiftCertificateDAO dao;
+
+    @Mock
+    private TagService tagService;
+
+    @InjectMocks
+    private GiftCertificateService service;
 
     @Test
-    void create() {
+    void testRead() {
+        GiftCertificateDTO dto = new GiftCertificateDTO(
+                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        entity.setCreateDate(OffsetDateTime.now());
+        Mockito.when(dao.read(Mockito.anyInt())).thenReturn(entity);
+        GiftCertificateDTO certificateDTO = service.read(1);
+        assertEquals(dto, certificateDTO);
+    }
+
+    @Test
+    void testReadAll() {
+        List<GiftCertificate> entities = new ArrayList<>(
+                Arrays.asList(new GiftCertificate(
+                        1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null,  10, null),
+                        new GiftCertificate(
+                                1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
+        Mockito.when(dao.readAll()).thenReturn(entities);
+
+        List<GiftCertificateDTO> tags = service.readAll();
+        assertTrue(tags.size() > 0);
+    }
+
+    @Test
+    void testDelete() {
+        GiftCertificateDTO certificateDTO = new GiftCertificateDTO(4, "test", "test",
+                BigDecimal.valueOf(1.0), 1, null);
+        Mockito.when(dao.delete(Mockito.any(GiftCertificate.class))).thenReturn(true);
+        assertTrue(service.delete(certificateDTO));
+    }
+
+    @Test
+    void testCreate() {
         GiftCertificateDTO dto = new GiftCertificateDTO(4, "test", "test",
-                1.0, 1);
-        assertNotNull(service.create(dto));
+                BigDecimal.valueOf(1.0), 1, null);
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        entity.setCreateDate(OffsetDateTime.now());
+        Mockito.when(dao.create(Mockito.any(GiftCertificate.class))).thenReturn(entity);
+        assertEquals(dto, service.create(dto));
     }
 
-    @Test
-    void read() {
-        GiftCertificateDTO certificate = service.read(1);
-        assertTrue(certificate.getName().isEmpty());
-    }
+
+
+
+
+
 
     @Test
     void update() {
         GiftCertificateDTO certificate = new GiftCertificateDTO(3, "testR", "test",
-                1.0, 1);
+                BigDecimal.valueOf(1.0), 1, null);
         GiftCertificateDTO oldCertificate = service.update(certificate);
         assertNotNull(oldCertificate);
     }
 
-    @Test
-    void delete() {
-        GiftCertificateDTO certificate = new GiftCertificateDTO(4, "test", "test",
-                1.0, 1);
-        assertTrue(service.delete(certificate));
-    }
-
-    @Test
-    void readAll() {
-        List<GiftCertificateDTO> tags = service.readAll();
-        assertTrue(tags.size() > 0);
-    }
 }

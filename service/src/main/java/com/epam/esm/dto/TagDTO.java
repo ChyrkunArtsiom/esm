@@ -1,6 +1,6 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.exception.ValidationMessageManager;
+import com.epam.esm.validator.ValidationMessageManager;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -9,8 +9,8 @@ import java.util.Objects;
 public class TagDTO extends AbstractDTO{
 
     private Integer id;
-    @NotBlank(message = ValidationMessageManager.BLANK_TAG)
-    @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_WRONG_SIZE)
+    @NotBlank(message = ValidationMessageManager.BLANK_TAG_NAME)
+    @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_NAME_WRONG_SIZE)
     private String name;
 
     public TagDTO() {

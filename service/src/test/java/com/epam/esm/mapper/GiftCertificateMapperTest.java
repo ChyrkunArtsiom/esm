@@ -5,6 +5,7 @@ import com.epam.esm.entity.GiftCertificate;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -19,11 +20,11 @@ class GiftCertificateMapperTest {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
         dto = new GiftCertificateDTO(1, "Test certificate", "Test description",
-                100.0, date.toString(),
-                date.plusDays(1).toString(), 10);
+                BigDecimal.valueOf(100.0), date.toString(),
+                date.plusDays(1).toString(), 10, null);
         entity = new GiftCertificate(1, "Test certificate", "Test description",
                 100.0, date,
-                date.plusDays(1), 10);
+                date.plusDays(1), 10, null);
     }
 
     @Test

@@ -3,10 +3,8 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.DAOException;
-import com.epam.esm.exception.DuplicateCertificateException;
-import com.epam.esm.exception.ErrorCodesManager;
-import com.epam.esm.exception.NoCertificateException;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,19 +22,26 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-@ComponentScan(basePackageClasses = HikariCPDataSource.class)
+@ComponentScan(basePackageClasses = {HikariCPDataSource.class, TagDAO.class})
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     private final static String SQL_INSERT_CERTIFICATE = "INSERT INTO esm_module2.certificates (name, description," +
             "price, create_date, duration) VALUES (?,?,?,?,?)";
 
+    private final static String SQL_INSERT_CERTIFICATE_TAG =
+            "INSERT INTO esm_module2.certificate_tag (certificate_id, tag_id) VALUES (?, ?)";
+
     private final static String SQL_READ_CERTIFICATE = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
             "WHERE id = (?)";
+
+    private final static String SQL_READ_TAGS_BY_CERTIFICATE = "SELECT name FROM esm_module2.tags " +
+            "INNER JOIN esm_module2.certificate_tag ON tags.id = certificate_tag.tag_id WHERE certificate_id = (?)";
 
     private final static String SQL_READ_ALL = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates";
@@ -49,10 +54,16 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     private final static Logger LOGGER = LogManager.getLogger(GiftCertificateDAO.class);
 
     private JdbcTemplate template;
+    private TagDAO tagDAO;
 
     @Autowired
     public void setTemplate(JdbcTemplate template) {
         this.template = template;
+    }
+
+    @Autowired
+    public void setTagDAO(TagDAO tagDAO) {
+        this.tagDAO = tagDAO;
     }
 
     @Override
@@ -60,16 +71,16 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         KeyHolder key = new GeneratedKeyHolder();
         try {
             template.update(connection -> {
-                connection.setAutoCommit(false);
                 PreparedStatement ps = connection.prepareStatement(SQL_INSERT_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, giftCertificate.getName());
                 ps.setString(2, giftCertificate.getDescription());
                 ps.setDouble(3, giftCertificate.getPrice());
                 //Setting up current datetime
+                OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
                 ps.setTimestamp(4, Timestamp.valueOf(
-                        LocalDateTime.ofInstant(OffsetDateTime.now().toInstant(), ZoneOffset.UTC)));
+                        LocalDateTime.ofInstant(currentTime.toInstant(), ZoneOffset.UTC)));
+                giftCertificate.setCreateDate(currentTime);
                 ps.setInt(5, giftCertificate.getDuration());
-                connection.commit();
                 return ps;
             }, key);
         } catch (DuplicateKeyException ex) {
@@ -81,6 +92,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
         if (key.getKeys() != null) {
             giftCertificate.setId((int)key.getKeys().get("id"));
+            bindTagsWithCertificate(giftCertificate);
             return giftCertificate;
         } else {
             LOGGER.log(Level.ERROR,
@@ -95,13 +107,15 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     public GiftCertificate read(int id) throws NoCertificateException{
         GiftCertificate certificate;
         Object[] params = new Object[] {id};
-        RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> certificateMapper(rs);
+        RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> mapToCertificate(rs);
 
         try {
             certificate = template.queryForObject(SQL_READ_CERTIFICATE, params, rowMapper);
             if (certificate == null) {
-                return null; //Throw an exception
+                throw new DAOException("Certificate doesn't exist.", ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
             } else {
+                List<String> tags = readTagsByCertificateId(id);
+                certificate.setTags(tags);
                 return certificate;
             }
         } catch (EmptyResultDataAccessException ex) {
@@ -133,7 +147,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     public boolean delete(GiftCertificate certificate) {
         Object[] params = new Object[] {certificate.getName()};
         int[] types = new int[] {Types.VARCHAR};
-
         return template.update(SQL_DELETE_CERTIFICATE, params, types) > 0;
     }
 
@@ -144,7 +157,8 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         RowMapper<List<GiftCertificate>> rowMapper = (rs, rowNum) -> {
             List<GiftCertificate> rows = new ArrayList<>();
             do {
-                GiftCertificate certificate = certificateMapper(rs);
+                GiftCertificate certificate = mapToCertificate(rs);
+                certificate.setTags(readTagsByCertificateId(certificate.getId()));
                 rows.add(certificate);
             } while (rs.next());
             return rows;
@@ -158,7 +172,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
-    private GiftCertificate certificateMapper(ResultSet rs) throws SQLException {
+    private GiftCertificate mapToCertificate(ResultSet rs) throws SQLException {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setId(rs.getInt("id"));
         certificate.setName(rs.getString("name"));
@@ -168,5 +182,40 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         certificate.setLastUpdateDate(rs.getObject("last_update_date", OffsetDateTime.class));
         certificate.setDuration(rs.getInt("duration"));
         return certificate;
+    }
+
+    private List<String> readTagsByCertificateId(int id) {
+        List<String> tags = new ArrayList<>();
+        Object[] params = new Object[] {id};
+        RowMapper<List<String>> tagsRowMapper = (rs, rowNum) -> {
+            List<String> rows = new ArrayList<>();
+            do {
+                String tag = rs.getString("name");
+                rows.add(tag);
+            } while (rs.next());
+            return rows;
+        };
+        try {
+            tags = template.queryForObject(SQL_READ_TAGS_BY_CERTIFICATE, params, tagsRowMapper);
+            return tags;
+        } catch (EmptyResultDataAccessException e) {
+            return tags;
+        }
+    }
+
+    private void bindTagsWithCertificate(GiftCertificate certificate) {
+        for (String tag : certificate.getTags()) {
+            Tag selected = tagDAO.read(tag);
+            try {
+                template.update(SQL_INSERT_CERTIFICATE_TAG, certificate.getId(), selected.getId());
+            }catch (DuplicateKeyException ex) {
+                LOGGER.log(Level.ERROR, String.format("Certificate is already bonded with tag id = {%s}.",
+                        selected.getId()), ex);
+                throw new DuplicateCertificateTagException(
+                        String.format("Certificate is already bonded with tag id = {%s}.",
+                        selected.getId()), ex, selected.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE_TAG);
+            }
+
+        }
     }
 }

@@ -74,7 +74,7 @@ public class TagDAO implements AbstractDAO<Tag> {
     }
 
     @Override
-    public Tag read(int id) throws NoTagException {
+    public Tag read(int id) throws DAOException {
         try {
             return readByParam(id, SQL_READ_TAG);
         } catch (EmptyResultDataAccessException|DAOException ex) {
@@ -84,7 +84,7 @@ public class TagDAO implements AbstractDAO<Tag> {
         }
     }
 
-    public Tag read(String name) throws NoTagException{
+    public Tag read(String name) throws DAOException{
         try {
             return readByParam(name, SQL_READ_TAG_BY_NAME);
         } catch (EmptyResultDataAccessException|DAOException ex) {

@@ -1,31 +1,55 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.validator.ValidationMessageManager;
+
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
 public class GiftCertificateDTO extends AbstractDTO {
     private Integer id;
+
+    @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)
+    @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE)
     private String name;
+
+    @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION)
+    @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE)
     private String description;
-    private Double price;
+
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
+    @Positive(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
+    private BigDecimal price;
+
     private String createDate;
+
     private String lastUpdateDate;
+
+    @Digits(integer = 10, fraction = 0, message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
+    @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
     private Integer duration;
+
     private List<String> tags;
 
     public GiftCertificateDTO() {
     }
 
-    public GiftCertificateDTO(Integer id, String name, String description, Double price, Integer duration) {
+    public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
+                              Integer duration, List<String> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
+        this.tags = tags;
     }
 
-    public GiftCertificateDTO(Integer id, String name, String description, Double price, String createDate,
-                              String lastUpdateDate, Integer duration) {
+    public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
+                              String lastUpdateDate, Integer duration, List<String> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -33,6 +57,7 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
+        this.tags = tags;
     }
 
     public Integer getId() {
@@ -59,11 +84,11 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.description = description;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -91,6 +116,14 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.duration = duration;
     }
 
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
@@ -105,9 +138,7 @@ public class GiftCertificateDTO extends AbstractDTO {
             return false;
         }
         GiftCertificateDTO certificate = (GiftCertificateDTO) obj;
-        return id.equals(certificate.id) && name.equals(certificate.name) && description.equals(certificate.description)
-                && price.equals(certificate.price) && createDate.equals(certificate.createDate)
-                && lastUpdateDate.equals(certificate.lastUpdateDate) && duration.equals(certificate.duration);
+        return name.equals(certificate.name);
     }
 
     @Override

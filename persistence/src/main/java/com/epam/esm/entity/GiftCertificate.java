@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,8 +17,17 @@ public class GiftCertificate extends AbstractEntity {
     public GiftCertificate() {
     }
 
+    public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<String> tags) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+        this.tags = tags;
+    }
+
     public GiftCertificate(Integer id, String name, String description, Double price,
-                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration) {
+                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<String> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -25,6 +35,7 @@ public class GiftCertificate extends AbstractEntity {
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
+        this.tags = tags;
     }
 
     public String getDescription() {
@@ -32,6 +43,9 @@ public class GiftCertificate extends AbstractEntity {
     }
 
     public void setDescription(String description) {
+        if (description == null) {
+            this.description = "";
+        }
         this.description = description;
     }
 
@@ -40,6 +54,9 @@ public class GiftCertificate extends AbstractEntity {
     }
 
     public void setPrice(Double price) {
+        if (price == null) {
+            this.price = 0.0;
+        }
         this.price = price;
     }
 
@@ -64,6 +81,9 @@ public class GiftCertificate extends AbstractEntity {
     }
 
     public void setDuration(Integer duration) {
+        if (duration == null) {
+            this.duration = 0;
+        }
         this.duration = duration;
     }
 
@@ -72,6 +92,9 @@ public class GiftCertificate extends AbstractEntity {
     }
 
     public void setTags(List<String> tags) {
+        if (tags == null) {
+            this.tags = new ArrayList<>();
+        }
         this.tags = tags;
     }
 
@@ -89,9 +112,7 @@ public class GiftCertificate extends AbstractEntity {
             return false;
         }
         GiftCertificate certificate = (GiftCertificate) obj;
-        return id.equals(certificate.id) && name.equals(certificate.name) && description.equals(certificate.description)
-                && price.equals(certificate.price) && createDate.equals(certificate.createDate)
-                && lastUpdateDate.equals(certificate.lastUpdateDate) && duration.equals(certificate.duration);
+        return name.equals(certificate.name);
     }
 
     @Override

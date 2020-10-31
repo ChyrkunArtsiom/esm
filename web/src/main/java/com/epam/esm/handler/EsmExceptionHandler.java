@@ -3,6 +3,7 @@ package com.epam.esm.handler;
 import com.epam.esm.exception.*;
 import com.epam.esm.util.ErrorManager;
 import com.epam.esm.util.ErrorMessageManager;
+import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,6 +13,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.validation.ConstraintViolation;
@@ -27,7 +29,7 @@ public class EsmExceptionHandler {
         return new EsmExceptionHandler();
     }
 
-    @ExceptionHandler(UnsupportedOperationException.class)
+    @ExceptionHandler({UnsupportedOperationException.class,})
     public ResponseEntity<?> unsupportedOperation() {
         HttpHeaders headers = new HttpHeaders();
         Set<HttpMethod> allowedMethods = new HashSet<>();
@@ -39,18 +41,16 @@ public class EsmExceptionHandler {
     }
 
     @ExceptionHandler({DuplicateCertificateException.class, DuplicateTagException.class})
-    public ResponseEntity<ErrorManager> duplicateCertificate(DAOException ex) {
-        String locale = "en_US"; //get locale from somewhere
-        ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
+    public ResponseEntity<ErrorManager> duplicateCertificate(DAOException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
         error.setErrorMessage(String.format(manager.getMessage("entityAlreadyExists"), ex.getName()));
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({NoTagException.class, NoCertificateException.class})
-    public ResponseEntity<ErrorManager> entityNotFound(DAOException ex) {
-        String locale = "en_US"; //get locale from somewhere
-        ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
+    public ResponseEntity<ErrorManager> entityNotFound(DAOException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
         switch (ex.getErrorCode()) {
             case 40401: {
@@ -64,7 +64,6 @@ public class EsmExceptionHandler {
         }
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
-
 
     //Invalid path variable exception
     @ExceptionHandler(ConstraintViolationException.class)
@@ -83,22 +82,44 @@ public class EsmExceptionHandler {
 
     //Exception to be thrown when validation on an argument annotated with @Valid fails.
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorManager> invalidDto(MethodArgumentNotValidException ex) {
-        String locale = "en_US"; //get locale from somewhere
-        ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
+    public ResponseEntity<ErrorManager> invalidDto(MethodArgumentNotValidException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
-
         StringBuilder responseMessage = new StringBuilder();
         for (ObjectError err : ex.getBindingResult().getAllErrors()) {
             String errorMessage = err.getDefaultMessage();
             if (errorMessage != null) {
                 switch (errorMessage) {
-                    case ValidationMessageManager.BLANK_TAG: {
+                    case ValidationMessageManager.BLANK_TAG_NAME: {
                         responseMessage.append(" ").append(manager.getMessage("blankTag"));
                         break;
                     }
-                    case ValidationMessageManager.TAG_WRONG_SIZE: {
+                    case ValidationMessageManager.TAG_NAME_WRONG_SIZE: {
                         responseMessage.append(" ").append(manager.getMessage("tagWrongSize"));
+                        break;
+                    }
+                    case ValidationMessageManager.BLANK_CERTIFICATE_NAME: {
+                        responseMessage.append(" ").append(manager.getMessage("certificateNameBlank"));
+                        break;
+                    }
+                    case ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION: {
+                        responseMessage.append(" ").append(manager.getMessage("certificateDescriptionBlank"));
+                        break;
+                    }
+                    case ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE: {
+                        responseMessage.append(" ").append(manager.getMessage("certificateNameWrongSize"));
+                        break;
+                    }
+                    case ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE: {
+                        responseMessage.append(" ").append(manager.getMessage("certificateDescriptionWrongSize"));
+                        break;
+                    }
+                    case ValidationMessageManager.CERTIFICATE_PRICE_INVALID: {
+                        responseMessage.append(" ").append(manager.getMessage("invalidPrice"));
+                        break;
+                    }
+                    case ValidationMessageManager.CERTIFICATE_DURATION_INVALID: {
+                        responseMessage.append(" ").append(manager.getMessage("durationInvalid"));
                         break;
                     }
                 }
@@ -110,20 +131,36 @@ public class EsmExceptionHandler {
 
     //Exception that indicates that a method argument has not the expected type.
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorManager> argumentWrongType(MethodArgumentTypeMismatchException ex) {
-        String locale = "en_US"; //get locale from somewhere
-        ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
+    public ResponseEntity<ErrorManager> argumentWrongType(MethodArgumentTypeMismatchException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
         error.setErrorMessage(String.format(manager.getMessage("argumentWrongType"), ex.getValue()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<ErrorManager> resourceIsNotValid(ServiceException ex) {
-        String locale = "en_US"; //get locale from somewhere
-        ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
+    public ResponseEntity<ErrorManager> resourceIsNotValid(ServiceException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
         error.setErrorMessage(String.format(manager.getMessage("resourceIsNotValid"), ex.getValue()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({CertificateNameIsNotPresentException.class})
+    public ResponseEntity<ErrorManager> certificateNameIsNotPresented(WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+        ErrorManager error = new ErrorManager();
+        error.setErrorMessage(manager.getMessage("certificateNameNotPresent"));
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    private ErrorMessageManager setLang(String locale) {
+        ErrorMessageManager manager;
+        try {
+            manager = ErrorMessageManager.valueOf(locale);
+        } catch (IllegalArgumentException|NullPointerException ex) {
+            manager = ErrorMessageManager.en_US;
+        }
+        return manager;
     }
 }

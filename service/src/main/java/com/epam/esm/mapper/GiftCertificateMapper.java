@@ -3,6 +3,7 @@ package com.epam.esm.mapper;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
 public class GiftCertificateMapper {
@@ -12,8 +13,13 @@ public class GiftCertificateMapper {
         certificate.setId(dto.getId());
         certificate.setName(dto.getName());
         certificate.setDescription(dto.getDescription());
-        certificate.setPrice(dto.getPrice());
+        if (dto.getPrice() != null) {
+            certificate.setPrice(dto.getPrice().doubleValue());
+        } else {
+            certificate.setPrice(0.0);
+        }
         certificate.setDuration(dto.getDuration());
+        certificate.setTags(dto.getTags());
         return certificate;
     }
 
@@ -22,11 +28,14 @@ public class GiftCertificateMapper {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
-        dto.setPrice(entity.getPrice());
+        dto.setPrice(BigDecimal.valueOf(entity.getPrice()));
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         dto.setCreateDate(entity.getCreateDate().format(df));
-        dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
+        if (entity.getLastUpdateDate() != null) {
+            dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
+        }
         dto.setDuration(entity.getDuration());
+        dto.setTags(entity.getTags());
         return dto;
     }
 }

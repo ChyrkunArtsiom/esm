@@ -47,17 +47,6 @@ public class TagService implements AbstractService<Tag, TagDTO> {
     }
 
     @Override
-    public TagDTO update(TagDTO dto) {
-        throw new UnsupportedOperationException("Tag is not supported by update method.");
-    }
-
-    @Override
-    public boolean delete(TagDTO dto) {
-        Tag entity = TagMapper.toEntity(dto);
-        return dao.delete(entity);
-    }
-
-    @Override
     public List<TagDTO> readAll() {
         List<TagDTO> dtos = new ArrayList<>();
         List<Tag> tags = dao.readAll();
@@ -66,5 +55,16 @@ public class TagService implements AbstractService<Tag, TagDTO> {
             dtos.add(TagMapper.toDto(t));
         }
         return dtos;
+    }
+
+    @Override
+    public TagDTO update(TagDTO dto) {
+        throw new UnsupportedOperationException("Tag is not supported by update method.");
+    }
+
+    @Override
+    public boolean delete(TagDTO dto) {
+        Tag entity = TagMapper.toEntity(dto);
+        return dao.delete(entity);
     }
 }

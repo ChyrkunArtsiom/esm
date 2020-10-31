@@ -26,7 +26,6 @@ public class HikariCPDataSource {
     @Value("${dataSource.driverName}")
     private String driverName;
 
-
     @Bean
     public DataSource postgresqlDataSource() {
         HikariConfig config = new HikariConfig();
