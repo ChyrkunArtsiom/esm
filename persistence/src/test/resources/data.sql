@@ -1,0 +1,2 @@
+INSERT INTO esm_module2.certificates (name, description, price, create_date, last_update_date, duration) VALUES ('test1', 'Test description 1', 1, '2020-11-01 23:24:38.851000', null, 1);
+INSERT INTO esm_module2.certificates (name, description, price, create_date, last_update_date, duration) VALUES ('test2', 'Test description 2', 2, '2020-11-01 23:24:58.419000', null, 2)
