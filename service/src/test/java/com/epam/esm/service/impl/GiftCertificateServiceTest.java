@@ -1,17 +1,16 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftCertificateDAO;
+import com.epam.esm.dao.util.SearchCriteria;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mapper.GiftCertificateMapper;
-import com.epam.esm.service.AbstractService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -57,6 +56,20 @@ class GiftCertificateServiceTest {
         Mockito.when(dao.readAll()).thenReturn(entities);
 
         List<GiftCertificateDTO> tags = service.readAll();
+        assertTrue(tags.size() > 0);
+    }
+
+    @Test
+    void testReadByParams() {
+        List<GiftCertificate> entities = new ArrayList<>(
+                Arrays.asList(new GiftCertificate(
+                                1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null,  10, null),
+                        new GiftCertificate(
+                                1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
+        Mockito.when(dao.readByParams(Mockito.any(SearchCriteria.class))).thenReturn(entities);
+
+        SearchCriteria criteria = new SearchCriteria("", "Test certificate", "", "name_asc");
+        List<GiftCertificateDTO> tags = service.readByParams(criteria);
         assertTrue(tags.size() > 0);
     }
 

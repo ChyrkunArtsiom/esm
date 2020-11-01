@@ -1,12 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.config.AppConfig;
+import com.epam.esm.dao.util.SearchCriteria;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.DuplicateCertificateException;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.service.impl.GiftCertificateService;
 import com.epam.esm.util.ErrorMessageManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
@@ -167,5 +166,22 @@ class GiftCertificateControllerTest {
 
         mockMvc.perform(put(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testReadByParams() throws Exception {
+        List<GiftCertificateDTO> dtos = new ArrayList<>(
+                Arrays.asList(new GiftCertificateDTO(
+                                100, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
+                        new GiftCertificateDTO(
+                                100, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
+                ));
+        Mockito.when(service.readByParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
+
+        mockMvc.perform(get(CERTIFICATES_PATH + "?sort=date_asc"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.[0].name").value("Test certificate1"))
+                .andExpect(jsonPath("$.[1].name").value("Test certificate2"))
+                .andExpect(status().isOk());
     }
 }

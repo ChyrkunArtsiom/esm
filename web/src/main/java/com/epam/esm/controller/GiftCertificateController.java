@@ -6,6 +6,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.GiftCertificateService;
+import com.epam.esm.dao.util.SearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpHeaders;
@@ -53,11 +54,11 @@ public class GiftCertificateController {
         return service.read(certificateId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+/*    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public List<GiftCertificateDTO> readAllCertificates() {
         return service.readAll();
-    }
+    }*/
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
     public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
@@ -66,6 +67,16 @@ public class GiftCertificateController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public List<GiftCertificateDTO> readCertificatesByParams(
+            @RequestParam(value = "tag", defaultValue = "") String tagName,
+            @RequestParam(value = "name", defaultValue = "") String name,
+            @RequestParam(value = "description", defaultValue = "") String description,
+            @RequestParam(value = "sort", defaultValue = "name_asc") String sort) {
+        return service.readByParams(new SearchCriteria(tagName, name, description, sort));
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")

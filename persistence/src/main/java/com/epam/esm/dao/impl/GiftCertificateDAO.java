@@ -1,6 +1,9 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
+import com.epam.esm.dao.util.SearchCriteria;
+import com.epam.esm.dao.util.SortOrder;
+import com.epam.esm.dao.util.SortType;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
@@ -22,7 +25,6 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +51,16 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     private final static String SQL_READ_ALL = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates";
+
+    private final static String SQL_READ_BY_PARAMS_TAGS = "SELECT DISTINCT certificates.id, certificates.name, " +
+            "description, price, create_date, last_update_date, duration " +
+            "FROM esm_module2.certificates INNER JOIN esm_module2.certificate_tag " +
+            "ON certificates.id = certificate_tag.certificate_id INNER JOIN esm_module2.tags " +
+            "ON certificate_tag.tag_id = tags.id";
+
+    private final static String SQL_READ_BY_PARAMS_NO_TAGS = "SELECT DISTINCT certificates.id, certificates.name, " +
+            "description, price, create_date, last_update_date, duration " +
+            "FROM esm_module2.certificates";
 
     private final static String SQL_UPDATE_CERTIFICATE = "UPDATE esm_module2.certificates SET " +
             "description = (?), price = (?), last_update_date = (?), duration = (?) WHERE name = (?)";
@@ -148,6 +160,42 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     }
 
     @Override
+    public List<GiftCertificate> readAll() {
+        List<GiftCertificate> certificates = new ArrayList<>();
+        RowMapper<List<GiftCertificate>> rowMapper = getRowMapper();
+
+        try {
+            certificates = template.queryForObject(SQL_READ_ALL, rowMapper);
+            return certificates;
+        } catch (EmptyResultDataAccessException e) {
+            return certificates;
+        }
+    }
+
+    public List<GiftCertificate> readByParams(SearchCriteria criteria) {
+        List<GiftCertificate> certificates = new ArrayList<>();
+        List<String> criteriaTypes = new ArrayList<>();
+        if (!criteria.getTagName().isEmpty()) {
+            criteriaTypes.add(criteria.getTagName());
+        }
+        if (!criteria.getName().isEmpty()) {
+            criteriaTypes.add("%" + criteria.getName() + "%");
+        }
+        if (!criteria.getDescription().isEmpty()) {
+            criteriaTypes.add("%" + criteria.getDescription() + "%");
+        }
+        Object[] params = criteriaTypes.toArray();
+        RowMapper<List<GiftCertificate>> rowMapper = getRowMapper();
+
+        try {
+            certificates = template.queryForObject(generateQuery(criteria), params, rowMapper);
+            return certificates;
+        } catch (EmptyResultDataAccessException e) {
+            return certificates;
+        }
+    }
+
+    @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
         GiftCertificate oldCertificate = read(giftCertificate.getName());
         if (oldCertificate != null) {
@@ -179,28 +227,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         Object[] params = new Object[] {certificate.getName()};
         int[] types = new int[] {Types.VARCHAR};
         return template.update(SQL_DELETE_CERTIFICATE, params, types) > 0;
-    }
-
-    @Override
-    public List<GiftCertificate> readAll() {
-        List<GiftCertificate> certificates = new ArrayList<>();
-
-        RowMapper<List<GiftCertificate>> rowMapper = (rs, rowNum) -> {
-            List<GiftCertificate> rows = new ArrayList<>();
-            do {
-                GiftCertificate certificate = mapToCertificate(rs);
-                certificate.setTags(readTagsByCertificateId(certificate.getId()));
-                rows.add(certificate);
-            } while (rs.next());
-            return rows;
-        };
-
-        try {
-            certificates = template.queryForObject(SQL_READ_ALL, rowMapper);
-            return certificates;
-        } catch (EmptyResultDataAccessException e) {
-            return certificates;
-        }
     }
 
     private GiftCertificate mapToCertificate(ResultSet rs) throws SQLException {
@@ -265,5 +291,66 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             }
         }
         return excessElements;
+    }
+
+    private String generateQuery(SearchCriteria criteria) {
+        StringBuilder query = new StringBuilder();
+        boolean hasWhere = false;
+        if (!criteria.getTagName().isEmpty()) {
+            query.append(SQL_READ_BY_PARAMS_TAGS);
+            query.append(" WHERE ");
+            query.append("tags.name = (?)");
+            hasWhere = true;
+        } else {
+            query.append(SQL_READ_BY_PARAMS_NO_TAGS);
+        }
+        if (!criteria.getName().isEmpty()) {
+            if (!hasWhere) {
+                query.append(" WHERE ");
+                query.append("certificates.name LIKE (?)");
+                hasWhere = true;
+            } else {
+                query.append(", certificates.name LIKE (?)");
+            }
+        }
+        if (!criteria.getDescription().isEmpty()) {
+            if (!hasWhere) {
+                query.append(" WHERE ");
+                query.append("description LIKE (?)");
+            } else {
+                query.append(", description LIKE (?)");
+            }
+        }
+        if (!criteria.getSort().isEmpty()) {
+            String[] sort = criteria.getSort().split("_");
+            query.append(" ORDER BY ");
+            SortType sortType = SortType.valueOf(sort[0].toUpperCase());
+            SortOrder order = SortOrder.valueOf(sort[1].toUpperCase());
+            switch (sortType) {
+                case NAME: {
+                    query.append("certificates.name");
+                    break;
+                }
+                case DATE: {
+                    query.append("create_date");
+                    break;
+                }
+            }
+            query.append(" ").append(order);
+        }
+        return query.toString();
+    }
+
+    private RowMapper<List<GiftCertificate>> getRowMapper() {
+        RowMapper<List<GiftCertificate>> rowMapper = (rs, rowNum) -> {
+            List<GiftCertificate> rows = new ArrayList<>();
+            do {
+                GiftCertificate certificate = mapToCertificate(rs);
+                certificate.setTags(readTagsByCertificateId(certificate.getId()));
+                rows.add(certificate);
+            } while (rs.next());
+            return rows;
+        };
+        return rowMapper;
     }
 }

@@ -4,9 +4,14 @@ import com.epam.esm.dao.impl.GiftCertificateDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.*;
+import com.epam.esm.exception.CertificateNameIsNotPresentException;
+import com.epam.esm.exception.DuplicateCertificateTagException;
+import com.epam.esm.exception.NoCertificateException;
+import com.epam.esm.exception.NoTagException;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.AbstractService;
+import com.epam.esm.dao.util.SearchCriteria;
+import com.epam.esm.validator.SearchCriteriaValidator;
 import com.epam.esm.validator.GiftCertificateDTOValidator;
 import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +135,21 @@ public class GiftCertificateService implements AbstractService<GiftCertificate, 
             }
         } else {
             throw new CertificateNameIsNotPresentException("Certificate name is not presented", "");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GiftCertificateDTO> readByParams(SearchCriteria criteria) {
+        if (SearchCriteriaValidator.isValid(criteria)) {
+            List<GiftCertificateDTO> dtos = new ArrayList<>();
+            List<GiftCertificate> certificates = dao.readByParams(criteria);
+            for (GiftCertificate c : certificates) {
+                dtos.add(GiftCertificateMapper.toDto(c));
+            }
+            return dtos;
+        } else {
+            return new ArrayList<>();
         }
     }
 }

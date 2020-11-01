@@ -1,5 +1,6 @@
 package com.epam.esm.dao.impl;
 
+import com.epam.esm.dao.util.SearchCriteria;
 import com.epam.esm.entity.GiftCertificate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +11,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +31,13 @@ class GiftCertificateDAOTest {
     @Test
     void testReadAll() {
         List<GiftCertificate> tags = dao.readAll();
+        assertTrue(tags.size() > 0);
+    }
+
+    @Test
+    void testReadByParams() {
+        SearchCriteria criteria = new SearchCriteria("", "", "boo", "date_desc");
+        List<GiftCertificate> tags = dao.readByParams(criteria);
         assertTrue(tags.size() > 0);
     }
 
@@ -57,11 +64,4 @@ class GiftCertificateDAOTest {
         GiftCertificate oldCertificate = dao.update(certificate);
         assertNotNull(oldCertificate);
     }
-
-
-
-
-
-
-
 }

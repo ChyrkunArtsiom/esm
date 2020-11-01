@@ -1,7 +1,6 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.CertificateNameIsNotPresentException;
 import com.epam.esm.exception.DescriptionIsNotValidException;
 import com.epam.esm.exception.DurationIsNotValidException;

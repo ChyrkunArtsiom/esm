@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GiftCertificateDTOValidatorTest {
 
     @Test
-    void isValid() {
+    void testIsValid() {
         GiftCertificateDTO dto = new GiftCertificateDTO(1, "name", "description", BigDecimal.valueOf(100.5), 10, null);
         assertTrue(GiftCertificateDTOValidator.isValid(dto));
     }

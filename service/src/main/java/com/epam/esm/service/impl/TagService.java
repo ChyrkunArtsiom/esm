@@ -6,6 +6,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.DAOException;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
+import com.epam.esm.dao.util.SearchCriteria;
 import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -66,5 +67,10 @@ public class TagService implements AbstractService<Tag, TagDTO> {
     public boolean delete(TagDTO dto) {
         Tag entity = TagMapper.toEntity(dto);
         return dao.delete(entity);
+    }
+
+    @Override
+    public List<TagDTO> readByParams(SearchCriteria criteria) {
+        throw new UnsupportedOperationException("Tag is not supported by search method.");
     }
 }
