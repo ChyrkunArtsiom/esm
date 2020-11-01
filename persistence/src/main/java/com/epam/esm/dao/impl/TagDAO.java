@@ -26,6 +26,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for interacting with{@link Tag} table in databse. Implements {@link AbstractDAO}.
+ */
 @Repository
 @ComponentScan(basePackageClasses = HikariCPDataSource.class)
 public class TagDAO implements AbstractDAO<Tag> {
@@ -44,6 +47,11 @@ public class TagDAO implements AbstractDAO<Tag> {
 
     private JdbcTemplate template;
 
+    /**
+     * Sets {@link JdbcTemplate} object.
+     *
+     * @param template the {@link JdbcTemplate} object
+     */
     @Autowired
     public void setTemplate(JdbcTemplate template) {
         this.template = template;
@@ -84,7 +92,13 @@ public class TagDAO implements AbstractDAO<Tag> {
         }
     }
 
-    public Tag read(String name) throws DAOException{
+    /**
+     * Gets {@link Tag} object by the name.
+     *
+     * @param name the name string
+     * @return the {@link Tag} object
+     */
+    public Tag read(String name) {
         try {
             return read(name, SQL_READ_TAG_BY_NAME);
         } catch (EmptyResultDataAccessException|DAOException ex) {

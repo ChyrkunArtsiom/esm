@@ -6,17 +6,31 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
+/**
+ * Data transfer object of {@link com.epam.esm.entity.Tag}.
+ */
 public class TagDTO extends AbstractDTO{
-
+    /** An id. */
     private Integer id;
+
+    /** A string of name. */
     @NotBlank(message = ValidationMessageManager.BLANK_TAG_NAME)
     @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_NAME_WRONG_SIZE)
     private String name;
 
+    /**
+     * Empty constructor.
+     */
     public TagDTO() {
 
     }
 
+    /**
+     * Constructor with all fields.
+     *
+     * @param id   the id
+     * @param name the string of name
+     */
     public TagDTO(Integer id, String name) {
         this.id = id;
         this.name = name;

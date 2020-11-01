@@ -10,34 +10,58 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Data transfer object of {@link com.epam.esm.entity.GiftCertificate}.
+ */
 public class GiftCertificateDTO extends AbstractDTO {
+    /** An id. */
     private Integer id;
 
+    /** A string of name. */
     @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)
     @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE)
     private String name;
 
+    /** A string of desctiption. */
     @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION)
     @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE)
     private String description;
 
+    /** A BigDecimal of price. */
     @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
     @Positive(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
     private BigDecimal price;
 
+    /** A string of date of creation. */
     private String createDate;
 
+    /** A string of date of last update. */
     private String lastUpdateDate;
 
+    /** A duration in days. */
     @Digits(integer = 10, fraction = 0, message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
     @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
     private Integer duration;
 
+    /** A list of tag names. */
     private List<String> tags;
 
+    /**
+     * Empty constructor.
+     */
     public GiftCertificateDTO() {
     }
 
+    /**
+     * Constructor without dates.
+     *
+     * @param id          the id
+     * @param name        the string of name
+     * @param description the string of description
+     * @param price       the BigDecimal of price
+     * @param duration    the duration
+     * @param tags        the list of tag names
+     */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
                               Integer duration, List<String> tags) {
         this.id = id;
@@ -48,6 +72,18 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.tags = tags;
     }
 
+    /**
+     * Constructor with all fields.
+     *
+     * @param id             the id
+     * @param name           the string of name
+     * @param description    the string of description
+     * @param price          the BigDecimal of price
+     * @param createDate     the string of date of creation
+     * @param lastUpdateDate the string of date of last update
+     * @param duration       the duration
+     * @param tags           the list of tag names
+     */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
                               String lastUpdateDate, Integer duration, List<String> tags) {
         this.id = id;

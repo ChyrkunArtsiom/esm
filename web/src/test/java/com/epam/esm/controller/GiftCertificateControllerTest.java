@@ -1,13 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.config.AppConfig;
-import com.epam.esm.dao.util.SearchCriteria;
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.DuplicateCertificateException;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.service.AbstractService;
 import com.epam.esm.util.ErrorMessageManager;
+import com.epam.esm.util.SearchCriteria;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +44,7 @@ class GiftCertificateControllerTest {
     private WebApplicationContext context;
 
     @Autowired
-    private AbstractService<GiftCertificate, GiftCertificateDTO> service;
+    private AbstractService<GiftCertificateDTO> service;
 
     @BeforeEach
     void setUp() {

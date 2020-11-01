@@ -6,17 +6,39 @@ import java.util.List;
 import java.util.Objects;
 
 
+/**
+ * Class for Certificate entity.
+ */
 public class GiftCertificate extends AbstractEntity {
+    /** A string of desctiption. */
     private String description;
+    /** A Double of price. */
     private Double price;
+    /** An OffSetDateTime of date of creation. */
     private OffsetDateTime createDate;
+    /** An OffSetDateTime of date of last update. */
     private OffsetDateTime lastUpdateDate;
+    /** A duration in days. */
     private Integer duration;
+    /** A list of tag names. */
     private List<String> tags;
 
+    /**
+     * Empty constructor.
+     */
     public GiftCertificate() {
     }
 
+    /**
+     * Constructor without dates.
+     *
+     * @param id          the id
+     * @param name        the string of name
+     * @param description the string of description
+     * @param price       the Double of price
+     * @param duration    the duration
+     * @param tags        the list of tag names
+     */
     public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<String> tags) {
         this.id = id;
         this.name = name;
@@ -26,6 +48,18 @@ public class GiftCertificate extends AbstractEntity {
         this.tags = tags;
     }
 
+    /**
+     * Constructor with all fields.
+     *
+     * @param id             the id
+     * @param name           the string of name
+     * @param description    the string of description
+     * @param price          the Double of price
+     * @param createDate     the OffSetDateTime of date of creation
+     * @param lastUpdateDate the OffSetDateTime of date of last update
+     * @param duration       the duration
+     * @param tags           the list of tag names
+     */
     public GiftCertificate(Integer id, String name, String description, Double price,
                            OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<String> tags) {
         this.id = id;

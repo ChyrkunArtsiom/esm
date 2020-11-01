@@ -21,14 +21,27 @@ import javax.validation.ConstraintViolationException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Exception handler class. Constructs a response depending on thrown exception.
+ */
 @ControllerAdvice
 public class EsmExceptionHandler {
 
+    /**
+     * Creates {@link EsmExceptionHandler} object for controllers.
+     *
+     * @return the {@link EsmExceptionHandler} object
+     */
     @Bean
     public EsmExceptionHandler handler() {
         return new EsmExceptionHandler();
     }
 
+    /**
+     * Handles {@link UnsupportedOperationException} exception.
+     *
+     * @return the {@link ResponseEntity} object with headers and http status
+     */
     @ExceptionHandler({UnsupportedOperationException.class,})
     public ResponseEntity<?> unsupportedOperation() {
         HttpHeaders headers = new HttpHeaders();
@@ -40,6 +53,13 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(headers, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
+    /**
+     * Handles {@link DuplicateCertificateException} and {@link DuplicateTagException} exceptions.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with headers, {@link ErrorManager} and http status
+     */
     @ExceptionHandler({DuplicateCertificateException.class, DuplicateTagException.class})
     public ResponseEntity<ErrorManager> duplicateCertificate(DAOException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
@@ -48,6 +68,13 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
+    /**
+     * Handles {@link NoTagException} and {@link NoCertificateException} exceptions.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
     @ExceptionHandler({NoTagException.class, NoCertificateException.class})
     public ResponseEntity<ErrorManager> entityNotFound(DAOException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
@@ -65,7 +92,12 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    //Invalid path variable exception
+    /**
+     * Handles {@link ConstraintViolationException} exception.
+     *
+     * @param constraintViolationException the exception
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorManager> handle(ConstraintViolationException constraintViolationException) {
         Set<ConstraintViolation<?>> violations = constraintViolationException.getConstraintViolations();
@@ -80,7 +112,13 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    //Exception to be thrown when validation on an argument annotated with @Valid fails.
+    /**
+     * Handles {@link MethodArgumentNotValidException} exception.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorManager> invalidDto(MethodArgumentNotValidException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
@@ -129,7 +167,14 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    //Exception that indicates that a method argument has not the expected type.
+    /**
+     * Handles {@link MethodArgumentTypeMismatchException} exception.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
+//Exception that indicates that a method argument has not the expected type.
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorManager> argumentWrongType(MethodArgumentTypeMismatchException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
@@ -138,6 +183,13 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles {@link ServiceException} exception.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<ErrorManager> resourceIsNotValid(ServiceException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
@@ -146,6 +198,12 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles {@link CertificateNameIsNotPresentException} exception.
+     *
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
     @ExceptionHandler({CertificateNameIsNotPresentException.class})
     public ResponseEntity<ErrorManager> certificateNameIsNotPresented(WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));

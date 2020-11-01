@@ -1,7 +1,16 @@
 package com.epam.esm.entity;
 
+/**
+ * Abstract class for entities to classify all entity classes.
+ */
 public abstract class AbstractEntity {
+    /**
+     * An id.
+     */
     protected Integer id;
+    /**
+     * A string of name.
+     */
     protected String name;
 
     public Integer getId() {

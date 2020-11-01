@@ -3,10 +3,9 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.DAOException;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.dao.util.SearchCriteria;
+import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,12 +14,20 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for interacting with {@link Tag}. Implements {@link AbstractService}.
+ */
 @Service
 @ComponentScan(basePackageClasses = TagDAO.class)
-public class TagService implements AbstractService<Tag, TagDTO> {
+public class TagService implements AbstractService<TagDTO> {
 
     private TagDAO dao;
 
+    /**
+     * Sets {@link TagDAO} object.
+     *
+     * @param dao the {@link TagDAO} object
+     */
     @Autowired
     public void setDao(TagDAO dao) {
         this.dao = dao;
@@ -37,12 +44,18 @@ public class TagService implements AbstractService<Tag, TagDTO> {
     }
 
     @Override
-    public TagDTO read(int id) throws DAOException {
+    public TagDTO read(int id) {
         Tag tag = dao.read(id);
         return TagMapper.toDto(tag);
     }
 
-    public TagDTO read(String name) throws DAOException {
+    /**
+     * Gets {@link TagDTO} object by the name.
+     *
+     * @param name the name string
+     * @return the {@link TagDTO} object
+     */
+    public TagDTO read(String name) {
         Tag tag = dao.read(name);
         return TagMapper.toDto(tag);
     }

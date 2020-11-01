@@ -6,8 +6,17 @@ import com.epam.esm.entity.GiftCertificate;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Class that converts {@link GiftCertificate} and {@link GiftCertificateDTO} objects to each other.
+ */
 public class GiftCertificateMapper {
 
+    /**
+     * Converts {@link GiftCertificateDTO} object to a {@link GiftCertificate}.
+     *
+     * @param dto the {@link GiftCertificateDTO} object
+     * @return the {@link GiftCertificate} object
+     */
     public static GiftCertificate toEntity(GiftCertificateDTO dto) {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setId(dto.getId());
@@ -23,6 +32,12 @@ public class GiftCertificateMapper {
         return certificate;
     }
 
+    /**
+     * Converts {@link GiftCertificate} object to a {@link GiftCertificateDTO}.
+     *
+     * @param entity the {@link GiftCertificate} object
+     * @return the {@link GiftCertificateDTO} object
+     */
     public static GiftCertificateDTO toDto(GiftCertificate entity) {
         GiftCertificateDTO dto = new GiftCertificateDTO();
         dto.setId(entity.getId());

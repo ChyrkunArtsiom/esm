@@ -2,12 +2,24 @@ package com.epam.esm.entity;
 
 import java.util.Objects;
 
+/**
+ * Class for Tag entity.
+ */
 public class Tag extends AbstractEntity {
 
+    /**
+     * Empty constructor.
+     */
     public Tag() {
 
     }
 
+    /**
+     * Constructor with all fields.
+     *
+     * @param id   the id
+     * @param name the string name
+     */
     public Tag(Integer id, String name) {
         this.id = id;
         this.name = name;

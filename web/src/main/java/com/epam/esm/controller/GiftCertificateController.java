@@ -2,11 +2,10 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.GiftCertificateService;
-import com.epam.esm.dao.util.SearchCriteria;
+import com.epam.esm.util.SearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpHeaders;
@@ -22,21 +21,36 @@ import javax.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * Class controller for interacting with {@link GiftCertificateDTO} objects.
+ */
 @RestController
 @ComponentScan(basePackageClasses = {GiftCertificateService.class, EsmExceptionHandler.class})
 @RequestMapping("/certificates")
 @Validated
 public class GiftCertificateController {
 
-    private AbstractService<GiftCertificate, GiftCertificateDTO> service;
+    private AbstractService<GiftCertificateDTO> service;
 
     private static final String CERTIFICATES_PATH = "/certificates/";
 
+    /**
+     * Sets {@link AbstractService} object.
+     *
+     * @param service the {@link AbstractService} object
+     */
     @Autowired
-    public void setService(AbstractService<GiftCertificate, GiftCertificateDTO> service) {
+    public void setService(AbstractService<GiftCertificateDTO> service) {
         this.service = service;
     }
 
+    /**
+     * Creates {@link GiftCertificateDTO} object. Returns location and status.
+     *
+     * @param dto the {@link GiftCertificateDTO} object.
+     * @param ucb the {@link UriComponentsBuilder} which creates URI of created object
+     * @return the {@link ResponseEntity} object with {@link GiftCertificateDTO} object, headers and http status
+     */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto,
                                                                 UriComponentsBuilder ucb) {
@@ -47,6 +61,12 @@ public class GiftCertificateController {
         return new ResponseEntity<>(createdCertificate, headers, HttpStatus.OK);
     }
 
+    /**
+     * Gets {@link GiftCertificateDTO} object by id.
+     *
+     * @param certificateId the {@link GiftCertificateDTO} object id
+     * @return the {@link GiftCertificateDTO} object
+     */
     @RequestMapping(value = "/{certificateId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public GiftCertificateDTO readCertificate(
@@ -60,6 +80,12 @@ public class GiftCertificateController {
         return service.readAll();
     }*/
 
+    /**
+     * Deletes {@link GiftCertificateDTO} object.
+     *
+     * @param dto the {@link GiftCertificateDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
     @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
     public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
         if (service.delete(dto)) {
@@ -69,6 +95,15 @@ public class GiftCertificateController {
         }
     }
 
+    /**
+     * Gets {@link GiftCertificateDTO} objects by parameters.
+     *
+     * @param tagName     the tag name
+     * @param name        the name of certificate
+     * @param description the description
+     * @param sort        the sort parameter
+     * @return the list of {@link GiftCertificateDTO} objects.
+     */
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public List<GiftCertificateDTO> readCertificatesByParams(
@@ -79,6 +114,12 @@ public class GiftCertificateController {
         return service.readByParams(new SearchCriteria(tagName, name, description, sort));
     }
 
+    /**
+     * Updates {@link GiftCertificateDTO} object.
+     *
+     * @param dto the {@link GiftCertificateDTO} object to update.
+     * @return the {@link ResponseEntity} object with http status
+     */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
     public ResponseEntity<?> updateCertificate(@RequestBody GiftCertificateDTO dto) {
         if (service.update(dto) != null) {

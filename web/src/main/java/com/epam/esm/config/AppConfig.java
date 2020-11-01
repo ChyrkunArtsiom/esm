@@ -13,11 +13,20 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 
+/**
+ * Configuration class for web initializing web application context.
+ */
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "com.epam.esm.controller")
 public class AppConfig implements WebMvcConfigurer {
 
+    /**
+     * Creates view resolver.
+     *
+     * @param manager the {@link ContentNegotiationManager} manager
+     * @return the {@link ViewResolver} object
+     */
     @Bean
     public ViewResolver viewResolver(ContentNegotiationManager manager) {
         ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
@@ -25,6 +34,11 @@ public class AppConfig implements WebMvcConfigurer {
         return resolver;
     }
 
+    /**
+     * Creates validation processor to enable method validation.
+     *
+     * @return {@link MethodValidationPostProcessor} object
+     */
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
         return new MethodValidationPostProcessor();

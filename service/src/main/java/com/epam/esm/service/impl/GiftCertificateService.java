@@ -10,9 +10,9 @@ import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.exception.NoTagException;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.dao.util.SearchCriteria;
-import com.epam.esm.validator.SearchCriteriaValidator;
+import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.validator.GiftCertificateDTOValidator;
+import com.epam.esm.validator.SearchCriteriaValidator;
 import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -22,19 +22,32 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for interacting with {@link GiftCertificateDAO}. Implements {@link AbstractService}.
+ */
 @Service
 @ComponentScan(basePackageClasses = {GiftCertificateDAO.class, TagService.class})
-public class GiftCertificateService implements AbstractService<GiftCertificate, GiftCertificateDTO> {
+public class GiftCertificateService implements AbstractService<GiftCertificateDTO> {
 
     private GiftCertificateDAO dao;
 
     private TagService tagService;
 
+    /**
+     * Sets {@link GiftCertificateDAO} object.
+     *
+     * @param dao the {@link GiftCertificateDAO} object
+     */
     @Autowired
     public void setDao(GiftCertificateDAO dao) {
         this.dao = dao;
     }
 
+    /**
+     * Sets {@link TagService} object.
+     *
+     * @param tagService the {@link TagService} object.
+     */
     @Autowired
     public void setTagService(TagService tagService) {
         this.tagService = tagService;
@@ -59,11 +72,11 @@ public class GiftCertificateService implements AbstractService<GiftCertificate, 
         return dtos;
     }
 
-    @Transactional(readOnly = true)
+/*    @Transactional(readOnly = true)
     public GiftCertificateDTO read(String name) {
         GiftCertificate certificate = dao.read(name);
         return GiftCertificateMapper.toDto(certificate);
-    }
+    }*/
 
     @Override
     public boolean delete(GiftCertificateDTO dto) {
@@ -79,11 +92,13 @@ public class GiftCertificateService implements AbstractService<GiftCertificate, 
     public GiftCertificateDTO create(GiftCertificateDTO dto) {
         if (GiftCertificateDTOValidator.isValid(dto)) {
             GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
-            for (String tag : entity.getTags()) {
-                try {
-                    tagService.read(tag);
-                } catch (NoTagException ex) {
-                    tagService.create(new TagDTO(0, tag));
+            if (entity.getTags() != null) {
+                for (String tag : entity.getTags()) {
+                    try {
+                        tagService.read(tag);
+                    } catch (NoTagException ex) {
+                        tagService.create(new TagDTO(0, tag));
+                    }
                 }
             }
             entity = dao.create(entity);

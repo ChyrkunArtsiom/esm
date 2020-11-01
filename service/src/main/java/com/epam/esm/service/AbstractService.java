@@ -1,17 +1,61 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.AbstractDTO;
-import com.epam.esm.entity.AbstractEntity;
-import com.epam.esm.exception.DAOException;
-import com.epam.esm.dao.util.SearchCriteria;
+import com.epam.esm.util.SearchCriteria;
 
 import java.util.List;
 
-public interface AbstractService<T extends AbstractEntity, U extends AbstractDTO> {
+/**
+ * The interface for interacting with service module.
+ *
+ * @param <U> the {@link AbstractDTO} type
+ */
+public interface AbstractService<U extends AbstractDTO> {
+    /**
+     * Creates entity. Returns {@link AbstractDTO} object if entity in database was created.
+     *
+     * @param entity the object of {@link AbstractDTO}
+     * @return the object of {@link AbstractDTO}
+     */
     U create(U entity);
-    U read(int id) throws DAOException;
+
+    /**
+     * Gets entity by id.
+     *
+     * @param id the id
+     * @return the object of {@link AbstractDTO}
+     */
+    U read(int id);
+
+    /**
+     * Updates entity. Returns {@link AbstractDTO} object if entity in database was updated.
+     *
+     * @param entity the object of {@link AbstractDTO}
+     * @return the t
+     */
     U update(U entity);
+
+    /**
+     * Deletes entity. Returns {@code true} if entity was deleted.
+     *
+     * @param dto the object of {@link AbstractDTO}
+     * @return {@code true} if entity was deleted
+     */
     boolean delete(U dto);
+
+    /**
+     * Reads all {@link AbstractDTO} objects.
+     *
+     * @return the list of {@link AbstractDTO} object
+     */
     List<U> readAll();
+
+    /**
+     * Gets the list of {@link AbstractDTO} objects by parameters.
+     * They are the fields of {@link SearchCriteria} class.
+     *
+     * @param criteria the {@link SearchCriteria} object
+     * @return the list of {@link AbstractDTO} objects
+     */
     List<U> readByParams(SearchCriteria criteria);
 }

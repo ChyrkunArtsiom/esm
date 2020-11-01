@@ -1,13 +1,13 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
-import com.epam.esm.dao.util.SearchCriteria;
-import com.epam.esm.dao.util.SortOrder;
-import com.epam.esm.dao.util.SortType;
 import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.*;
+import com.epam.esm.util.SearchCriteria;
+import com.epam.esm.util.SortOrder;
+import com.epam.esm.util.SortType;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +28,9 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
+ */
 @Repository
 @ComponentScan(basePackageClasses = {HikariCPDataSource.class, TagDAO.class})
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
@@ -75,11 +78,21 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     private JdbcTemplate template;
     private TagDAO tagDAO;
 
+    /**
+     * Sets {@link JdbcTemplate} object.
+     *
+     * @param template the {@link JdbcTemplate} object
+     */
     @Autowired
     public void setTemplate(JdbcTemplate template) {
         this.template = template;
     }
 
+    /**
+     * Sets {@link TagDAO} object.
+     *
+     * @param tagDAO the {@link TagDAO} object
+     */
     @Autowired
     public void setTagDAO(TagDAO tagDAO) {
         this.tagDAO = tagDAO;
@@ -134,7 +147,13 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
-    public GiftCertificate read(String name) throws NoCertificateException{
+    /**
+     * Gets {@link GiftCertificate} object by the name.
+     *
+     * @param name the name string
+     * @return the {@link GiftCertificate} object
+     */
+    public GiftCertificate read(String name) {
         try {
             return read(name, SQL_READ_CERTIFICATE_BY_NAME);
         } catch (EmptyResultDataAccessException ex) {
@@ -172,6 +191,13 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
+    /**
+     * Gets the list of {@link GiftCertificate} objects by parameters.
+     * They are the fields of {@link SearchCriteria} class.
+     *
+     * @param criteria the {@link SearchCriteria} object
+     * @return the list of {@link GiftCertificate} objects
+     */
     public List<GiftCertificate> readByParams(SearchCriteria criteria) {
         List<GiftCertificate> certificates = new ArrayList<>();
         List<String> criteriaTypes = new ArrayList<>();

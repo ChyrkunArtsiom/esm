@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+/**
+ * Configuration class for connection to database.
+ */
 @PropertySource({"classpath:/datasource.properties"})
 @Configuration
 @EnableTransactionManagement
@@ -26,6 +29,11 @@ public class HikariCPDataSource {
     @Value("${dataSource.driverName}")
     private String driverName;
 
+    /**
+     * Creates data source for postgresql database.
+     *
+     * @return the DataSource object.
+     */
     @Bean
     public DataSource postgresqlDataSource() {
         HikariConfig config = new HikariConfig();
@@ -38,11 +46,22 @@ public class HikariCPDataSource {
         return dataSource;
     }
 
+    /**
+     * Creates Transaction Manager for @Transactional functionality.
+     *
+     * @return the PlatformTransactionManager object
+     */
     @Bean
     public PlatformTransactionManager txManager() {
         return new DataSourceTransactionManager(postgresqlDataSource());
     }
 
+    /**
+     * Creates jdbcTemplate object.
+     *
+     * @param dataSource the data source
+     * @return the jdbcTemplate object
+     */
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
