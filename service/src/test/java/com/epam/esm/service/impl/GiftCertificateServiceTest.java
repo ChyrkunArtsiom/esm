@@ -78,18 +78,16 @@ class GiftCertificateServiceTest {
         assertEquals(dto, service.create(dto));
     }
 
-
-
-
-
-
-
     @Test
-    void update() {
-        GiftCertificateDTO certificate = new GiftCertificateDTO(3, "testR", "test",
-                BigDecimal.valueOf(1.0), 1, null);
-        GiftCertificateDTO oldCertificate = service.update(certificate);
-        assertNotNull(oldCertificate);
+    void testUpdate() {
+        List<String> tags = new ArrayList<>(Arrays.asList("rest", "tagtagtest"));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(0, "test", "test",
+                BigDecimal.valueOf(1.0), 1, tags);
+        Mockito.when(dao.read(Mockito.anyString()))
+                .thenReturn(GiftCertificateMapper.toEntity(certificate));
+        Mockito.when(dao.update(Mockito.any(GiftCertificate.class)))
+                .thenReturn(GiftCertificateMapper.toEntity(certificate));
+        assertNull(service.update(certificate));
     }
 
 }

@@ -76,7 +76,7 @@ public class TagDAO implements AbstractDAO<Tag> {
     @Override
     public Tag read(int id) throws DAOException {
         try {
-            return readByParam(id, SQL_READ_TAG);
+            return read(id, SQL_READ_TAG);
         } catch (EmptyResultDataAccessException|DAOException ex) {
             LOGGER.log(Level.ERROR, String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)), ex);
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)), ex,
@@ -86,7 +86,7 @@ public class TagDAO implements AbstractDAO<Tag> {
 
     public Tag read(String name) throws DAOException{
         try {
-            return readByParam(name, SQL_READ_TAG_BY_NAME);
+            return read(name, SQL_READ_TAG_BY_NAME);
         } catch (EmptyResultDataAccessException|DAOException ex) {
             LOGGER.log(Level.ERROR, String.format("Tag with id = {%s} doesn't exist.", name), ex);
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", name), ex,
@@ -94,7 +94,7 @@ public class TagDAO implements AbstractDAO<Tag> {
         }
     }
 
-    private Tag readByParam(Object param, String query) {
+    private Tag read(Object param, String query) {
         Tag tag;
         Object[] params = new Object[] {param};
 

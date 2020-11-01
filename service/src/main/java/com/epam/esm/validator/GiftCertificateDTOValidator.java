@@ -1,6 +1,7 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.CertificateNameIsNotPresentException;
 import com.epam.esm.exception.DescriptionIsNotValidException;
 import com.epam.esm.exception.DurationIsNotValidException;
@@ -14,7 +15,7 @@ public class GiftCertificateDTOValidator {
                 isDurationValid(dto.getDuration());
     }
 
-    private static boolean isNameValid(String name) {
+    public static boolean isNameValid(String name) {
         if (name.matches("^[a-zA-ZА-Яа-я]{3,45}$")) {
             return true;
         } else {
@@ -22,7 +23,7 @@ public class GiftCertificateDTOValidator {
         }
     }
 
-    private static boolean isDescriptionValid(String description) {
+    public static boolean isDescriptionValid(String description) {
         if (description.matches("^[\\w\\W]{3,45}$")) {
             return true;
         } else {
@@ -30,7 +31,7 @@ public class GiftCertificateDTOValidator {
         }
     }
 
-    private static boolean isPriceValid(BigDecimal price) {
+    public static boolean isPriceValid(BigDecimal price) {
         if (price.intValue() >= 0) {
             return true;
         } else {
@@ -38,7 +39,7 @@ public class GiftCertificateDTOValidator {
         }
     }
 
-    private static boolean isDurationValid(Integer duration) {
+    public static boolean isDurationValid(Integer duration) {
         if (duration > 0) {
             return true;
         } else {

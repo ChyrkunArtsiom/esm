@@ -155,4 +155,17 @@ class GiftCertificateControllerTest {
         mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testUpdateCertificate() throws Exception {
+        List<String> tags = new ArrayList<>(Arrays.asList("tagOne", "tagTwo"));
+        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
+                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, tags);
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(giftCertificateDTO);
+        Mockito.when(service.update(Mockito.any(GiftCertificateDTO.class))).thenReturn(null);
+
+        mockMvc.perform(put(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNoContent());
+    }
 }

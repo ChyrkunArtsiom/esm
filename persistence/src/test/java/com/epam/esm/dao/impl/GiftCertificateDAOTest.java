@@ -49,14 +49,11 @@ class GiftCertificateDAOTest {
         assertNotNull(dao.create(certificate));
     }
 
-
-
-
-
     @Test
     void testUpdate() {
-        GiftCertificate certificate = new GiftCertificate(5, "testR", "test",
-                1.0, null, null, 1, null);
+        List<String> tags = new ArrayList<>(Arrays.asList("rest", "tagtest"));
+        GiftCertificate certificate = new GiftCertificate(0, "test", "after updating",
+                69.0, null, null, 69, tags);
         GiftCertificate oldCertificate = dao.update(certificate);
         assertNotNull(oldCertificate);
     }

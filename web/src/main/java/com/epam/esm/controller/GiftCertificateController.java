@@ -37,8 +37,8 @@ public class GiftCertificateController {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-    public ResponseEntity<GiftCertificateDTO> createTag(@Valid @RequestBody GiftCertificateDTO dto,
-                                            UriComponentsBuilder ucb) {
+    public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto,
+                                                                UriComponentsBuilder ucb) {
         GiftCertificateDTO createdCertificate = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
         URI locationUri = ucb.path(CERTIFICATES_PATH).path(String.valueOf(createdCertificate.getId())).build().toUri();
@@ -55,16 +55,25 @@ public class GiftCertificateController {
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<GiftCertificateDTO> readAllTags() {
+    public List<GiftCertificateDTO> readAllCertificates() {
         return service.readAll();
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteTag(@RequestBody GiftCertificateDTO dto) {
+    public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
         if (service.delete(dto)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
+    public ResponseEntity<?> updateCertificate(@RequestBody GiftCertificateDTO dto) {
+        if (service.update(dto) != null) {
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 

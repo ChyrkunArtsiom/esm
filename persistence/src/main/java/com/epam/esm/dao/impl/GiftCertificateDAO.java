@@ -40,16 +40,23 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
             "WHERE id = (?)";
 
+    private final static String SQL_READ_CERTIFICATE_BY_NAME = "SELECT " +
+            "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
+            "WHERE name = (?)";
+
     private final static String SQL_READ_TAGS_BY_CERTIFICATE = "SELECT name FROM esm_module2.tags " +
             "INNER JOIN esm_module2.certificate_tag ON tags.id = certificate_tag.tag_id WHERE certificate_id = (?)";
 
     private final static String SQL_READ_ALL = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates";
 
-    private final static String SQL_UPDATE_CERTIFICATE = "UPDATE esm_module2.certificates SET name = (?)," +
-            "description = (?), price = (?), last_update_date = (?), duration = (?) WHERE id = (?)";
+    private final static String SQL_UPDATE_CERTIFICATE = "UPDATE esm_module2.certificates SET " +
+            "description = (?), price = (?), last_update_date = (?), duration = (?) WHERE name = (?)";
 
     private final static String SQL_DELETE_CERTIFICATE = "DELETE FROM esm_module2.certificates WHERE name = (?)";
+
+    private final static String SQL_DELETE_CERTIFICATE_TAG =
+            "DELETE FROM esm_module2.certificate_tag WHERE certificate_id = (?) AND tag_id = (?)";
 
     private final static Logger LOGGER = LogManager.getLogger(GiftCertificateDAO.class);
 
@@ -92,7 +99,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
         if (key.getKeys() != null) {
             giftCertificate.setId((int)key.getKeys().get("id"));
-            bindTagsWithCertificate(giftCertificate);
+            bindTagsWithCertificate(giftCertificate.getId(), giftCertificate.getTags());
             return giftCertificate;
         } else {
             LOGGER.log(Level.ERROR,
@@ -105,19 +112,8 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     @Override
     public GiftCertificate read(int id) throws NoCertificateException{
-        GiftCertificate certificate;
-        Object[] params = new Object[] {id};
-        RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> mapToCertificate(rs);
-
         try {
-            certificate = template.queryForObject(SQL_READ_CERTIFICATE, params, rowMapper);
-            if (certificate == null) {
-                throw new DAOException("Certificate doesn't exist.", ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
-            } else {
-                List<String> tags = readTagsByCertificateId(id);
-                certificate.setTags(tags);
-                return certificate;
-            }
+            return read(id, SQL_READ_CERTIFICATE);
         } catch (EmptyResultDataAccessException ex) {
             LOGGER.log(Level.ERROR, String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex);
             throw new NoCertificateException(
@@ -126,21 +122,56 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
+    public GiftCertificate read(String name) throws NoCertificateException{
+        try {
+            return read(name, SQL_READ_CERTIFICATE_BY_NAME);
+        } catch (EmptyResultDataAccessException ex) {
+            LOGGER.log(Level.ERROR, String.format("Certificate with name = {%s} doesn't exist.", String.valueOf(name)), ex);
+            throw new NoCertificateException(
+                    String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(name)), ex,
+                    String.valueOf(name), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
+        }
+    }
+
+    private GiftCertificate read(Object param, String query) {
+        GiftCertificate certificate;
+        Object[] params = new Object[] {param};
+        RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> mapToCertificate(rs);
+        certificate = template.queryForObject(query, params, rowMapper);
+        if (certificate == null) {
+            throw new DAOException("Certificate doesn't exist.", ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
+        } else {
+            List<String> tags = readTagsByCertificateId(certificate.getId());
+            certificate.setTags(tags);
+            return certificate;
+        }
+    }
+
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
-        GiftCertificate oldCertificate = read(giftCertificate.getId());
+        GiftCertificate oldCertificate = read(giftCertificate.getName());
         if (oldCertificate != null) {
-            Object[] params = new Object[] {giftCertificate.getName(), giftCertificate.getDescription(),
-                    giftCertificate.getPrice(), OffsetDateTime.now(), giftCertificate.getDuration(),
-                    giftCertificate.getId()};
-            int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE,
-                    Types.INTEGER, Types.INTEGER};
-
+            Object[] params = new Object[] {giftCertificate.getDescription(),
+                    giftCertificate.getPrice(), OffsetDateTime.now(ZoneOffset.UTC),  giftCertificate.getDuration(), giftCertificate.getName()};
+            int[] types = new int[] {Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER, Types.VARCHAR};
             if (template.update(SQL_UPDATE_CERTIFICATE, params, types) > 0) {
+                List<String> oldTags = oldCertificate.getTags();
+                List<String> newTags = giftCertificate.getTags();
+                List<String> tagsToDelete = getExcessElements(oldTags, newTags);
+                List<String> tagsToAdd = getExcessElements(newTags, oldTags);
+                //delete tags from certificate_tag
+                deleteBindedTags(tagsToDelete, oldCertificate.getId());
+                //create new certificate_tag
+                bindTagsWithCertificate(oldCertificate.getId(), tagsToAdd);
                 return oldCertificate;
             }
         }
-        return null; //Throw an exception
+        LOGGER.log(Level.ERROR,
+                String.format("Certificate with name = {%s} doesn't exist.",
+                        String.valueOf(giftCertificate.getName())));
+        throw new NoCertificateException(
+                String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(giftCertificate.getName())),
+                String.valueOf(giftCertificate.getName()), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
     }
 
     @Override
@@ -203,11 +234,11 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
-    private void bindTagsWithCertificate(GiftCertificate certificate) {
-        for (String tag : certificate.getTags()) {
+    private void bindTagsWithCertificate(int certificateId, List<String> tags) {
+        for (String tag : tags) {
             Tag selected = tagDAO.read(tag);
             try {
-                template.update(SQL_INSERT_CERTIFICATE_TAG, certificate.getId(), selected.getId());
+                template.update(SQL_INSERT_CERTIFICATE_TAG, certificateId, selected.getId());
             }catch (DuplicateKeyException ex) {
                 LOGGER.log(Level.ERROR, String.format("Certificate is already bonded with tag id = {%s}.",
                         selected.getId()), ex);
@@ -217,5 +248,22 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             }
 
         }
+    }
+
+    private void deleteBindedTags(List<String> tags, int certificateId) {
+        for (String tag : tags) {
+            Tag deleted = tagDAO.read(tag);
+            template.update(SQL_DELETE_CERTIFICATE_TAG, certificateId, deleted.getId());
+        }
+    }
+
+    private List<String> getExcessElements(List<String> firstList, List<String> secondList) {
+        List<String> excessElements = new ArrayList<>();
+        for (String el : firstList) {
+            if (!secondList.contains(el)) {
+                excessElements.add(el);
+            }
+        }
+        return excessElements;
     }
 }
