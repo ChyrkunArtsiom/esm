@@ -50,7 +50,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testCreateTag() throws Exception {
+    public void testCreateTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -63,7 +63,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testCreateExistingTag() throws Exception {
+    public void testCreateExistingTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -80,7 +80,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testPutMethod() throws Exception {
+    public void testPutMethod() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -92,7 +92,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testReadTag() throws Exception {
+    public void testReadTag() throws Exception {
         TagDTO tagDTO = new TagDTO(1, "testingname");
         Mockito.when(service.read(tagDTO.getId())).thenReturn(tagDTO);
 
@@ -103,7 +103,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testReadMissingTag() throws Exception {
+    public void testReadMissingTag() throws Exception {
         TagDTO tagDTO = new TagDTO(100, "testingname");
         NoTagException ex = new NoTagException(tagDTO.getName(), 40401);
         Mockito.when(service.read(tagDTO.getId())).thenThrow(ex);
@@ -119,7 +119,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testReadAllTags() throws Exception {
+    public void testReadAllTags() throws Exception {
         List<TagDTO> dtos = new ArrayList<>(
                 Arrays.asList(new TagDTO(1, "name1"), new TagDTO(2, "name2")));
         Mockito.when(service.readAll()).thenReturn(dtos);
@@ -133,7 +133,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testDeleteTag() throws Exception {
+    public void testDeleteTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -144,7 +144,7 @@ class TagControllerTest {
     }
 
     @Test
-    void testDeleteMissingTag() throws Exception {
+    public void testDeleteMissingTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);

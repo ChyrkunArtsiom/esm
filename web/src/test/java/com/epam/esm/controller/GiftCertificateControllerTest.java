@@ -52,7 +52,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testCreateCertificate() throws Exception {
+    public void testCreateCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.55), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -66,7 +66,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testCreateExistingCertificate() throws Exception {
+    public void testCreateExistingCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -84,7 +84,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testReadCertificate() throws Exception {
+    public void testReadCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         Mockito.when(service.read(certificateDTO.getId())).thenReturn(certificateDTO);
@@ -97,7 +97,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testReadMissingCertificate() throws Exception {
+    public void testReadMissingCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 100, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         NoCertificateException ex = new NoCertificateException(certificateDTO.getName(), 40402);
@@ -113,7 +113,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testReadAllCertificates() throws Exception {
+    public void testReadAllCertificates() throws Exception {
         List<GiftCertificateDTO> dtos = new ArrayList<>(
                 Arrays.asList(new GiftCertificateDTO(
                         100, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
@@ -131,7 +131,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testDeleteCertificate() throws Exception {
+    public void testDeleteCertificate() throws Exception {
         GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -143,7 +143,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testDeleteMissingCertificate() throws Exception {
+    public void testDeleteMissingCertificate() throws Exception {
         GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -155,7 +155,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testUpdateCertificate() throws Exception {
+    public void testUpdateCertificate() throws Exception {
         List<String> tags = new ArrayList<>(Arrays.asList("tagOne", "tagTwo"));
         GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, tags);
@@ -168,7 +168,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void testReadByParams() throws Exception {
+    public void testReadByParams() throws Exception {
         List<GiftCertificateDTO> dtos = new ArrayList<>(
                 Arrays.asList(new GiftCertificateDTO(
                                 100, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),

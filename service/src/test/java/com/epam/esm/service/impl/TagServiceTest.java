@@ -31,34 +31,38 @@ class TagServiceTest {
     private TagService service;
 
     @Test
-    void testReadAll() {
+    public void testReadAll() {
         List<Tag> entities = new ArrayList<>(
                 Arrays.asList(new Tag(1, "name1"), new Tag(2, "name2")));
         Mockito.when(dao.readAll()).thenReturn(entities);
 
         List<TagDTO> tags = service.readAll();
+        Mockito.verify(dao, Mockito.times(1)).readAll();
         assertTrue(tags.size() > 0);
     }
 
     @Test
-    void testCreate() {
+    public void testCreate() {
         TagDTO dto = new TagDTO(1, "testtag");
         Mockito.when(dao.create(Mockito.any(Tag.class))).thenReturn(TagMapper.toEntity(dto));
         assertEquals(dto, service.create(dto));
+        Mockito.verify(dao, Mockito.times(1)).create(Mockito.any(Tag.class));
     }
 
     @Test
-    void testRead() {
+    public void testRead() {
         TagDTO dto = new TagDTO(1, "testtag");
         Mockito.when(dao.read(Mockito.anyInt())).thenReturn(TagMapper.toEntity(dto));
         TagDTO tag = service.read(4);
         assertEquals(dto, tag);
+        Mockito.verify(dao, Mockito.times(1)).read(Mockito.anyInt());
     }
 
     @Test
-    void testDelete() {
+    public void testDelete() {
         TagDTO tag = new TagDTO(1, "tagtodelete");
         Mockito.when(dao.delete(Mockito.any(Tag.class))).thenReturn(true);
         assertTrue(service.delete(tag));
+        Mockito.verify(dao, Mockito.times(1)).delete(Mockito.any(Tag.class));
     }
 }

@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class TagDTOValidatorTest {
 
     @Test
-    void isValid() {
+    public void isValid() {
         TagDTO dto = new TagDTO(1, "name");
-        assertTrue(TagDTOValidator.isValid(dto));
+        assertDoesNotThrow(() -> TagDTOValidator.isValid(dto));
     }
 
     @Test
-    void testInvalidName() {
+    public void testInvalidName() {
         TagDTO dto = new TagDTO(1, "tt");
         TagNameIsNotValidException thrown = assertThrows(TagNameIsNotValidException.class,
                 () -> TagDTOValidator.isValid(dto));

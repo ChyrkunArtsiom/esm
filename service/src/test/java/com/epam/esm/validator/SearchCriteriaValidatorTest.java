@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class SearchCriteriaValidatorTest {
 
     @Test
-    void testIsValid() {
+    public void testIsValid() {
         SearchCriteria criteria = new SearchCriteria("tag", "name", "description", "name_asc");
-        assertTrue(SearchCriteriaValidator.isValid(criteria));
+        assertDoesNotThrow(() -> SearchCriteriaValidator.isValid(criteria));
     }
 
     @Test
-    void testInvalidSortingOrder() {
+    public void testInvalidSortingOrder() {
         SearchCriteria criteria = new SearchCriteria("tag", "name", "description", "wrong_sort");
         SortParamNotValidException thrown = assertThrows(SortParamNotValidException.class,
                 () -> SearchCriteriaValidator.isValid(criteria));

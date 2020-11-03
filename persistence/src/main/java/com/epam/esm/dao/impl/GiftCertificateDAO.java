@@ -13,7 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,42 +36,44 @@ import java.util.List;
 @ComponentScan(basePackageClasses = {HikariCPDataSource.class, TagDAO.class})
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
-    private final static String SQL_INSERT_CERTIFICATE = "INSERT INTO esm_module2.certificates (name, description," +
+    private final static String INSERT_CERTIFICATE_SQL = "INSERT INTO esm_module2.certificates (name, description," +
             "price, create_date, duration) VALUES (?,?,?,?,?)";
 
-    private final static String SQL_INSERT_CERTIFICATE_TAG =
+    private final static String INSERT_CERTIFICATE_TAG_SQL =
             "INSERT INTO esm_module2.certificate_tag (certificate_id, tag_id) VALUES (?, ?)";
 
-    private final static String SQL_READ_CERTIFICATE = "SELECT " +
+    private final static String GET_CERTIFICATE_SQL = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
             "WHERE id = (?)";
 
-    private final static String SQL_READ_CERTIFICATE_BY_NAME = "SELECT " +
+    private final static String GET_CERTIFICATES_BY_TAG_SQL = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
             "WHERE name = (?)";
 
-    private final static String SQL_READ_TAGS_BY_CERTIFICATE = "SELECT name FROM esm_module2.tags " +
+    private final static String GET_TAGS_BY_CERTIFICATE_SQL = "SELECT name FROM esm_module2.tags " +
             "INNER JOIN esm_module2.certificate_tag ON tags.id = certificate_tag.tag_id WHERE certificate_id = (?)";
 
-    private final static String SQL_READ_ALL = "SELECT " +
+    private final static String GET_ALL_CERTIFICATES_SQL = "SELECT " +
             "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates";
 
-    private final static String SQL_READ_BY_PARAMS_TAGS = "SELECT DISTINCT certificates.id, certificates.name, " +
+    private final static String GET_CERTIFICATES_BY_PARAMS_WITH_TAGS_SQL =
+            "SELECT DISTINCT certificates.id, certificates.name, " +
             "description, price, create_date, last_update_date, duration " +
             "FROM esm_module2.certificates INNER JOIN esm_module2.certificate_tag " +
             "ON certificates.id = certificate_tag.certificate_id INNER JOIN esm_module2.tags " +
             "ON certificate_tag.tag_id = tags.id";
 
-    private final static String SQL_READ_BY_PARAMS_NO_TAGS = "SELECT DISTINCT certificates.id, certificates.name, " +
+    private final static String GET_CERTIFICATES_BY_PARAMS_WITHOUT_TAGS_SQL =
+            "SELECT DISTINCT certificates.id, certificates.name, " +
             "description, price, create_date, last_update_date, duration " +
             "FROM esm_module2.certificates";
 
-    private final static String SQL_UPDATE_CERTIFICATE = "UPDATE esm_module2.certificates SET " +
+    private final static String UPDATE_CERTIFICATE_SQL = "UPDATE esm_module2.certificates SET " +
             "description = (?), price = (?), last_update_date = (?), duration = (?) WHERE name = (?)";
 
-    private final static String SQL_DELETE_CERTIFICATE = "DELETE FROM esm_module2.certificates WHERE name = (?)";
+    private final static String DELETE_CERTIFICATE_SQL = "DELETE FROM esm_module2.certificates WHERE name = (?)";
 
-    private final static String SQL_DELETE_CERTIFICATE_TAG =
+    private final static String DELETE_CERTIFICATE_TAG_SQL =
             "DELETE FROM esm_module2.certificate_tag WHERE certificate_id = (?) AND tag_id = (?)";
 
     private final static Logger LOGGER = LogManager.getLogger(GiftCertificateDAO.class);
@@ -105,7 +106,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         KeyHolder key = new GeneratedKeyHolder();
         try {
             template.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(SQL_INSERT_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(INSERT_CERTIFICATE_SQL, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, giftCertificate.getName());
                 ps.setString(2, giftCertificate.getDescription());
                 ps.setDouble(3, giftCertificate.getPrice());
@@ -140,7 +141,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     @Override
     public GiftCertificate read(int id) throws NoCertificateException{
         try {
-            return read(id, SQL_READ_CERTIFICATE);
+            return read(id, GET_CERTIFICATE_SQL);
         } catch (EmptyResultDataAccessException ex) {
             LOGGER.log(Level.ERROR, String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex);
             throw new NoCertificateException(
@@ -157,7 +158,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
      */
     public GiftCertificate read(String name) {
         try {
-            return read(name, SQL_READ_CERTIFICATE_BY_NAME);
+            return read(name, GET_CERTIFICATES_BY_TAG_SQL);
         } catch (EmptyResultDataAccessException ex) {
             LOGGER.log(Level.ERROR, String.format("Certificate with name = {%s} doesn't exist.", String.valueOf(name)), ex);
             throw new NoCertificateException(
@@ -186,7 +187,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         RowMapper<List<GiftCertificate>> rowMapper = getRowMapper();
 
         try {
-            certificates = template.queryForObject(SQL_READ_ALL, rowMapper);
+            certificates = template.queryForObject(GET_ALL_CERTIFICATES_SQL, rowMapper);
             return certificates;
         } catch (EmptyResultDataAccessException e) {
             return certificates;
@@ -230,7 +231,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             Object[] params = new Object[] {giftCertificate.getDescription(),
                     giftCertificate.getPrice(), OffsetDateTime.now(ZoneOffset.UTC),  giftCertificate.getDuration(), giftCertificate.getName()};
             int[] types = new int[] {Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER, Types.VARCHAR};
-            if (template.update(SQL_UPDATE_CERTIFICATE, params, types) > 0) {
+            if (template.update(UPDATE_CERTIFICATE_SQL, params, types) > 0) {
                 List<String> oldTags = oldCertificate.getTags();
                 List<String> newTags = giftCertificate.getTags();
                 List<String> tagsToDelete = getExcessElements(oldTags, newTags);
@@ -252,7 +253,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     public boolean delete(GiftCertificate certificate) {
         Object[] params = new Object[] {certificate.getName()};
         int[] types = new int[] {Types.VARCHAR};
-        return template.update(SQL_DELETE_CERTIFICATE, params, types) > 0;
+        return template.update(DELETE_CERTIFICATE_SQL, params, types) > 0;
     }
 
     private GiftCertificate mapToCertificate(ResultSet rs) throws SQLException {
@@ -271,7 +272,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         List<String> tags = new ArrayList<>();
         Object[] params = new Object[] {id};
         try {
-            tags = template.query(SQL_READ_TAGS_BY_CERTIFICATE, params, getResultSetExtractor());
+            tags = template.query(GET_TAGS_BY_CERTIFICATE_SQL, params, getResultSetExtractor());
             return tags;
         } catch (EmptyResultDataAccessException e) {
             return tags;
@@ -282,7 +283,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         for (String tag : tags) {
             Tag selected = tagDAO.read(tag);
             try {
-                template.update(SQL_INSERT_CERTIFICATE_TAG, certificateId, selected.getId());
+                template.update(INSERT_CERTIFICATE_TAG_SQL, certificateId, selected.getId());
             }catch (DuplicateKeyException ex) {
                 LOGGER.log(Level.ERROR, String.format("Certificate is already bonded with tag id = {%s}.",
                         selected.getId()), ex);
@@ -297,7 +298,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     private void deleteBindedTags(List<String> tags, int certificateId) {
         for (String tag : tags) {
             Tag deleted = tagDAO.read(tag);
-            template.update(SQL_DELETE_CERTIFICATE_TAG, certificateId, deleted.getId());
+            template.update(DELETE_CERTIFICATE_TAG_SQL, certificateId, deleted.getId());
         }
     }
 
@@ -315,12 +316,12 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         StringBuilder query = new StringBuilder();
         boolean hasWhere = false;
         if (!criteria.getTagName().isEmpty()) {
-            query.append(SQL_READ_BY_PARAMS_TAGS);
+            query.append(GET_CERTIFICATES_BY_PARAMS_WITH_TAGS_SQL);
             query.append(" WHERE ");
             query.append("tags.name = (?)");
             hasWhere = true;
         } else {
-            query.append(SQL_READ_BY_PARAMS_NO_TAGS);
+            query.append(GET_CERTIFICATES_BY_PARAMS_WITHOUT_TAGS_SQL);
         }
         if (!criteria.getName().isEmpty()) {
             if (!hasWhere) {
@@ -328,7 +329,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 query.append("certificates.name LIKE (?)");
                 hasWhere = true;
             } else {
-                query.append(", certificates.name LIKE (?)");
+                query.append("AND certificates.name LIKE (?)");
             }
         }
         if (!criteria.getDescription().isEmpty()) {
@@ -336,7 +337,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 query.append(" WHERE ");
                 query.append("description LIKE (?)");
             } else {
-                query.append(", description LIKE (?)");
+                query.append("AND description LIKE (?)");
             }
         }
         if (!criteria.getSort().isEmpty()) {

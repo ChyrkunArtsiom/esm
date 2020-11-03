@@ -28,13 +28,13 @@ class GiftCertificateMapperTest {
     }
 
     @Test
-    void testToEntity() {
+    public void testToEntity() {
         GiftCertificate converted = GiftCertificateMapper.toEntity(dto);
         assertEquals(entity, converted);
     }
 
     @Test
-    void testToDto() {
+    public void testToDto() {
         GiftCertificateDTO converted = GiftCertificateMapper.toDto(entity);
         assertEquals(dto, converted);
     }

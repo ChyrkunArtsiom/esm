@@ -21,13 +21,13 @@ public class Tag extends AbstractEntity {
      * @param name the string name
      */
     public Tag(Integer id, String name) {
-        this.id = id;
-        this.name = name;
+        setId(id);
+        setName(name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(getId(), getName());
     }
 
     @Override
@@ -39,11 +39,11 @@ public class Tag extends AbstractEntity {
             return false;
         }
         Tag tag = (Tag) obj;
-        return id.equals(tag.id) && name.equals(tag.name);
+        return getId().equals(tag.getId()) && getName().equals(tag.getName());
     }
 
     @Override
     public String toString() {
-        return "Tag id: " + this.id + ", name: " + this.name;
+        return String.format("Tag id: %d, name: %s", getId(), getName());
     }
 }

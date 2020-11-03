@@ -30,7 +30,7 @@ class GiftCertificateDAOTest {
 
     @Test
     @Order(1)
-    void testCreate() {
+    public void testCreate() {
         List<String> tags = new ArrayList<>(Arrays.asList("firsttag", "secondtag"));
         GiftCertificate certificate = new GiftCertificate(0, "test3", "test",
                 1.0, null, null, 1, tags);
@@ -39,7 +39,7 @@ class GiftCertificateDAOTest {
 
     @Test
     @Order(2)
-    void testRead() {
+    public void testRead() {
         GiftCertificate certificate = dao.read("test3");
         assertNotNull(certificate);
     }
@@ -47,7 +47,7 @@ class GiftCertificateDAOTest {
     @Test
     @Order(3)
     @Transactional(readOnly = true)
-    void testReadByParams() {
+    public void testReadByParams() {
         GiftCertificate certificate = new GiftCertificate(0, "test3", "test",
                 1.0, null, null, 1, null);
         SearchCriteria criteria = new SearchCriteria("", "test", "", "date_desc");
@@ -58,14 +58,14 @@ class GiftCertificateDAOTest {
     @Test
     @Order(4)
     @Transactional(readOnly = true)
-    void testReadAll() {
+    public void testReadAll() {
         List<GiftCertificate> certificates = dao.readAll();
         assertEquals(certificates.size(), 3);
     }
 
     @Test
     @Order(5)
-    void testUpdate() {
+    public void testUpdate() {
         List<String> tags = new ArrayList<>();
         tags.add("firsttag");
         GiftCertificate certificate = new GiftCertificate(0, "test3", "after updating",
@@ -76,7 +76,7 @@ class GiftCertificateDAOTest {
 
     @Test
     @Order(6)
-    void testDelete() {
+    public void testDelete() {
         GiftCertificate certificate = new GiftCertificate(4, "test3", "after updating",
                 69.0, null, null, 69, null);
         assertTrue(dao.delete(certificate));

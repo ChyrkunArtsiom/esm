@@ -33,15 +33,15 @@ import java.util.List;
 @ComponentScan(basePackageClasses = HikariCPDataSource.class)
 public class TagDAO implements AbstractDAO<Tag> {
 
-    private final static String SQL_INSERT_TAG = "INSERT INTO esm_module2.tags (name) VALUES (?)";
+    private final static String INSERT_TAG_SQL = "INSERT INTO esm_module2.tags (name) VALUES (?)";
 
-    private final static String SQL_READ_TAG = "SELECT id, name FROM esm_module2.tags WHERE id = (?)";
+    private final static String GET_TAG_BY_ID_SQL = "SELECT id, name FROM esm_module2.tags WHERE id = (?)";
 
-    private final static String SQL_READ_TAG_BY_NAME = "SELECT id, name FROM esm_module2.tags WHERE name = (?)";
+    private final static String GET_TAG_BY_NAME_SQL = "SELECT id, name FROM esm_module2.tags WHERE name = (?)";
 
-    private final static String SQL_READ_ALL = "SELECT id, name FROM esm_module2.tags";
+    private final static String GET_ALL_TAGS_SQL = "SELECT id, name FROM esm_module2.tags";
 
-    private final static String SQL_DELETE_TAG = "DELETE FROM esm_module2.tags WHERE name = (?)";
+    private final static String DELETE_TAG_SQL = "DELETE FROM esm_module2.tags WHERE name = (?)";
 
     private final static Logger LOGGER = LogManager.getLogger(TagDAO.class);
 
@@ -62,7 +62,7 @@ public class TagDAO implements AbstractDAO<Tag> {
         KeyHolder key = new GeneratedKeyHolder();
         try {
             template.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(SQL_INSERT_TAG, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(INSERT_TAG_SQL, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, tag.getName());
                 return ps;
                 }, key);
@@ -84,7 +84,7 @@ public class TagDAO implements AbstractDAO<Tag> {
     @Override
     public Tag read(int id) throws DAOException {
         try {
-            return read(id, SQL_READ_TAG);
+            return read(id, GET_TAG_BY_ID_SQL);
         } catch (EmptyResultDataAccessException|DAOException ex) {
             LOGGER.log(Level.ERROR, String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)), ex);
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)), ex,
@@ -100,7 +100,7 @@ public class TagDAO implements AbstractDAO<Tag> {
      */
     public Tag read(String name) {
         try {
-            return read(name, SQL_READ_TAG_BY_NAME);
+            return read(name, GET_TAG_BY_NAME_SQL);
         } catch (EmptyResultDataAccessException|DAOException ex) {
             LOGGER.log(Level.ERROR, String.format("Tag with id = {%s} doesn't exist.", name), ex);
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", name), ex,
@@ -135,7 +135,7 @@ public class TagDAO implements AbstractDAO<Tag> {
     public boolean delete(Tag tag) {
         Object[] params = new Object[] {tag.getName()};
         int[] types = new int[] {Types.VARCHAR};
-        return template.update(SQL_DELETE_TAG, params, types) > 0;
+        return template.update(DELETE_TAG_SQL, params, types) > 0;
     }
 
     @Override
@@ -154,7 +154,7 @@ public class TagDAO implements AbstractDAO<Tag> {
         };
 
         try {
-            tags = template.queryForObject(SQL_READ_ALL, rowMapper);
+            tags = template.queryForObject(GET_ALL_TAGS_SQL, rowMapper);
             return tags;
         } catch (EmptyResultDataAccessException e) {
             return tags;

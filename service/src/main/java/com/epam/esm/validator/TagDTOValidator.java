@@ -11,13 +11,10 @@ public class TagDTOValidator {
      * Validates {@link TagDTO} object.
      *
      * @param dto the {@link TagDTO} object to validate
-     * @return {@code true} if {@link TagDTO} object is valid
      * @throws TagNameIsNotValidException if {@link TagDTO} object is not valid
      */
-    public static boolean isValid(TagDTO dto) throws TagNameIsNotValidException{
-        if (dto.getName().matches("^[a-zA-ZА-Яа-я]{3,45}$")) {
-            return true;
-        } else {
+    public static void isValid(TagDTO dto) {
+        if (!dto.getName().matches("^[a-zA-ZА-Яа-я]{3,45}$")) {
             throw new TagNameIsNotValidException(dto.getName());
         }
     }

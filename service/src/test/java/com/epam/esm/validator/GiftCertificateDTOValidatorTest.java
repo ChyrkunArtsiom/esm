@@ -1,12 +1,10 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.exception.CertificateNameIsNotValidException;
-import com.epam.esm.exception.DescriptionIsNotValidException;
-import com.epam.esm.exception.DurationIsNotValidException;
-import com.epam.esm.exception.PriceIsNotValidException;
+import com.epam.esm.exception.*;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Executable;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,13 +12,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class GiftCertificateDTOValidatorTest {
 
     @Test
-    void testIsValid() {
+    public void testIsValid() {
         GiftCertificateDTO dto = new GiftCertificateDTO(1, "name", "description", BigDecimal.valueOf(100.5), 10, null);
-        assertTrue(GiftCertificateDTOValidator.isValid(dto));
+        assertDoesNotThrow(() -> GiftCertificateDTOValidator.isValid(dto));
     }
 
     @Test
-    void testInvalidName() {
+    public void testInvalidName() {
         GiftCertificateDTO dto = new GiftCertificateDTO
                 (1, "tt", "description", BigDecimal.valueOf(100.5), 10, null);
         CertificateNameIsNotValidException thrown = assertThrows(CertificateNameIsNotValidException.class,
@@ -29,7 +27,7 @@ class GiftCertificateDTOValidatorTest {
     }
 
     @Test
-    void testInvalidDescription() {
+    public void testInvalidDescription() {
         GiftCertificateDTO dto = new GiftCertificateDTO
                 (1, "name", "tt", BigDecimal.valueOf(100.5), 10, null);
         DescriptionIsNotValidException thrown = assertThrows(DescriptionIsNotValidException.class,
@@ -38,7 +36,7 @@ class GiftCertificateDTOValidatorTest {
     }
 
     @Test
-    void testInvalidPrice() {
+    public void testInvalidPrice() {
         GiftCertificateDTO dto = new GiftCertificateDTO
                 (1, "name", "description", BigDecimal.valueOf(-1), 10, null);
         PriceIsNotValidException thrown = assertThrows(PriceIsNotValidException.class,
@@ -47,7 +45,7 @@ class GiftCertificateDTOValidatorTest {
     }
 
     @Test
-    void testInvalidDuration() {
+    public void testInvalidDuration() {
         GiftCertificateDTO dto = new GiftCertificateDTO
                 (1, "name", "description", BigDecimal.valueOf(1), -1, null);
         DurationIsNotValidException thrown = assertThrows(DurationIsNotValidException.class,

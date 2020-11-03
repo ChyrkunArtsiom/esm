@@ -10,10 +10,7 @@ import java.util.Objects;
  * Data transfer object of {@link com.epam.esm.entity.Tag}.
  */
 public class TagDTO extends AbstractDTO{
-    /** An id. */
-    private Integer id;
 
-    /** A string of name. */
     @NotBlank(message = ValidationMessageManager.BLANK_TAG_NAME)
     @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_NAME_WRONG_SIZE)
     private String name;
@@ -32,16 +29,8 @@ public class TagDTO extends AbstractDTO{
      * @param name the string of name
      */
     public TagDTO(Integer id, String name) {
-        this.id = id;
+        setId(id);
         this.name = name;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -54,7 +43,7 @@ public class TagDTO extends AbstractDTO{
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(getId(), name);
     }
 
     @Override
@@ -66,11 +55,11 @@ public class TagDTO extends AbstractDTO{
             return false;
         }
         TagDTO tag = (TagDTO) obj;
-        return id.equals(tag.id) && name.equals(tag.name);
+        return getId().equals(tag.getId()) && name.equals(tag.name);
     }
 
     @Override
     public String toString() {
-        return "Tag id: " + this.id + ", name: " + this.name;
+        return String.format("Tag id: %d, name: %s", getId(), getName());
     }
 }

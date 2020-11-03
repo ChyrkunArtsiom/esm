@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import java.util.Objects;
  * Class for Certificate entity.
  */
 public class GiftCertificate extends AbstractEntity {
-    /** A string of desctiption. */
+    /** A string of description. */
     private String description;
     /** A Double of price. */
     private Double price;
@@ -40,8 +41,8 @@ public class GiftCertificate extends AbstractEntity {
      * @param tags        the list of tag names
      */
     public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<String> tags) {
-        this.id = id;
-        this.name = name;
+        setId(id);
+        setName(name);
         this.description = description;
         this.price = price;
         this.duration = duration;
@@ -62,8 +63,8 @@ public class GiftCertificate extends AbstractEntity {
      */
     public GiftCertificate(Integer id, String name, String description, Double price,
                            OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<String> tags) {
-        this.id = id;
-        this.name = name;
+        setId(id);
+        setName(name);
         this.description = description;
         this.price = price;
         this.createDate = createDate;
@@ -134,7 +135,7 @@ public class GiftCertificate extends AbstractEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(getId(), getName());
     }
 
     @Override
@@ -146,12 +147,22 @@ public class GiftCertificate extends AbstractEntity {
             return false;
         }
         GiftCertificate certificate = (GiftCertificate) obj;
-        return name.equals(certificate.name);
+        return getName().equals(certificate.getName());
     }
 
     @Override
     public String toString() {
-        return "GiftCertificate: {id: " + id + ", name: " + name + ", description: " + description + ", price: " + price +
-                ", created: " + createDate + ", updated: " + lastUpdateDate + ", duration: " + duration + "}";
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        String created = null;
+        String updated = null;
+        if (getCreateDate() != null) {
+            created = getCreateDate().format(df);
+        }
+        if (getLastUpdateDate() != null) {
+            updated = getLastUpdateDate().format(df);
+        }
+        return String.format("GiftCertificate: {id: %d, name: %s, description: %s, " +
+                        "price: %f, created: %s, updated: %s, duration: %d}",
+                getId(), getName(), getDescription(), getPrice(), created, updated, getDuration());
     }
 }

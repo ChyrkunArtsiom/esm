@@ -74,12 +74,6 @@ public class GiftCertificateController {
         return service.read(certificateId);
     }
 
-/*    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
-    @ResponseStatus(HttpStatus.OK)
-    public List<GiftCertificateDTO> readAllCertificates() {
-        return service.readAll();
-    }*/
-
     /**
      * Deletes {@link GiftCertificateDTO} object.
      *

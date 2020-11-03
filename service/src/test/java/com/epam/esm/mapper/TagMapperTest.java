@@ -19,13 +19,13 @@ class TagMapperTest {
     }
 
     @Test
-    void testToEntity() {
+    public void testToEntity() {
         Tag converted = TagMapper.toEntity(dto);
         assertEquals(entity, converted);
     }
 
     @Test
-    void testToDto() {
+    public void testToDto() {
         TagDTO converted = TagMapper.toDto(entity);
         assertEquals(dto, converted);
     }

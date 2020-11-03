@@ -14,15 +14,12 @@ import java.util.Objects;
  * Data transfer object of {@link com.epam.esm.entity.GiftCertificate}.
  */
 public class GiftCertificateDTO extends AbstractDTO {
-    /** An id. */
-    private Integer id;
 
-    /** A string of name. */
     @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)
     @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE)
     private String name;
 
-    /** A string of desctiption. */
+    /** A string of description. */
     @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION)
     @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE)
     private String description;
@@ -64,7 +61,7 @@ public class GiftCertificateDTO extends AbstractDTO {
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
                               Integer duration, List<String> tags) {
-        this.id = id;
+        setId(id);
         this.name = name;
         this.description = description;
         this.price = price;
@@ -86,7 +83,7 @@ public class GiftCertificateDTO extends AbstractDTO {
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
                               String lastUpdateDate, Integer duration, List<String> tags) {
-        this.id = id;
+        setId(id);
         this.name = name;
         this.description = description;
         this.price = price;
@@ -94,14 +91,6 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
         this.tags = tags;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -162,7 +151,7 @@ public class GiftCertificateDTO extends AbstractDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(getId(), name);
     }
 
     @Override
@@ -179,7 +168,8 @@ public class GiftCertificateDTO extends AbstractDTO {
 
     @Override
     public String toString() {
-        return "GiftCertificate: {id: " + id + ", name: " + name + ", description: " + description + ", price: " + price +
-                ", created: " + createDate + ", updated: " + lastUpdateDate + ", duration: " + duration + "}";
+        return String.format("GiftCertificate: {id: %d, name: %s, description: %s, " +
+                        "price: %f, created: %s, updated: %s, duration: %d}",
+                getId(), getName(), getDescription(), getPrice(), getCreateDate(), getLastUpdateDate(), getDuration());
     }
 }

@@ -35,12 +35,10 @@ public class TagService implements AbstractService<TagDTO> {
 
     @Override
     public TagDTO create(TagDTO dto) {
-        if (TagDTOValidator.isValid(dto)) {
-            Tag entity = TagMapper.toEntity(dto);
-            entity = dao.create(entity);
-            return TagMapper.toDto(entity);
-        }
-        return null;
+        TagDTOValidator.isValid(dto);
+        Tag entity = TagMapper.toEntity(dto);
+        entity = dao.create(entity);
+        return TagMapper.toDto(entity);
     }
 
     @Override

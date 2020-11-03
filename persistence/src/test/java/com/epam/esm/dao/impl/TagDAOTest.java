@@ -24,31 +24,31 @@ class TagDAOTest {
     private TagDAO dao;
 
     @Test
-    void testCreate() {
+    public void testCreate() {
         Tag tag = new Tag(3, "thirdtag");
         assertNotNull(dao.create(tag));
     }
 
     @Test
-    void testReadById() {
+    public void testReadById() {
         Tag tag = dao.read(1);
         assertNotNull(tag);
     }
 
     @Test
-    void testReadByName() {
+    public void testReadByName() {
         Tag tag = dao.read("firsttag");
         assertNotNull(tag);
     }
 
     @Test
-    void testDelete() {
+    public void testDelete() {
         Tag tag = new Tag(3, "thirdtag");
         assertTrue(dao.delete(tag));
     }
 
     @Test
-    void testReadAll() {
+    public void testReadAll() {
         List<Tag> tags = dao.readAll();
         assertTrue(tags.size() > 0);
     }
