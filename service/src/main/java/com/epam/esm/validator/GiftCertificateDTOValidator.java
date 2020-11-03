@@ -1,10 +1,7 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.exception.CertificateNameIsNotPresentException;
-import com.epam.esm.exception.DescriptionIsNotValidException;
-import com.epam.esm.exception.DurationIsNotValidException;
-import com.epam.esm.exception.PriceIsNotValidException;
+import com.epam.esm.exception.*;
 
 import java.math.BigDecimal;
 
@@ -34,7 +31,7 @@ public class GiftCertificateDTOValidator {
         if (name.matches("^[a-zA-ZА-Яа-я]{3,45}$")) {
             return true;
         } else {
-            throw new CertificateNameIsNotPresentException(name);
+            throw new CertificateNameIsNotValidException(name);
         }
     }
 

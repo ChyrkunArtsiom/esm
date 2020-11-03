@@ -13,9 +13,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -233,9 +235,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 List<String> newTags = giftCertificate.getTags();
                 List<String> tagsToDelete = getExcessElements(oldTags, newTags);
                 List<String> tagsToAdd = getExcessElements(newTags, oldTags);
-                //delete tags from certificate_tag
                 deleteBindedTags(tagsToDelete, oldCertificate.getId());
-                //create new certificate_tag
                 bindTagsWithCertificate(oldCertificate.getId(), tagsToAdd);
                 return oldCertificate;
             }
@@ -270,16 +270,8 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     private List<String> readTagsByCertificateId(int id) {
         List<String> tags = new ArrayList<>();
         Object[] params = new Object[] {id};
-        RowMapper<List<String>> tagsRowMapper = (rs, rowNum) -> {
-            List<String> rows = new ArrayList<>();
-            do {
-                String tag = rs.getString("name");
-                rows.add(tag);
-            } while (rs.next());
-            return rows;
-        };
         try {
-            tags = template.queryForObject(SQL_READ_TAGS_BY_CERTIFICATE, params, tagsRowMapper);
+            tags = template.query(SQL_READ_TAGS_BY_CERTIFICATE, params, getResultSetExtractor());
             return tags;
         } catch (EmptyResultDataAccessException e) {
             return tags;
@@ -368,7 +360,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     }
 
     private RowMapper<List<GiftCertificate>> getRowMapper() {
-        RowMapper<List<GiftCertificate>> rowMapper = (rs, rowNum) -> {
+        return (rs, rowNum) -> {
             List<GiftCertificate> rows = new ArrayList<>();
             do {
                 GiftCertificate certificate = mapToCertificate(rs);
@@ -377,6 +369,16 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             } while (rs.next());
             return rows;
         };
-        return rowMapper;
+    }
+
+    private ResultSetExtractor<List<String>> getResultSetExtractor() {
+        return resultSet -> {
+            List<String> rows = new ArrayList<>();
+            while (resultSet.next()) {
+                String tag = resultSet.getString("name");
+                rows.add(tag);
+            }
+            return rows;
+        };
     }
 }

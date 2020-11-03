@@ -10,6 +10,7 @@ import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.exception.NoTagException;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.AbstractService;
+import com.epam.esm.util.InputSanitizer;
 import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.validator.GiftCertificateDTOValidator;
 import com.epam.esm.validator.SearchCriteriaValidator;
@@ -91,6 +92,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     @Transactional(noRollbackFor = NoTagException.class)
     public GiftCertificateDTO create(GiftCertificateDTO dto) {
         if (GiftCertificateDTOValidator.isValid(dto)) {
+            dto.setDescription(InputSanitizer.sanitize(dto.getDescription()));
             GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
             if (entity.getTags() != null) {
                 for (String tag : entity.getTags()) {
@@ -122,7 +124,8 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
                 //if description is present
                 if (dto.getDescription() != null &&
                         GiftCertificateDTOValidator.isDescriptionValid(dto.getDescription())) {
-                    toUpdate.setDescription(substitute.getDescription());
+                    String description = InputSanitizer.sanitize(substitute.getDescription());
+                    toUpdate.setDescription(description);
                 }
                 //if duration is present
                 if (dto.getDuration() != null && GiftCertificateDTOValidator.isDurationValid(dto.getDuration())) {
