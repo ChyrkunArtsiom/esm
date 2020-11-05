@@ -1,6 +1,5 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.AbstractDTO;
 import com.epam.esm.util.SearchCriteria;
 
 import java.util.List;
@@ -8,14 +7,14 @@ import java.util.List;
 /**
  * The interface for interacting with service module.
  *
- * @param <U> the {@link AbstractDTO} type
+ * @param <U> the type parameter
  */
-public interface AbstractService<U extends AbstractDTO> {
+public interface AbstractService<U> {
     /**
-     * Creates entity. Returns {@link AbstractDTO} object if entity in database was created.
+     * Creates entity. Returns {@link U} object if entity in database was created.
      *
-     * @param entity the object of {@link AbstractDTO}
-     * @return the object of {@link AbstractDTO}
+     * @param entity the object of {@link U}
+     * @return the object of {@link U}
      */
     U create(U entity);
 
@@ -23,14 +22,14 @@ public interface AbstractService<U extends AbstractDTO> {
      * Gets entity by id.
      *
      * @param id the id
-     * @return the object of {@link AbstractDTO}
+     * @return the object of {@link U}
      */
     U read(int id);
 
     /**
-     * Updates entity. Returns {@link AbstractDTO} object if entity in database was updated.
+     * Updates entity. Returns {@link U} object if entity in database was updated.
      *
-     * @param entity the object of {@link AbstractDTO}
+     * @param entity the object of {@link U}
      * @return the t
      */
     U update(U entity);
@@ -38,24 +37,24 @@ public interface AbstractService<U extends AbstractDTO> {
     /**
      * Deletes entity. Returns {@code true} if entity was deleted.
      *
-     * @param dto the object of {@link AbstractDTO}
+     * @param dto the object of {@link U}
      * @return {@code true} if entity was deleted
      */
     boolean delete(U dto);
 
     /**
-     * Reads all {@link AbstractDTO} objects.
+     * Reads all {@link U} objects.
      *
-     * @return the list of {@link AbstractDTO} object
+     * @return the list of {@link U} object
      */
     List<U> readAll();
 
     /**
-     * Gets the list of {@link AbstractDTO} objects by parameters.
+     * Gets the list of {@link U} objects by parameters.
      * They are the fields of {@link SearchCriteria} class.
      *
      * @param criteria the {@link SearchCriteria} object
-     * @return the list of {@link AbstractDTO} objects
+     * @return the list of {@link U} objects
      */
     List<U> readByParams(SearchCriteria criteria);
 }

@@ -9,7 +9,9 @@ import java.util.Objects;
 /**
  * Data transfer object of {@link com.epam.esm.entity.Tag}.
  */
-public class TagDTO extends AbstractDTO{
+public class TagDTO {
+
+    private Integer id;
 
     @NotBlank(message = ValidationMessageManager.BLANK_TAG_NAME)
     @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_NAME_WRONG_SIZE)
@@ -31,6 +33,14 @@ public class TagDTO extends AbstractDTO{
     public TagDTO(Integer id, String name) {
         setId(id);
         this.name = name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {

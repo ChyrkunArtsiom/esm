@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class for interacting with {@link Tag}. Implements {@link AbstractService}.
@@ -60,12 +60,9 @@ public class TagService implements AbstractService<TagDTO> {
 
     @Override
     public List<TagDTO> readAll() {
-        List<TagDTO> dtos = new ArrayList<>();
-        List<Tag> tags = dao.readAll();
-
-        for (Tag t : tags) {
-            dtos.add(TagMapper.toDto(t));
-        }
+        List<TagDTO> dtos;
+        List<Tag> entities = dao.readAll();
+        dtos = entities.stream().map(TagMapper::toDto).collect(Collectors.toList());
         return dtos;
     }
 

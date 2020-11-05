@@ -10,7 +10,11 @@ import java.util.Objects;
 /**
  * Class for Certificate entity.
  */
-public class GiftCertificate extends AbstractEntity {
+public class GiftCertificate {
+
+    private Integer id;
+
+    private String name;
     /** A string of description. */
     private String description;
     /** A Double of price. */
@@ -41,8 +45,8 @@ public class GiftCertificate extends AbstractEntity {
      * @param tags        the list of tag names
      */
     public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<String> tags) {
-        setId(id);
-        setName(name);
+        this.id = id;
+        this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
@@ -63,14 +67,36 @@ public class GiftCertificate extends AbstractEntity {
      */
     public GiftCertificate(Integer id, String name, String description, Double price,
                            OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<String> tags) {
-        setId(id);
-        setName(name);
+        this.id = id;
+        this.name = name;
         this.description = description;
         this.price = price;
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
         this.tags = tags;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        if (id == null) {
+            id = 0;
+        }
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        if (name == null) {
+            name = "";
+        }
+        this.name = name;
     }
 
     public String getDescription() {
@@ -147,7 +173,8 @@ public class GiftCertificate extends AbstractEntity {
             return false;
         }
         GiftCertificate certificate = (GiftCertificate) obj;
-        return getName().equals(certificate.getName());
+        return name.equals(certificate.getName()) && description.equals(certificate.getDescription())
+                && price.equals(certificate.getPrice()) && duration.equals(certificate.getDuration());
     }
 
     @Override

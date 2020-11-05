@@ -8,9 +8,6 @@ import com.epam.esm.exception.*;
 import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.util.SortOrder;
 import com.epam.esm.util.SortType;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
@@ -76,8 +73,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     private final static String DELETE_CERTIFICATE_TAG_SQL =
             "DELETE FROM esm_module2.certificate_tag WHERE certificate_id = (?) AND tag_id = (?)";
 
-    private final static Logger LOGGER = LogManager.getLogger(GiftCertificateDAO.class);
-
     private JdbcTemplate template;
     private TagDAO tagDAO;
 
@@ -119,8 +114,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 return ps;
             }, key);
         } catch (DuplicateKeyException ex) {
-            LOGGER.log(Level.ERROR, String.format(
-                    "Certificate with name = {%s} already exists.", giftCertificate.getName()), ex);
             throw new DuplicateCertificateException(
                     String.format("Certificate with name = {%s} already exists.", giftCertificate.getName()), ex,
                     giftCertificate.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE);
@@ -130,8 +123,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             bindTagsWithCertificate(giftCertificate.getId(), giftCertificate.getTags());
             return giftCertificate;
         } else {
-            LOGGER.log(Level.ERROR,
-                    String.format("Cannot create certificate with name = {%s}.", giftCertificate.getName()));
             throw new DAOException(
                     String.format("Cannot create certificate with name = {%s}.", giftCertificate.getName()),
                     giftCertificate.getName(), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
@@ -143,7 +134,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         try {
             return read(id, GET_CERTIFICATE_SQL);
         } catch (EmptyResultDataAccessException ex) {
-            LOGGER.log(Level.ERROR, String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex);
             throw new NoCertificateException(
                     String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex,
                     String.valueOf(id), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
@@ -160,7 +150,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         try {
             return read(name, GET_CERTIFICATES_BY_TAG_SQL);
         } catch (EmptyResultDataAccessException ex) {
-            LOGGER.log(Level.ERROR, String.format("Certificate with name = {%s} doesn't exist.", String.valueOf(name)), ex);
             throw new NoCertificateException(
                     String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(name)), ex,
                     String.valueOf(name), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
@@ -241,9 +230,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                 return oldCertificate;
             }
         }
-        LOGGER.log(Level.ERROR,
-                String.format("Certificate with name = {%s} doesn't exist.",
-                        String.valueOf(giftCertificate.getName())));
         throw new NoCertificateException(
                 String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(giftCertificate.getName())),
                 String.valueOf(giftCertificate.getName()), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
@@ -280,18 +266,18 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     }
 
     private void bindTagsWithCertificate(int certificateId, List<String> tags) {
-        for (String tag : tags) {
-            Tag selected = tagDAO.read(tag);
-            try {
-                template.update(INSERT_CERTIFICATE_TAG_SQL, certificateId, selected.getId());
-            }catch (DuplicateKeyException ex) {
-                LOGGER.log(Level.ERROR, String.format("Certificate is already bonded with tag id = {%s}.",
-                        selected.getId()), ex);
-                throw new DuplicateCertificateTagException(
-                        String.format("Certificate is already bonded with tag id = {%s}.",
-                        selected.getId()), ex, selected.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE_TAG);
-            }
+        if (tags != null) {
+            for (String tag : tags) {
+                Tag selected = tagDAO.read(tag);
+                try {
+                    template.update(INSERT_CERTIFICATE_TAG_SQL, certificateId, selected.getId());
+                }catch (DuplicateKeyException ex) {
+                    throw new DuplicateCertificateTagException(
+                            String.format("Certificate is already bonded with tag id = {%s}.",
+                                    selected.getId()), ex, selected.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE_TAG);
+                }
 
+            }
         }
     }
 

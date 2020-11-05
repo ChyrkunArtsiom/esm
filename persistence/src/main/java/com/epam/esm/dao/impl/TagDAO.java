@@ -7,9 +7,6 @@ import com.epam.esm.exception.DAOException;
 import com.epam.esm.exception.DuplicateTagException;
 import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoTagException;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
@@ -43,8 +40,6 @@ public class TagDAO implements AbstractDAO<Tag> {
 
     private final static String DELETE_TAG_SQL = "DELETE FROM esm_module2.tags WHERE name = (?)";
 
-    private final static Logger LOGGER = LogManager.getLogger(TagDAO.class);
-
     private JdbcTemplate template;
 
     /**
@@ -67,7 +62,6 @@ public class TagDAO implements AbstractDAO<Tag> {
                 return ps;
                 }, key);
         } catch (DuplicateKeyException ex) {
-            LOGGER.log(Level.ERROR, String.format("Tag with name = {%s} already exists.", tag.getName()), ex);
             throw new DuplicateTagException(String.format("Tag with name = {%s} already exists.", tag.getName()), ex,
                     tag.getName(), ErrorCodesManager.DUPLICATE_TAG);
         }
@@ -75,7 +69,6 @@ public class TagDAO implements AbstractDAO<Tag> {
             tag.setId((int)key.getKeys().get("id"));
             return tag;
         } else {
-            LOGGER.log(Level.ERROR, String.format("Cannot create tag with name = {%s}.", tag.getName()));
             throw new DAOException(String.format("Cannot create tag with name = {%s}.", tag.getName()),
                     tag.getName(), ErrorCodesManager.TAG_DOESNT_EXIST);
         }
@@ -86,7 +79,6 @@ public class TagDAO implements AbstractDAO<Tag> {
         try {
             return read(id, GET_TAG_BY_ID_SQL);
         } catch (EmptyResultDataAccessException|DAOException ex) {
-            LOGGER.log(Level.ERROR, String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)), ex);
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)), ex,
                     String.valueOf(id), ErrorCodesManager.TAG_DOESNT_EXIST);
         }
@@ -102,7 +94,6 @@ public class TagDAO implements AbstractDAO<Tag> {
         try {
             return read(name, GET_TAG_BY_NAME_SQL);
         } catch (EmptyResultDataAccessException|DAOException ex) {
-            LOGGER.log(Level.ERROR, String.format("Tag with id = {%s} doesn't exist.", name), ex);
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", name), ex,
                     name, ErrorCodesManager.TAG_DOESNT_EXIST);
         }

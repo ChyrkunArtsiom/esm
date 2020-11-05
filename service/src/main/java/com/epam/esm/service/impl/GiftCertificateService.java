@@ -4,7 +4,9 @@ import com.epam.esm.dao.impl.GiftCertificateDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.*;
+import com.epam.esm.exception.ArgumentIsNotPresent;
+import com.epam.esm.exception.NoCertificateException;
+import com.epam.esm.exception.NoTagException;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.AbstractService;
 import com.epam.esm.util.InputSanitizer;
@@ -17,8 +19,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class for interacting with {@link GiftCertificateDAO}. Implements {@link AbstractService}.
@@ -61,19 +63,16 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     @Override
     @Transactional(readOnly = true)
     public List<GiftCertificateDTO> readAll() {
-        List<GiftCertificateDTO> dtos = new ArrayList<>();
+        List<GiftCertificateDTO> dtos;
         List<GiftCertificate> certificates = dao.readAll();
-
-        for (GiftCertificate c : certificates) {
-            dtos.add(GiftCertificateMapper.toDto(c));
-        }
+        dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
         return dtos;
     }
 
     @Override
     public boolean delete(GiftCertificateDTO dto) {
         if (dto.getName() == null) {
-            throw new CertificateNameIsNotPresentException("Certificate name is not presented", "");
+            throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
         }
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
         return dao.delete(entity);
@@ -137,19 +136,17 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
                 return create(dto);
             }
         } else {
-            throw new CertificateNameIsNotPresentException("Certificate name is not presented", "");
+            throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<GiftCertificateDTO> readByParams(SearchCriteria criteria) {
-        List<GiftCertificateDTO> dtos = new ArrayList<>();
+        List<GiftCertificateDTO> dtos;
         SearchCriteriaValidator.isValid(criteria);
         List<GiftCertificate> certificates = dao.readByParams(criteria);
-        for (GiftCertificate c : certificates) {
-            dtos.add(GiftCertificateMapper.toDto(c));
-        }
+        dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
         return dtos;
     }
 }

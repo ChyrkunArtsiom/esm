@@ -199,16 +199,16 @@ public class EsmExceptionHandler {
     }
 
     /**
-     * Handles {@link CertificateNameIsNotPresentException} exception.
+     * Handles {@link ArgumentIsNotPresent} exception.
      *
      * @param request the {@link WebRequest} object
      * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
      */
-    @ExceptionHandler({CertificateNameIsNotPresentException.class})
-    public ResponseEntity<ErrorManager> certificateNameIsNotPresented(WebRequest request) {
+    @ExceptionHandler({ArgumentIsNotPresent.class})
+    public ResponseEntity<ErrorManager> certificateNameIsNotPresented(ArgumentIsNotPresent ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
-        error.setErrorMessage(manager.getMessage("certificateNameNotPresent"));
+        error.setErrorMessage(String.format(manager.getMessage("argumentNotPresent"), ex.getArgument()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 

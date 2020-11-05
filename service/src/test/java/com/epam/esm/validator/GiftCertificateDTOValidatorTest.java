@@ -1,10 +1,12 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.exception.*;
+import com.epam.esm.exception.CertificateNameIsNotValidException;
+import com.epam.esm.exception.DescriptionIsNotValidException;
+import com.epam.esm.exception.DurationIsNotValidException;
+import com.epam.esm.exception.PriceIsNotValidException;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Executable;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;

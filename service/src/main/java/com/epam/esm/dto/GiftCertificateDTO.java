@@ -13,7 +13,9 @@ import java.util.Objects;
 /**
  * Data transfer object of {@link com.epam.esm.entity.GiftCertificate}.
  */
-public class GiftCertificateDTO extends AbstractDTO {
+public class GiftCertificateDTO {
+
+    private Integer id;
 
     @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)
     @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE)
@@ -93,6 +95,14 @@ public class GiftCertificateDTO extends AbstractDTO {
         this.tags = tags;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -163,7 +173,8 @@ public class GiftCertificateDTO extends AbstractDTO {
             return false;
         }
         GiftCertificateDTO certificate = (GiftCertificateDTO) obj;
-        return name.equals(certificate.name);
+        return name.equals(certificate.getName()) && description.equals(certificate.getDescription())
+                && price.equals(certificate.getPrice()) && duration.equals(certificate.getDuration());
     }
 
     @Override

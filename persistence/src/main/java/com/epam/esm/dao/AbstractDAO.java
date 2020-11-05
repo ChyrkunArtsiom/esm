@@ -1,7 +1,5 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.entity.AbstractEntity;
-
 import java.util.List;
 
 /**
@@ -9,12 +7,12 @@ import java.util.List;
  *
  * @param <T> the type parameter
  */
-public interface AbstractDAO<T extends AbstractEntity> {
+public interface AbstractDAO<T> {
     /**
-     * Creates entity. Returns {@link AbstractEntity} object if entity in database was created.
+     * Creates entity. Returns {@link T} object if entity in database was created.
      *
-     * @param entity the object of {@link AbstractEntity}
-     * @return the object of {@link AbstractEntity}
+     * @param entity the object
+     * @return the object of {@link T}
      */
     T create(T entity);
 
@@ -22,14 +20,14 @@ public interface AbstractDAO<T extends AbstractEntity> {
      * Gets entity by id.
      *
      * @param id the id
-     * @return the object of {@link AbstractEntity}
+     * @return the object of {@link T}
      */
     T read(int id);
 
     /**
-     * Updates entity. Returns {@link AbstractEntity} object if entity in database was updated.
+     * Updates entity. Returns {@link T} object if entity in database was updated.
      *
-     * @param entity the object of {@link AbstractEntity}
+     * @param entity the object of {@link T}
      * @return the t
      */
     T update(T entity);
@@ -37,15 +35,15 @@ public interface AbstractDAO<T extends AbstractEntity> {
     /**
      * Deletes entity. Returns {@code true} if entity was deleted.
      *
-     * @param entity the object of {@link AbstractEntity}
+     * @param entity the object of {@link T}
      * @return {@code true} if entity was deleted
      */
     boolean delete(T entity);
 
     /**
-     * Reads all {@link AbstractEntity} objects.
+     * Reads all {@link T} objects.
      *
-     * @return the list of {@link AbstractEntity} object
+     * @return the list of {@link T} object
      */
     List<T> readAll();
 }

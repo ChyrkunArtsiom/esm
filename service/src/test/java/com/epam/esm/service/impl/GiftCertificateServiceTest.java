@@ -4,7 +4,7 @@ import com.epam.esm.dao.impl.GiftCertificateDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.CertificateNameIsNotPresentException;
+import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.util.SearchCriteria;
 import org.junit.jupiter.api.Test;
@@ -119,7 +119,7 @@ class GiftCertificateServiceTest {
         List<String> tags = new ArrayList<>(Arrays.asList("rest", "tagtagtest"));
         GiftCertificateDTO certificate = new GiftCertificateDTO(0, null, "test",
                 BigDecimal.valueOf(1.0), 1, tags);
-        assertThrows(CertificateNameIsNotPresentException.class,
+        assertThrows(ArgumentIsNotPresent.class,
                 () -> service.update(certificate));
     }
 
