@@ -1,2 +1,7 @@
 .idea/
 *.iml
+/target
+persistence/target
+service/target
+web/target
+out/
