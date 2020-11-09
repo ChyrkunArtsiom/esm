@@ -1,7 +1,6 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
-import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.*;
@@ -9,6 +8,7 @@ import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.util.SortOrder;
 import com.epam.esm.util.SortType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -30,7 +30,8 @@ import java.util.List;
  * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
  */
 @Repository
-@ComponentScan(basePackageClasses = {HikariCPDataSource.class, TagDAO.class})
+@EnableAutoConfiguration
+@ComponentScan(basePackageClasses = TagDAO.class)
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     private final static String INSERT_CERTIFICATE_SQL = "INSERT INTO esm_module2.certificates (name, description," +
@@ -73,28 +74,11 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     private final static String DELETE_CERTIFICATE_TAG_SQL =
             "DELETE FROM esm_module2.certificate_tag WHERE certificate_id = (?) AND tag_id = (?)";
 
+    @Autowired
     private JdbcTemplate template;
+
+    @Autowired
     private TagDAO tagDAO;
-
-    /**
-     * Sets {@link JdbcTemplate} object.
-     *
-     * @param template the {@link JdbcTemplate} object
-     */
-    @Autowired
-    public void setTemplate(JdbcTemplate template) {
-        this.template = template;
-    }
-
-    /**
-     * Sets {@link TagDAO} object.
-     *
-     * @param tagDAO the {@link TagDAO} object
-     */
-    @Autowired
-    public void setTagDAO(TagDAO tagDAO) {
-        this.tagDAO = tagDAO;
-    }
 
     @Override
     public GiftCertificate create(GiftCertificate giftCertificate) throws DAOException {

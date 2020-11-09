@@ -1,6 +1,5 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.config.AppConfig;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.exception.DuplicateCertificateException;
 import com.epam.esm.exception.NoCertificateException;
@@ -15,6 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,24 +34,17 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ActiveProfiles("test")
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-@WebAppConfiguration
-@ContextConfiguration(classes = AppConfig.class)
+@SpringBootTest(classes = GiftCertificateController.class)
+@AutoConfigureMockMvc
 class GiftCertificateControllerTest {
     private final static String CERTIFICATES_PATH = "/certificates";
+
+    @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private WebApplicationContext context;
-
-    @Autowired
+    @MockBean
     private AbstractService<GiftCertificateDTO> service;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-    }
 
     @Test
     public void testCreateCertificate() throws Exception {
@@ -116,11 +111,11 @@ class GiftCertificateControllerTest {
     public void testReadAllCertificates() throws Exception {
         List<GiftCertificateDTO> dtos = new ArrayList<>(
                 Arrays.asList(new GiftCertificateDTO(
-                        100, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
+                        1, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
                         new GiftCertificateDTO(
-                        100, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
+                        2, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
                 ));
-        Mockito.when(service.readAll()).thenReturn(dtos);
+        Mockito.when(service.readByParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
 
 
         mockMvc.perform(get(CERTIFICATES_PATH))
@@ -183,4 +178,6 @@ class GiftCertificateControllerTest {
                 .andExpect(jsonPath("$.[1].name").value("Test certificate2"))
                 .andExpect(status().isOk());
     }
+
+
 }

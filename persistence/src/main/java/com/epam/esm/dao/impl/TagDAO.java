@@ -1,14 +1,13 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
-import com.epam.esm.datasource.HikariCPDataSource;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.DAOException;
 import com.epam.esm.exception.DuplicateTagException;
 import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoTagException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,7 +26,7 @@ import java.util.List;
  * Class for interacting with{@link Tag} table in databse. Implements {@link AbstractDAO}.
  */
 @Repository
-@ComponentScan(basePackageClasses = HikariCPDataSource.class)
+@EnableAutoConfiguration
 public class TagDAO implements AbstractDAO<Tag> {
 
     private final static String INSERT_TAG_SQL = "INSERT INTO esm_module2.tags (name) VALUES (?)";
@@ -40,17 +39,8 @@ public class TagDAO implements AbstractDAO<Tag> {
 
     private final static String DELETE_TAG_SQL = "DELETE FROM esm_module2.tags WHERE name = (?)";
 
-    private JdbcTemplate template;
-
-    /**
-     * Sets {@link JdbcTemplate} object.
-     *
-     * @param template the {@link JdbcTemplate} object
-     */
     @Autowired
-    public void setTemplate(JdbcTemplate template) {
-        this.template = template;
-    }
+    private JdbcTemplate template;
 
     @Override
     public Tag create(Tag tag) throws DAOException {

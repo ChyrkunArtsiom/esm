@@ -24,8 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
-@ContextConfiguration(classes = GiftCertificateService.class)
+@ExtendWith(MockitoExtension.class)
 class GiftCertificateServiceTest {
 
     @Mock
