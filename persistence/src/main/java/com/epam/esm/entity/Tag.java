@@ -1,14 +1,22 @@
 package com.epam.esm.entity;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Class for Tag entity.
  */
-public class Tag {
+@Entity(name = "tags")
+@Table(name = "tags", schema = "esm_module2")
+public class Tag implements Serializable {
 
+    @Id
+    @SequenceGenerator(name = "tags_id_seq", sequenceName = "esm_module2.tags_id_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_id_seq")
     private Integer id;
 
+    @Column(unique = true)
     private String name;
 
     /**
@@ -19,13 +27,22 @@ public class Tag {
     }
 
     /**
+     * Constructor with name
+     *
+     * @param name the string name
+     */
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    /**
      * Constructor with all fields.
      *
      * @param id   the id
      * @param name the string name
      */
     public Tag(Integer id, String name) {
-        this.id = id;
+/*        this.id = id;*/
         this.name = name;
     }
 

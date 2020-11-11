@@ -1,6 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.util.SearchCriteria;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ class GiftCertificateDAOTest {
 
     @Test
     public void testCreate() {
-        List<String> tags = new ArrayList<>(Arrays.asList("firsttag", "secondtag"));
+        List<Tag> tags = new ArrayList<>(Arrays.asList(new Tag(1, "firsttag"), new Tag(2, "secondtag")));
         GiftCertificate certificate = new GiftCertificate(0, "test3", "test",
                 1.0, null, null, 1, tags);
         assertNotNull(dao.create(certificate));
@@ -57,8 +58,8 @@ class GiftCertificateDAOTest {
 
     @Test
     public void testUpdate() {
-        List<String> tags = new ArrayList<>();
-        tags.add("firsttag");
+        List<Tag> tags = new ArrayList<>();
+        tags.add(new Tag(1, "firsttag"));
         GiftCertificate certificate = new GiftCertificate(0, "test1", "after updating",
                 69.0, null, null, 69, tags);
         GiftCertificate oldCertificate = dao.update(certificate);

@@ -2,9 +2,12 @@ package com.epam.esm.mapper;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that converts {@link GiftCertificate} and {@link GiftCertificateDTO} objects to each other.
@@ -28,7 +31,11 @@ public class GiftCertificateMapper {
             certificate.setPrice(0.0);
         }
         certificate.setDuration(dto.getDuration());
-        certificate.setTags(dto.getTags());
+        List<Tag> tags = new ArrayList<>();
+        for (String tag : dto.getTags()) {
+            tags.add(new Tag(tag));
+        }
+        certificate.setTags(tags);
         return certificate;
     }
 
@@ -50,7 +57,11 @@ public class GiftCertificateMapper {
             dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
         }
         dto.setDuration(entity.getDuration());
-        dto.setTags(entity.getTags());
+        List<String> tags = new ArrayList<>();
+        for (Tag tag : entity.getTags()) {
+            tags.add(tag.getName());
+        }
+        dto.setTags(tags);
         return dto;
     }
 }

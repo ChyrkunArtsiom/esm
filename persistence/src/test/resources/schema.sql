@@ -14,6 +14,8 @@ create unique index tags_id_uindex
 create unique index tags_name_uindex
     on esm_module2.tags (name);
 
+CREATE SEQUENCE esm_module2.tags_id_seq START WITH 3 INCREMENT BY 1;
+
 create table esm_module2.certificates
 (
     id               serial                   not null,

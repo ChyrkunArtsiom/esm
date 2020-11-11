@@ -10,8 +10,11 @@ import java.util.Objects;
 /**
  * Class for Certificate entity.
  */
+/*@Entity*/
 public class GiftCertificate {
 
+/*    @Id
+    @GeneratedValue*/
     private Integer id;
 
     private String name;
@@ -20,13 +23,14 @@ public class GiftCertificate {
     /** A Double of price. */
     private Double price;
     /** An OffSetDateTime of date of creation. */
+
     private OffsetDateTime createDate;
     /** An OffSetDateTime of date of last update. */
     private OffsetDateTime lastUpdateDate;
     /** A duration in days. */
     private Integer duration;
     /** A list of tag names. */
-    private List<String> tags;
+    private List<Tag> tags;
 
     /**
      * Empty constructor.
@@ -44,13 +48,17 @@ public class GiftCertificate {
      * @param duration    the duration
      * @param tags        the list of tag names
      */
-    public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<String> tags) {
+    public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<Tag> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
-        this.tags = tags;
+        if (tags == null) {
+            this.tags = new ArrayList<>();
+        } else {
+            this.tags = new ArrayList<>(tags);
+        }
     }
 
     /**
@@ -66,7 +74,7 @@ public class GiftCertificate {
      * @param tags           the list of tag names
      */
     public GiftCertificate(Integer id, String name, String description, Double price,
-                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<String> tags) {
+                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<Tag> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -74,7 +82,11 @@ public class GiftCertificate {
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
-        this.tags = tags;
+        if (tags == null) {
+            this.tags = new ArrayList<>();
+        } else {
+            this.tags = new ArrayList<>(tags);
+        }
     }
 
     public Integer getId() {
@@ -148,15 +160,16 @@ public class GiftCertificate {
         this.duration = duration;
     }
 
-    public List<String> getTags() {
+    public List<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(List<Tag> tags) {
         if (tags == null) {
             this.tags = new ArrayList<>();
+        } else {
+            this.tags = new ArrayList<>(tags);
         }
-        this.tags = tags;
     }
 
     @Override

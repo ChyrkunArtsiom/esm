@@ -23,6 +23,13 @@ public interface AbstractDAO<T> {
      * @return the object of {@link T}
      */
     T read(int id);
+    /**
+     * Gets entity by name.
+     *
+     * @param name the string of name
+     * @return the object of {@link T}
+     */
+    T read(String name);
 
     /**
      * Updates entity. Returns {@link T} object if entity in database was updated.

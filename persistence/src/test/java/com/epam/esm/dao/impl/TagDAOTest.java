@@ -6,7 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,8 +24,10 @@ class TagDAOTest {
     private TagDAO dao;
 
     @Test
+    @Transactional
+    @Rollback(false)
     public void testCreate() {
-        Tag tag = new Tag(3, "thirdtag");
+        Tag tag = new Tag( "thirdtag");
         assertNotNull(dao.create(tag));
     }
 
@@ -40,8 +44,9 @@ class TagDAOTest {
     }
 
     @Test
+    @Transactional
     public void testDelete() {
-        Tag tag = new Tag(3, "thirdtag");
+        Tag tag = new Tag( "thirdtag");
         assertTrue(dao.delete(tag));
     }
 

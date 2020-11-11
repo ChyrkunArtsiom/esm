@@ -4,6 +4,7 @@ import com.epam.esm.dao.impl.GiftCertificateDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.exception.NoTagException;
@@ -85,11 +86,11 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         dto.setDescription(InputSanitizer.sanitize(dto.getDescription()));
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
         if (entity.getTags() != null) {
-            for (String tag : entity.getTags()) {
+            for (Tag tag : entity.getTags()) {
                 try {
-                    tagService.read(tag);
+                    tagService.read(tag.getName());
                 } catch (NoTagException ex) {
-                    tagService.create(new TagDTO(0, tag));
+                    tagService.create(new TagDTO(0, tag.getName()));
                 }
             }
         }
@@ -122,11 +123,11 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
                         TagDTOValidator.isValid(new TagDTO(0, tag));
                     }
                     toUpdate.setTags(substitute.getTags());
-                    for (String tag : toUpdate.getTags()) {
+                    for (Tag tag : toUpdate.getTags()) {
                         try {
-                            tagService.read(tag);
+                            tagService.read(tag.getName());
                         } catch (NoTagException ex) {
-                            tagService.create(new TagDTO(0, tag));
+                            tagService.create(new TagDTO(0, tag.getName()));
                         }
                     }
                 }

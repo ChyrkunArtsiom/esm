@@ -148,7 +148,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         if (certificate == null) {
             throw new DAOException("Certificate doesn't exist.", ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
         } else {
-            List<String> tags = readTagsByCertificateId(certificate.getId());
+            List<Tag> tags = readTagsByCertificateId(certificate.getId());
             certificate.setTags(tags);
             return certificate;
         }
@@ -205,10 +205,10 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
                     giftCertificate.getPrice(), OffsetDateTime.now(ZoneOffset.UTC),  giftCertificate.getDuration(), giftCertificate.getName()};
             int[] types = new int[] {Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER, Types.VARCHAR};
             if (template.update(UPDATE_CERTIFICATE_SQL, params, types) > 0) {
-                List<String> oldTags = oldCertificate.getTags();
-                List<String> newTags = giftCertificate.getTags();
-                List<String> tagsToDelete = getExcessElements(oldTags, newTags);
-                List<String> tagsToAdd = getExcessElements(newTags, oldTags);
+                List<Tag> oldTags = oldCertificate.getTags();
+                List<Tag> newTags = giftCertificate.getTags();
+                List<Tag> tagsToDelete = getExcessElements(oldTags, newTags);
+                List<Tag> tagsToAdd = getExcessElements(newTags, oldTags);
                 deleteBindedTags(tagsToDelete, oldCertificate.getId());
                 bindTagsWithCertificate(oldCertificate.getId(), tagsToAdd);
                 return oldCertificate;
@@ -238,8 +238,8 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         return certificate;
     }
 
-    private List<String> readTagsByCertificateId(int id) {
-        List<String> tags = new ArrayList<>();
+    private List<Tag> readTagsByCertificateId(int id) {
+        List<Tag> tags = new ArrayList<>();
         Object[] params = new Object[] {id};
         try {
             tags = template.query(GET_TAGS_BY_CERTIFICATE_SQL, params, getResultSetExtractor());
@@ -249,10 +249,10 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
-    private void bindTagsWithCertificate(int certificateId, List<String> tags) {
+    private void bindTagsWithCertificate(int certificateId, List<Tag> tags) {
         if (tags != null) {
-            for (String tag : tags) {
-                Tag selected = tagDAO.read(tag);
+            for (Tag tag : tags) {
+                Tag selected = tagDAO.read(tag.getName());
                 try {
                     template.update(INSERT_CERTIFICATE_TAG_SQL, certificateId, selected.getId());
                 }catch (DuplicateKeyException ex) {
@@ -265,16 +265,17 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
-    private void deleteBindedTags(List<String> tags, int certificateId) {
-        for (String tag : tags) {
-            Tag deleted = tagDAO.read(tag);
+    private void deleteBindedTags(List<Tag> tags, int certificateId) {
+        for (Tag tag : tags) {
+            Tag deleted = tagDAO.read(tag.getName());
             template.update(DELETE_CERTIFICATE_TAG_SQL, certificateId, deleted.getId());
         }
     }
 
-    private List<String> getExcessElements(List<String> firstList, List<String> secondList) {
-        List<String> excessElements = new ArrayList<>();
-        for (String el : firstList) {
+    //Переделать под теги
+    private List<Tag> getExcessElements(List<Tag> firstList, List<Tag> secondList) {
+        List<Tag> excessElements = new ArrayList<>();
+        for (Tag el : firstList) {
             if (!secondList.contains(el)) {
                 excessElements.add(el);
             }
@@ -342,14 +343,14 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         };
     }
 
-    private ResultSetExtractor<List<String>> getResultSetExtractor() {
+    private ResultSetExtractor<List<Tag>> getResultSetExtractor() {
         return resultSet -> {
-            List<String> rows = new ArrayList<>();
+            List<Tag> tags = new ArrayList<>();
             while (resultSet.next()) {
-                String tag = resultSet.getString("name");
-                rows.add(tag);
+                Tag tag = new Tag(/*resultSet.getInt("id"),*/ resultSet.getString("name"));
+                tags.add(tag);
             }
-            return rows;
+            return tags;
         };
     }
 }
