@@ -9,7 +9,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +21,10 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Class controller for interacting with {@link TagDTO} objects.
@@ -74,10 +75,14 @@ public class TagController {
      * @param tagId the {@link TagDTO} object id
      * @return the {@link TagDTO} object
      */
-    @RequestMapping(value = "/{tagId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{tagId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public TagDTO readTag(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int tagId) {
-        return service.read(tagId);
+    public RepresentationModel readTag(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int tagId) {
+        TagDTO tag = service.read(tagId);
+        Link deleteLink = linkTo(methodOn(TagController.class).deleteTag(tag)).withRel("delete");
+        Link selflink = linkTo(TagController.class).slash(tag.getId()).withSelfRel();
+        tag.add(deleteLink, selflink);
+        return tag;
     }
 
     /**
@@ -103,6 +108,11 @@ public class TagController {
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public List<TagDTO> readAllTags() {
-        return service.readAll();
+        List<TagDTO> tags = service.readAll();
+        tags = tags.stream()
+                .map(t -> t
+                        .add(linkTo(TagController.class).slash(t.getId()).withSelfRel()))
+                .collect(Collectors.toList());
+        return tags;
     }
 }

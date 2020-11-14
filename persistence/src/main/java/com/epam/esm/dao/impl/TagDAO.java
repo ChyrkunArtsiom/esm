@@ -2,7 +2,6 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.DAOException;
 import com.epam.esm.exception.DuplicateTagException;
 import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoTagException;
@@ -25,11 +24,12 @@ public class TagDAO implements AbstractDAO<Tag> {
     private EntityManager entityManager;
 
     @Override
-    public Tag create(Tag tag) throws DAOException {
+    public Tag create(Tag tag) {
         try{
             entityManager.persist(tag);
+            entityManager.flush();
             return tag;
-        } catch (EntityExistsException ex) {
+        } catch (PersistenceException ex) {
             throw new DuplicateTagException(String.format("Tag with name = {%s} already exists.", tag.getName()), ex,
                     tag.getName(), ErrorCodesManager.DUPLICATE_TAG);
         }

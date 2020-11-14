@@ -10,10 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +30,7 @@ class TagServiceTest {
     @Test
     public void testReadAll() {
         List<Tag> entities = new ArrayList<>(
-                Arrays.asList(new Tag(1, "name1"), new Tag(2, "name2")));
+                Arrays.asList(new Tag("name1"), new Tag("name2")));
         Mockito.when(dao.readAll()).thenReturn(entities);
 
         List<TagDTO> tags = service.readAll();

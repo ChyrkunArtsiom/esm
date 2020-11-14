@@ -3,28 +3,31 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.*;
+import com.epam.esm.exception.DuplicateCertificateException;
+import com.epam.esm.exception.ErrorCodesManager;
+import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.util.SortOrder;
 import com.epam.esm.util.SortType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
-import java.time.LocalDateTime;
+import javax.persistence.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
@@ -32,27 +35,11 @@ import java.util.List;
 @Repository
 @EnableAutoConfiguration
 @ComponentScan(basePackageClasses = TagDAO.class)
+@EntityScan(basePackageClasses = GiftCertificate.class)
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
-
-    private final static String INSERT_CERTIFICATE_SQL = "INSERT INTO esm_module2.certificates (name, description," +
-            "price, create_date, duration) VALUES (?,?,?,?,?)";
-
-    private final static String INSERT_CERTIFICATE_TAG_SQL =
-            "INSERT INTO esm_module2.certificate_tag (certificate_id, tag_id) VALUES (?, ?)";
-
-    private final static String GET_CERTIFICATE_SQL = "SELECT " +
-            "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
-            "WHERE id = (?)";
-
-    private final static String GET_CERTIFICATES_BY_TAG_SQL = "SELECT " +
-            "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates " +
-            "WHERE name = (?)";
 
     private final static String GET_TAGS_BY_CERTIFICATE_SQL = "SELECT name FROM esm_module2.tags " +
             "INNER JOIN esm_module2.certificate_tag ON tags.id = certificate_tag.tag_id WHERE certificate_id = (?)";
-
-    private final static String GET_ALL_CERTIFICATES_SQL = "SELECT " +
-            "id, name, description, price, create_date, last_update_date, duration FROM esm_module2.certificates";
 
     private final static String GET_CERTIFICATES_BY_PARAMS_WITH_TAGS_SQL =
             "SELECT DISTINCT certificates.id, certificates.name, " +
@@ -66,105 +53,58 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             "description, price, create_date, last_update_date, duration " +
             "FROM esm_module2.certificates";
 
-    private final static String UPDATE_CERTIFICATE_SQL = "UPDATE esm_module2.certificates SET " +
-            "description = (?), price = (?), last_update_date = (?), duration = (?) WHERE name = (?)";
-
-    private final static String DELETE_CERTIFICATE_SQL = "DELETE FROM esm_module2.certificates WHERE name = (?)";
-
-    private final static String DELETE_CERTIFICATE_TAG_SQL =
-            "DELETE FROM esm_module2.certificate_tag WHERE certificate_id = (?) AND tag_id = (?)";
-
     @Autowired
     private JdbcTemplate template;
 
-    @Autowired
-    private TagDAO tagDAO;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
-    public GiftCertificate create(GiftCertificate giftCertificate) throws DAOException {
-        KeyHolder key = new GeneratedKeyHolder();
-        try {
-            template.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(INSERT_CERTIFICATE_SQL, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, giftCertificate.getName());
-                ps.setString(2, giftCertificate.getDescription());
-                ps.setDouble(3, giftCertificate.getPrice());
-                //Setting up current datetime
-                OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
-                ps.setTimestamp(4, Timestamp.valueOf(
-                        LocalDateTime.ofInstant(currentTime.toInstant(), ZoneOffset.UTC)));
-                giftCertificate.setCreateDate(currentTime);
-                ps.setInt(5, giftCertificate.getDuration());
-                return ps;
-            }, key);
-        } catch (DuplicateKeyException ex) {
+    public GiftCertificate create(GiftCertificate giftCertificate) {
+        try{
+            OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+            giftCertificate.setCreateDate(currentTime);
+            entityManager.persist(giftCertificate);
+            entityManager.flush();
+            return giftCertificate;
+        } catch (PersistenceException ex) {
             throw new DuplicateCertificateException(
                     String.format("Certificate with name = {%s} already exists.", giftCertificate.getName()), ex,
                     giftCertificate.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE);
         }
-        if (key.getKeys() != null) {
-            giftCertificate.setId((int)key.getKeys().get("id"));
-            bindTagsWithCertificate(giftCertificate.getId(), giftCertificate.getTags());
-            return giftCertificate;
-        } else {
-            throw new DAOException(
-                    String.format("Cannot create certificate with name = {%s}.", giftCertificate.getName()),
-                    giftCertificate.getName(), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
-        }
     }
 
     @Override
-    public GiftCertificate read(int id) throws NoCertificateException{
-        try {
-            return read(id, GET_CERTIFICATE_SQL);
-        } catch (EmptyResultDataAccessException ex) {
-            throw new NoCertificateException(
-                    String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)), ex,
-                    String.valueOf(id), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
-        }
-    }
-
-    /**
-     * Gets {@link GiftCertificate} object by the name.
-     *
-     * @param name the name string
-     * @return the {@link GiftCertificate} object
-     */
-    public GiftCertificate read(String name) {
-        try {
-            return read(name, GET_CERTIFICATES_BY_TAG_SQL);
-        } catch (EmptyResultDataAccessException ex) {
-            throw new NoCertificateException(
-                    String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(name)), ex,
-                    String.valueOf(name), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
-        }
-    }
-
-    private GiftCertificate read(Object param, String query) {
-        GiftCertificate certificate;
-        Object[] params = new Object[] {param};
-        RowMapper<GiftCertificate> rowMapper = (rs, rowNum) -> mapToCertificate(rs);
-        certificate = template.queryForObject(query, params, rowMapper);
+    public GiftCertificate read(int id) {
+        GiftCertificate certificate = entityManager.find(GiftCertificate.class, id);
         if (certificate == null) {
-            throw new DAOException("Certificate doesn't exist.", ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
+            throw new NoCertificateException(
+                    String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)),
+                    String.valueOf(id), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
         } else {
-            List<Tag> tags = readTagsByCertificateId(certificate.getId());
-            certificate.setTags(tags);
             return certificate;
         }
     }
 
     @Override
-    public List<GiftCertificate> readAll() {
-        List<GiftCertificate> certificates = new ArrayList<>();
-        RowMapper<List<GiftCertificate>> rowMapper = getRowMapper();
-
+    public GiftCertificate read(String name) {
         try {
-            certificates = template.queryForObject(GET_ALL_CERTIFICATES_SQL, rowMapper);
-            return certificates;
-        } catch (EmptyResultDataAccessException e) {
-            return certificates;
+            TypedQuery<GiftCertificate> query = entityManager.createQuery(
+                    "SELECT с FROM certificates с WHERE с.name=:name", GiftCertificate.class);
+            query.setParameter("name", name);
+            return query.getSingleResult();
+        } catch (NoResultException ex) {
+            throw new NoCertificateException(
+                    String.format("Certificate with name = {%s} doesn't exist.", String.valueOf(name)), ex,
+                    String.valueOf(name), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
         }
+    }
+
+    @Override
+    public List<GiftCertificate> readAll() {
+        TypedQuery<GiftCertificate> query = entityManager.createQuery(
+                "SELECT c FROM certificates c", GiftCertificate.class);
+        return query.getResultList();
     }
 
     /**
@@ -199,31 +139,25 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
-        GiftCertificate oldCertificate = read(giftCertificate.getName());
-        if (oldCertificate != null) {
-            Object[] params = new Object[] {giftCertificate.getDescription(),
-                    giftCertificate.getPrice(), OffsetDateTime.now(ZoneOffset.UTC),  giftCertificate.getDuration(), giftCertificate.getName()};
-            int[] types = new int[] {Types.VARCHAR, Types.DOUBLE, Types.TIMESTAMP_WITH_TIMEZONE, Types.INTEGER, Types.VARCHAR};
-            if (template.update(UPDATE_CERTIFICATE_SQL, params, types) > 0) {
-                List<Tag> oldTags = oldCertificate.getTags();
-                List<Tag> newTags = giftCertificate.getTags();
-                List<Tag> tagsToDelete = getExcessElements(oldTags, newTags);
-                List<Tag> tagsToAdd = getExcessElements(newTags, oldTags);
-                deleteBindedTags(tagsToDelete, oldCertificate.getId());
-                bindTagsWithCertificate(oldCertificate.getId(), tagsToAdd);
-                return oldCertificate;
-            }
-        }
-        throw new NoCertificateException(
-                String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(giftCertificate.getName())),
-                String.valueOf(giftCertificate.getName()), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
+        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+        giftCertificate.setLastUpdateDate(currentTime);
+        GiftCertificate updatedCertificate = entityManager.merge(giftCertificate);
+        entityManager.flush();
+        return updatedCertificate;
     }
 
     @Override
     public boolean delete(GiftCertificate certificate) {
-        Object[] params = new Object[] {certificate.getName()};
-        int[] types = new int[] {Types.VARCHAR};
-        return template.update(DELETE_CERTIFICATE_SQL, params, types) > 0;
+        try {
+            TypedQuery<GiftCertificate> query = entityManager.createQuery(
+                    "SELECT c FROM certificates c WHERE c.name=:name", GiftCertificate.class);
+            query.setParameter("name", certificate.getName());
+            GiftCertificate toDelete = query.getSingleResult();
+            entityManager.remove(toDelete);
+            return true;
+        } catch (NoResultException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private GiftCertificate mapToCertificate(ResultSet rs) throws SQLException {
@@ -238,8 +172,8 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         return certificate;
     }
 
-    private List<Tag> readTagsByCertificateId(int id) {
-        List<Tag> tags = new ArrayList<>();
+    private Set<Tag> readTagsByCertificateId(int id) {
+        Set<Tag> tags = new HashSet<>();
         Object[] params = new Object[] {id};
         try {
             tags = template.query(GET_TAGS_BY_CERTIFICATE_SQL, params, getResultSetExtractor());
@@ -247,40 +181,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         } catch (EmptyResultDataAccessException e) {
             return tags;
         }
-    }
-
-    private void bindTagsWithCertificate(int certificateId, List<Tag> tags) {
-        if (tags != null) {
-            for (Tag tag : tags) {
-                Tag selected = tagDAO.read(tag.getName());
-                try {
-                    template.update(INSERT_CERTIFICATE_TAG_SQL, certificateId, selected.getId());
-                }catch (DuplicateKeyException ex) {
-                    throw new DuplicateCertificateTagException(
-                            String.format("Certificate is already bonded with tag id = {%s}.",
-                                    selected.getId()), ex, selected.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE_TAG);
-                }
-
-            }
-        }
-    }
-
-    private void deleteBindedTags(List<Tag> tags, int certificateId) {
-        for (Tag tag : tags) {
-            Tag deleted = tagDAO.read(tag.getName());
-            template.update(DELETE_CERTIFICATE_TAG_SQL, certificateId, deleted.getId());
-        }
-    }
-
-    //Переделать под теги
-    private List<Tag> getExcessElements(List<Tag> firstList, List<Tag> secondList) {
-        List<Tag> excessElements = new ArrayList<>();
-        for (Tag el : firstList) {
-            if (!secondList.contains(el)) {
-                excessElements.add(el);
-            }
-        }
-        return excessElements;
     }
 
     private String generateQuery(SearchCriteria criteria) {
@@ -343,9 +243,9 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         };
     }
 
-    private ResultSetExtractor<List<Tag>> getResultSetExtractor() {
+    private ResultSetExtractor<Set<Tag>> getResultSetExtractor() {
         return resultSet -> {
-            List<Tag> tags = new ArrayList<>();
+            Set<Tag> tags = new HashSet<>();
             while (resultSet.next()) {
                 Tag tag = new Tag(/*resultSet.getInt("id"),*/ resultSet.getString("name"));
                 tags.add(tag);

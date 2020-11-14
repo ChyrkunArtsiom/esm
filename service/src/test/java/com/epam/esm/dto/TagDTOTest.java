@@ -10,13 +10,13 @@ class TagDTOTest {
 
     @Test
     public void testEqualsSameTag() {
-        Tag tag = new Tag(1, "tag");
+        Tag tag = new Tag("tag");
         assertEquals(tag, tag);
     }
 
     @Test
     public void testEqualsWrongObject() {
-        Tag tag = new Tag(1, "tag");
+        Tag tag = new Tag("tag");
         assertNotEquals(tag, "String");
     }
 

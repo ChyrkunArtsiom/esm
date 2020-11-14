@@ -1,36 +1,58 @@
 package com.epam.esm.entity;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
  * Class for Certificate entity.
  */
-/*@Entity*/
-public class GiftCertificate {
+@Entity(name = "certificates")
+@Table(name = "certificates", schema = "esm_module2")
+public class GiftCertificate implements Serializable {
 
-/*    @Id
-    @GeneratedValue*/
+    @Id
+    @SequenceGenerator(
+            name = "certificates_id_seq", sequenceName = "esm_module2.certificates_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "certificates_id_seq")
     private Integer id;
 
+    @Column(unique = true, nullable = false)
     private String name;
-    /** A string of description. */
-    private String description;
-    /** A Double of price. */
-    private Double price;
-    /** An OffSetDateTime of date of creation. */
 
+    /** A string of description. */
+    @Column(nullable = false)
+    private String description;
+
+    /** A Double of price. */
+    @Column(nullable = false)
+    private Double price;
+
+    /** An OffSetDateTime of date of creation. */
+    @Column(name = "create_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createDate;
+
     /** An OffSetDateTime of date of last update. */
+    @Column(name = "last_update_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime lastUpdateDate;
+
     /** A duration in days. */
+    @Column(name = "duration", nullable = false)
     private Integer duration;
-    /** A list of tag names. */
-    private List<Tag> tags;
+
+    /** A set of tag names. */
+    @ManyToMany(/*fetch = FetchType.EAGER, */cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "certificate_tag", schema = "esm_module2",
+            joinColumns = @JoinColumn(name = "certificate_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 
     /**
      * Empty constructor.
@@ -41,30 +63,25 @@ public class GiftCertificate {
     /**
      * Constructor without dates.
      *
-     * @param id          the id
      * @param name        the string of name
      * @param description the string of description
      * @param price       the Double of price
      * @param duration    the duration
      * @param tags        the list of tag names
      */
-    public GiftCertificate(Integer id, String name, String description, Double price, Integer duration, List<Tag> tags) {
-        this.id = id;
+    public GiftCertificate(String name, String description, Double price, Integer duration, Set<Tag> tags) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
-        if (tags == null) {
-            this.tags = new ArrayList<>();
-        } else {
-            this.tags = new ArrayList<>(tags);
+        if (tags != null) {
+            this.tags = new HashSet<>(tags);
         }
     }
 
     /**
      * Constructor with all fields.
      *
-     * @param id             the id
      * @param name           the string of name
      * @param description    the string of description
      * @param price          the Double of price
@@ -73,19 +90,16 @@ public class GiftCertificate {
      * @param duration       the duration
      * @param tags           the list of tag names
      */
-    public GiftCertificate(Integer id, String name, String description, Double price,
-                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, List<Tag> tags) {
-        this.id = id;
+    public GiftCertificate(String name, String description, Double price,
+                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, Set<Tag> tags) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.duration = duration;
-        if (tags == null) {
-            this.tags = new ArrayList<>();
-        } else {
-            this.tags = new ArrayList<>(tags);
+        if (tags != null) {
+            this.tags = new HashSet<>(tags);
         }
     }
 
@@ -160,15 +174,13 @@ public class GiftCertificate {
         this.duration = duration;
     }
 
-    public List<Tag> getTags() {
+    public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<Tag> tags) {
-        if (tags == null) {
-            this.tags = new ArrayList<>();
-        } else {
-            this.tags = new ArrayList<>(tags);
+    public void setTags(Set<Tag> tags) {
+        if (tags != null) {
+            this.tags = new HashSet<>(tags);
         }
     }
 

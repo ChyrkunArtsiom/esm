@@ -4,6 +4,7 @@ import com.epam.esm.exception.*;
 import com.epam.esm.util.ErrorManager;
 import com.epam.esm.util.ErrorMessageManager;
 import com.epam.esm.validator.ValidationMessageManager;
+import org.hibernate.StaleObjectStateException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -99,7 +100,7 @@ public class EsmExceptionHandler {
      * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorManager> handle(ConstraintViolationException constraintViolationException) {
+    public ResponseEntity<ErrorManager> invalidBody(ConstraintViolationException constraintViolationException) {
         Set<ConstraintViolation<?>> violations = constraintViolationException.getConstraintViolations();
         ErrorManager error = new ErrorManager();
         String errorMessage = "";
@@ -110,6 +111,14 @@ public class EsmExceptionHandler {
         }
         error.setErrorMessage(errorMessage);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(StaleObjectStateException.class)
+    public ResponseEntity<ErrorManager> updateConflict(WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+        ErrorManager error = new ErrorManager();
+        error.setErrorMessage(manager.getMessage("updateConflict"));
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     /**
@@ -174,7 +183,6 @@ public class EsmExceptionHandler {
      * @param request the {@link WebRequest} object
      * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
      */
-//Exception that indicates that a method argument has not the expected type.
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorManager> argumentWrongType(MethodArgumentTypeMismatchException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));

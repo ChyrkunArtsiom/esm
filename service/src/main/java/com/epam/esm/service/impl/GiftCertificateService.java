@@ -1,14 +1,15 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftCertificateDAO;
+import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.exception.NoTagException;
 import com.epam.esm.mapper.GiftCertificateMapper;
+import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
 import com.epam.esm.util.InputSanitizer;
 import com.epam.esm.util.SearchCriteria;
@@ -20,7 +21,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +35,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
 
     private GiftCertificateDAO dao;
 
-    private TagService tagService;
+    private TagDAO tagDAO;
 
     /**
      * Sets {@link GiftCertificateDAO} object.
@@ -44,14 +47,9 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         this.dao = dao;
     }
 
-    /**
-     * Sets {@link TagService} object.
-     *
-     * @param tagService the {@link TagService} object.
-     */
     @Autowired
-    public void setTagService(TagService tagService) {
-        this.tagService = tagService;
+    public void setTagDAO(TagDAO tagDAO) {
+        this.tagDAO = tagDAO;
     }
 
     @Override
@@ -71,6 +69,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     }
 
     @Override
+    @Transactional
     public boolean delete(GiftCertificateDTO dto) {
         if (dto.getName() == null) {
             throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
@@ -86,13 +85,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         dto.setDescription(InputSanitizer.sanitize(dto.getDescription()));
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
         if (entity.getTags() != null) {
-            for (Tag tag : entity.getTags()) {
-                try {
-                    tagService.read(tag.getName());
-                } catch (NoTagException ex) {
-                    tagService.create(new TagDTO(0, tag.getName()));
-                }
-            }
+            entity.setTags(checkTags(entity));
         }
         entity = dao.create(entity);
         return GiftCertificateMapper.toDto(entity);
@@ -119,17 +112,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
                     toUpdate.setDuration(substitute.getDuration());
                 }
                 if (dto.getTags() != null) {
-                    for (String tag : dto.getTags()) {
-                        TagDTOValidator.isValid(new TagDTO(0, tag));
-                    }
-                    toUpdate.setTags(substitute.getTags());
-                    for (Tag tag : toUpdate.getTags()) {
-                        try {
-                            tagService.read(tag.getName());
-                        } catch (NoTagException ex) {
-                            tagService.create(new TagDTO(0, tag.getName()));
-                        }
-                    }
+                    toUpdate.setTags(checkTags(substitute));
                 }
                 dao.update(toUpdate);
                 return null;
@@ -149,5 +132,21 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         List<GiftCertificate> certificates = dao.readByParams(criteria);
         dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
         return dtos;
+    }
+
+    private Set<Tag> checkTags(GiftCertificate certificate) {
+        Set<Tag> newSetOfTags = new HashSet<>();
+        for (Tag tag : certificate.getTags()) {
+            TagDTOValidator.isValid(TagMapper.toDto(tag));
+        }
+        for (Tag tag : certificate.getTags()) {
+            try {
+                Tag oldTag = tagDAO.read(tag.getName());
+                newSetOfTags.add(oldTag);
+            } catch (NoTagException ex) {
+                newSetOfTags.add(tag);
+            }
+        }
+        return newSetOfTags;
     }
 }

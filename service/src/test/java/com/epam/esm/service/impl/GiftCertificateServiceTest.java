@@ -1,9 +1,11 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftCertificateDAO;
+import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.util.SearchCriteria;
@@ -13,14 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,6 +27,9 @@ class GiftCertificateServiceTest {
 
     @Mock
     private GiftCertificateDAO dao;
+
+    @Mock
+    private TagDAO tagDAO;
 
     @Mock
     private TagService tagService;
@@ -52,9 +53,9 @@ class GiftCertificateServiceTest {
     public void testReadAll() {
         List<GiftCertificate> entities = new ArrayList<>(
                 Arrays.asList(new GiftCertificate(
-                        1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null,  10, null),
+                        "Test certificate", "Description", 1.5, OffsetDateTime.now(), null,  10, null),
                         new GiftCertificate(
-                                1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
+                                "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
         Mockito.when(dao.readAll()).thenReturn(entities);
         List<GiftCertificateDTO> tags = service.readAll();
         Mockito.verify(dao, Mockito.times(1)).readAll();
@@ -65,9 +66,9 @@ class GiftCertificateServiceTest {
     public void testReadByParams() {
         List<GiftCertificate> entities = new ArrayList<>(
                 Arrays.asList(new GiftCertificate(
-                                1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null,  10, null),
+                                "Test certificate", "Description", 1.5, OffsetDateTime.now(), null,  10, null),
                         new GiftCertificate(
-                                1, "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
+                                "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
         Mockito.when(dao.readByParams(Mockito.any(SearchCriteria.class))).thenReturn(entities);
 
         SearchCriteria criteria = new SearchCriteria("", "Test certificate", "", "name_asc");
@@ -87,35 +88,43 @@ class GiftCertificateServiceTest {
 
     @Test
     public void testCreate() {
-        List<String> tags = new ArrayList<>(Arrays.asList("firsttag", "secondtag"));
+        Tag firstTag = new Tag(1, "firsttag");
+        Tag secondTag = new Tag(2, "secondtag");
+        Set<String> tags = new HashSet<>(Arrays.asList("firsttag", "secondtag"));
         GiftCertificateDTO dto = new GiftCertificateDTO(4, "test", "test",
                 BigDecimal.valueOf(1.0), 1, tags);
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
         entity.setCreateDate(OffsetDateTime.now());
-        Mockito.when(tagService.read(Mockito.anyString())).thenReturn(new TagDTO(1, "firsttag"));
+        Mockito.when(tagDAO.read(firstTag.getName())).thenReturn(firstTag);
+        Mockito.when(tagDAO.read(secondTag.getName())).thenReturn(secondTag);
         Mockito.when(dao.create(Mockito.any(GiftCertificate.class))).thenReturn(entity);
         assertEquals(dto, service.create(dto));
-        Mockito.verify(tagService, Mockito.times(2)).read(Mockito.anyString());
+        Mockito.verify(tagDAO, Mockito.times(2)).read(Mockito.anyString());
         Mockito.verify(dao, Mockito.times(1)).create(Mockito.any(GiftCertificate.class));
     }
 
     @Test
     public void testUpdate() {
-        List<String> tags = new ArrayList<>(Arrays.asList("rest", "tagtagtest"));
+        Tag rest = new Tag(1, "rest");
+        Tag testTag = new Tag(2, "tagtagtest");
+        Set<String> tags = new HashSet<>(Arrays.asList("rest", "tagtagtest"));
         GiftCertificateDTO certificate = new GiftCertificateDTO(0, "test", "test",
                 BigDecimal.valueOf(1.0), 1, tags);
         Mockito.when(dao.read(Mockito.anyString()))
                 .thenReturn(GiftCertificateMapper.toEntity(certificate));
         Mockito.when(dao.update(Mockito.any(GiftCertificate.class)))
                 .thenReturn(GiftCertificateMapper.toEntity(certificate));
+        Mockito.when(tagDAO.read(rest.getName())).thenReturn(rest);
+        Mockito.when(tagDAO.read(testTag.getName())).thenReturn(testTag);
         assertNull(service.update(certificate));
         Mockito.verify(dao, Mockito.times(1)).read(Mockito.anyString());
+        Mockito.verify(tagDAO, Mockito.times(2)).read(Mockito.anyString());
         Mockito.verify(dao, Mockito.times(1)).update(Mockito.any(GiftCertificate.class));
     }
 
     @Test
     public void testUpdateWhenNameNotPresent() {
-        List<String> tags = new ArrayList<>(Arrays.asList("rest", "tagtagtest"));
+        Set<String> tags = new HashSet<>(Arrays.asList("rest", "tagtagtest"));
         GiftCertificateDTO certificate = new GiftCertificateDTO(0, null, "test",
                 BigDecimal.valueOf(1.0), 1, tags);
         assertThrows(ArgumentIsNotPresent.class,

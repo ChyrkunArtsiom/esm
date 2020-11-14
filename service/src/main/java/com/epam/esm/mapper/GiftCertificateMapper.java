@@ -6,8 +6,8 @@ import com.epam.esm.entity.Tag;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class that converts {@link GiftCertificate} and {@link GiftCertificateDTO} objects to each other.
@@ -22,7 +22,6 @@ public class GiftCertificateMapper {
      */
     public static GiftCertificate toEntity(GiftCertificateDTO dto) {
         GiftCertificate certificate = new GiftCertificate();
-        certificate.setId(dto.getId());
         certificate.setName(dto.getName());
         certificate.setDescription(dto.getDescription());
         if (dto.getPrice() != null) {
@@ -31,9 +30,11 @@ public class GiftCertificateMapper {
             certificate.setPrice(0.0);
         }
         certificate.setDuration(dto.getDuration());
-        List<Tag> tags = new ArrayList<>();
-        for (String tag : dto.getTags()) {
-            tags.add(new Tag(tag));
+        Set<Tag> tags = new HashSet<>();
+        if (dto.getTags() != null) {
+            for (String tag : dto.getTags()) {
+                tags.add(new Tag(tag));
+            }
         }
         certificate.setTags(tags);
         return certificate;
@@ -57,9 +58,11 @@ public class GiftCertificateMapper {
             dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
         }
         dto.setDuration(entity.getDuration());
-        List<String> tags = new ArrayList<>();
-        for (Tag tag : entity.getTags()) {
-            tags.add(tag.getName());
+        Set<String> tags = new HashSet<>();
+        if (entity.getTags() != null) {
+            for (Tag tag : entity.getTags()) {
+                tags.add(tag.getName());
+            }
         }
         dto.setTags(tags);
         return dto;

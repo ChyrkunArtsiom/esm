@@ -11,9 +11,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,23 +27,31 @@ class GiftCertificateDAOTest {
     private GiftCertificateDAO dao;
 
     @Test
+    @Transactional
     public void testCreate() {
-        List<Tag> tags = new ArrayList<>(Arrays.asList(new Tag(1, "firsttag"), new Tag(2, "secondtag")));
-        GiftCertificate certificate = new GiftCertificate(0, "test3", "test",
+        Set<Tag> tags = new HashSet<>();
+        tags.add(new Tag("thirdtag"));
+        GiftCertificate certificate = new GiftCertificate("test3", "test",
                 1.0, null, null, 1, tags);
         assertNotNull(dao.create(certificate));
     }
 
     @Test
-    public void testRead() {
-        GiftCertificate certificate = dao.read("test2");
+    public void testReadById() {
+        GiftCertificate certificate = dao.read(1);
+        assertNotNull(certificate);
+    }
+
+    @Test
+    public void testReadByName() {
+        GiftCertificate certificate = dao.read("test1");
         assertNotNull(certificate);
     }
 
     @Test
     @Transactional(readOnly = true)
     public void testReadByParams() {
-        GiftCertificate certificate = new GiftCertificate(0, "test1", "Test description 1",
+        GiftCertificate certificate = new GiftCertificate("test1", "Test description 1",
                 1.0, null, null, 1, null);
         SearchCriteria criteria = new SearchCriteria("", "test1", "", "date_desc");
         List<GiftCertificate> certificates = dao.readByParams(criteria);
@@ -57,18 +66,21 @@ class GiftCertificateDAOTest {
     }
 
     @Test
+    @Transactional
     public void testUpdate() {
-        List<Tag> tags = new ArrayList<>();
-        tags.add(new Tag(1, "firsttag"));
-        GiftCertificate certificate = new GiftCertificate(0, "test1", "after updating",
-                69.0, null, null, 69, tags);
+        GiftCertificate certificate = dao.read("test1");
+        certificate.setDescription("after update");
+        Set<Tag> tags = certificate.getTags();
+        tags.add(new Tag("newtag"));
+        certificate.setTags(tags);
         GiftCertificate oldCertificate = dao.update(certificate);
         assertNotNull(oldCertificate);
     }
 
     @Test
+    @Transactional
     public void testDelete() {
-        GiftCertificate certificate = new GiftCertificate(4, "test2", "after updating",
+        GiftCertificate certificate = new GiftCertificate("test2", "after updating",
                 null, null, null, null, null);
         assertTrue(dao.delete(certificate));
     }

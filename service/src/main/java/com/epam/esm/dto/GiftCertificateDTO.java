@@ -7,8 +7,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Data transfer object of {@link com.epam.esm.entity.GiftCertificate}.
@@ -42,8 +42,8 @@ public class GiftCertificateDTO {
     @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
     private Integer duration;
 
-    /** A list of tag names. */
-    private List<String> tags;
+    /** A set of tag names. */
+    private Set<String> tags;
 
     /**
      * Empty constructor.
@@ -62,7 +62,7 @@ public class GiftCertificateDTO {
      * @param tags        the list of tag names
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
-                              Integer duration, List<String> tags) {
+                              Integer duration, Set<String> tags) {
         setId(id);
         this.name = name;
         this.description = description;
@@ -84,7 +84,7 @@ public class GiftCertificateDTO {
      * @param tags           the list of tag names
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
-                              String lastUpdateDate, Integer duration, List<String> tags) {
+                              String lastUpdateDate, Integer duration, Set<String> tags) {
         setId(id);
         this.name = name;
         this.description = description;
@@ -151,11 +151,11 @@ public class GiftCertificateDTO {
         this.duration = duration;
     }
 
-    public List<String> getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 

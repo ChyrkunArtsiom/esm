@@ -22,7 +22,7 @@ class GiftCertificateMapperTest {
         dto = new GiftCertificateDTO(1, "Test certificate", "Test description",
                 BigDecimal.valueOf(100.0), date.toString(),
                 date.plusDays(1).toString(), 10, null);
-        entity = new GiftCertificate(1, "Test certificate", "Test description",
+        entity = new GiftCertificate("Test certificate", "Test description",
                 100.0, date,
                 date.plusDays(1), 10, null);
     }

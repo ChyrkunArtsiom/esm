@@ -12,11 +12,11 @@ import java.util.Objects;
 public class Tag implements Serializable {
 
     @Id
-    @SequenceGenerator(name = "tags_id_seq", sequenceName = "esm_module2.tags_id_seq")
+    @SequenceGenerator(name = "tags_id_seq", schema = "esm_module2", sequenceName = "tags_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_id_seq")
     private Integer id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String name;
 
     /**
@@ -36,13 +36,13 @@ public class Tag implements Serializable {
     }
 
     /**
-     * Constructor with all fields.
+     * Constructor with all fields
      *
      * @param id   the id
      * @param name the string name
      */
     public Tag(Integer id, String name) {
-/*        this.id = id;*/
+        this.id = id;
         this.name = name;
     }
 
@@ -76,7 +76,7 @@ public class Tag implements Serializable {
             return false;
         }
         Tag tag = (Tag) obj;
-        return getId().equals(tag.getId()) && getName().equals(tag.getName());
+        return getName().equals(tag.getName());
     }
 
     @Override

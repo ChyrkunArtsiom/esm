@@ -14,7 +14,7 @@ create unique index tags_id_uindex
 create unique index tags_name_uindex
     on esm_module2.tags (name);
 
-CREATE SEQUENCE esm_module2.tags_id_seq START WITH 3 INCREMENT BY 1;
+CREATE SEQUENCE esm_module2.tags_id_seq START WITH 1 INCREMENT BY 1;
 
 create table esm_module2.certificates
 (
@@ -34,6 +34,8 @@ create unique index certificates_id_uindex
 
 create unique index certificates_name_uindex
     on esm_module2.certificates (name);
+
+CREATE SEQUENCE esm_module2.certificates_id_seq START WITH 1 INCREMENT BY 1;
 
 create table esm_module2.certificate_tag
 (
