@@ -83,4 +83,17 @@ public class TagService implements AbstractService<TagDTO> {
     public List<TagDTO> readByParams(SearchCriteria criteria) {
         throw new UnsupportedOperationException("Tag is not supported by search method.");
     }
+
+    @Override
+    public List<TagDTO> readPaginated(int page, int size) {
+        List<TagDTO> dtos;
+        List<Tag> entities = dao.readPaginated(page, size);
+        dtos = entities.stream().map(TagMapper::toDto).collect(Collectors.toList());
+        return dtos;
+    }
+
+    @Override
+    public int getLastPage(int size) {
+        return dao.getLastPage(size);
+    }
 }

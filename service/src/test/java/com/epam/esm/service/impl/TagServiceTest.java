@@ -39,6 +39,19 @@ class TagServiceTest {
     }
 
     @Test
+    public void testReadPaginated() {
+        int page = 1;
+        int size = 2;
+        List<Tag> entities = new ArrayList<>(
+                Arrays.asList(new Tag("name1"), new Tag("name2")));
+        Mockito.when(dao.readPaginated(page, size)).thenReturn(entities);
+
+        List<TagDTO> tags = service.readPaginated(page, size);
+        Mockito.verify(dao, Mockito.times(1)).readPaginated(page, size);
+        assertEquals(tags.size(), size);
+    }
+
+    @Test
     public void testCreate() {
         TagDTO dto = new TagDTO(1, "testtag");
         Mockito.when(dao.create(Mockito.any(Tag.class))).thenReturn(TagMapper.toEntity(dto));

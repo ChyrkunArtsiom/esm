@@ -23,6 +23,7 @@ public interface AbstractDAO<T> {
      * @return the object of {@link T}
      */
     T read(int id);
+
     /**
      * Gets entity by name.
      *
@@ -53,4 +54,22 @@ public interface AbstractDAO<T> {
      * @return the list of {@link T} object
      */
     List<T> readAll();
+
+
+    /**
+     * Gets the list of {@link T} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link T} objects
+     */
+    List<T> readPaginated(int page, int size);
+
+    /**
+     * Gets a number of last page of objects.
+     *
+     * @param size the size of page
+     * @return the number of last page
+     */
+    int getLastPage(int size);
 }

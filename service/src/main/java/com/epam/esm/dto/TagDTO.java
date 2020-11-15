@@ -2,6 +2,7 @@ package com.epam.esm.dto;
 
 import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -10,6 +11,7 @@ import java.util.Objects;
 /**
  * Data transfer object of {@link com.epam.esm.entity.Tag}.
  */
+@Relation(itemRelation = "tag", collectionRelation = "tags")
 public class TagDTO extends RepresentationModel<TagDTO> {
 
     private Integer id;

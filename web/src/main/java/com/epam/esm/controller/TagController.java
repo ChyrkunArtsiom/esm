@@ -1,6 +1,8 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.TagService;
@@ -20,6 +22,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,20 +56,16 @@ public class TagController {
      * Creates {@link TagDTO} object. Returns location and status.
      *
      * @param dto the {@link TagDTO} object.
-     * @param ucb the {@link UriComponentsBuilder} which creates URI of created object
      * @return the {@link RepresentationModel} object with {@link TagDTO} object, headers and http status
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
-    public RepresentationModel createTag(@Valid @RequestBody TagDTO dto,
-                                             UriComponentsBuilder ucb) {
-
+    public ResponseEntity<TagDTO> createTag(@Valid @RequestBody TagDTO dto) {
         TagDTO createdTag = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
-        URI locationUri = ucb.path(TAGS_PATH).path(String.valueOf(createdTag.getId())).build().toUri();
-        headers.setLocation(locationUri);
-        Link selflink = linkTo(TagController.class).slash(createdTag.getId()).withSelfRel();
-        createdTag.add(selflink);
-        return CollectionModel.of(createdTag);
+        Link selfLink = linkTo(TagController.class).slash(createdTag.getId()).withSelfRel();
+        headers.setLocation(selfLink.toUri());
+        createdTag.add(selfLink);
+        return new ResponseEntity<>(createdTag, headers, HttpStatus.OK);
     }
 
     /**
@@ -106,13 +105,41 @@ public class TagController {
      * @return the list of {@link TagDTO} objects.
      */
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
-    public List<TagDTO> readAllTags() {
-        List<TagDTO> tags = service.readAll();
+    public CollectionModel readAllTags(
+            @RequestParam(value = "page", defaultValue = "1") @Positive @Digits(integer = 4, fraction = 0) int page,
+            @RequestParam(value = "size", defaultValue = "2") @Positive @Digits(integer = 4, fraction = 0) int size
+    ) {
+        int lastPage = service.getLastPage(size);
+        if (page > lastPage) {
+            throw new ResourceNotFoundException();
+        }
+        List<TagDTO> tags = service.readPaginated(page, size);
         tags = tags.stream()
                 .map(t -> t
                         .add(linkTo(TagController.class).slash(t.getId()).withSelfRel()))
                 .collect(Collectors.toList());
-        return tags;
+        CollectionModel result = CollectionModel.of(tags);
+        if (hasPrevious(page)) {
+            result.add(buildLinkToPage(page - 1, size, "prev"));
+        }
+        if (hasNext(page, size)) {
+            result.add(buildLinkToPage(page + 1, size, "next"));
+        }
+        return result;
+    }
+
+    private Link buildLinkToPage(int page, int size, String rel) {
+        return linkTo(methodOn(TagController.class).readAllTags(page, size)).withRel(rel);
+    }
+
+    private boolean hasNext(int page, int size) {
+        int lastPage = service.getLastPage(size);
+        return page < lastPage;
+    }
+
+    private boolean hasPrevious(int page) {
+        return page > 1;
     }
 }

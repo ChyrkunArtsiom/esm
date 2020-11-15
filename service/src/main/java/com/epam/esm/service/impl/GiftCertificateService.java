@@ -149,4 +149,14 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         }
         return newSetOfTags;
     }
+
+    @Override
+    public List<GiftCertificateDTO> readPaginated(int page, int size) {
+        return null;
+    }
+
+    @Override
+    public int getLastPage(int size) {
+        return dao.getLastPage(size);
+    }
 }

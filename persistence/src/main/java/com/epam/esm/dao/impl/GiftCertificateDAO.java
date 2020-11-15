@@ -253,4 +253,14 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             return tags;
         };
     }
+
+    @Override
+    public List<GiftCertificate> readPaginated(int page, int size) {
+        return null;
+    }
+
+    @Override
+    public int getLastPage(int size) {
+        return 0;
+    }
 }

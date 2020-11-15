@@ -105,6 +105,7 @@ public class GiftCertificateController {
             @RequestParam(value = "name", defaultValue = "") String name,
             @RequestParam(value = "description", defaultValue = "") String description,
             @RequestParam(value = "sort", defaultValue = "name_asc") String sort) {
+
         return service.readByParams(new SearchCriteria(tagName, name, description, sort));
     }
 

@@ -81,4 +81,23 @@ public class TagDAO implements AbstractDAO<Tag> {
         TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t", Tag.class);
         return query.getResultList();
     }
+
+    @Override
+    public List<Tag> readPaginated(int page, int size) {
+        TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t ORDER BY t.id", Tag.class);
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+        return query.getResultList();
+    }
+
+    @Override
+    public int getLastPage(int size) {
+        Query query = entityManager.createQuery("SELECT count(t.id) FROM tags t");
+        Long count = (Long)query.getSingleResult();
+        int pages = count.intValue()/size;
+        if (count % size > 0) {
+            pages++;
+        }
+        return pages;
+    }
 }

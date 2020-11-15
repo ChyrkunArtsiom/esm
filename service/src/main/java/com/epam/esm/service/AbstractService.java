@@ -57,4 +57,21 @@ public interface AbstractService<U> {
      * @return the list of {@link U} objects
      */
     List<U> readByParams(SearchCriteria criteria);
+
+    /**
+     * Gets the list of {@link U} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link U} objects
+     */
+    List<U> readPaginated(int page, int size);
+
+    /**
+     * Gets a number of last page of objects.
+     *
+     * @param size the size of page
+     * @return the number of last page
+     */
+    int getLastPage(int size);
 }

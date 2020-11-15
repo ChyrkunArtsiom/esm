@@ -11,8 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TagDAO.class)
@@ -25,7 +24,7 @@ class TagDAOTest {
     @Test
     @Transactional
     public void testCreate() {
-        Tag tag = new Tag( "thirdtag");
+        Tag tag = new Tag( "fifth");
         assertNotNull(dao.create(tag));
     }
 
@@ -52,5 +51,13 @@ class TagDAOTest {
     public void testReadAll() {
         List<Tag> tags = dao.readAll();
         assertTrue(tags.size() > 0);
+    }
+
+    @Test
+    public void testReadPaginated() {
+        int page = 2;
+        int size = 2;
+        List<Tag> tags = dao.readPaginated(page, size);
+        assertEquals(tags.size(), size);
     }
 }
