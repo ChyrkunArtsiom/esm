@@ -228,6 +228,14 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(GetParamIsNotPresent.class)
+    public ResponseEntity<ErrorManager> getParameterIsNotPresent(WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+        ErrorManager error = new ErrorManager();
+        error.setErrorMessage(manager.getMessage("getParamIsNotPresent"));
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     private ErrorMessageManager setLang(String locale) {
         ErrorMessageManager manager;
         try {

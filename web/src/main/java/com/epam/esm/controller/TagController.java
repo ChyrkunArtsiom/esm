@@ -2,6 +2,8 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.ArgumentIsNotPresent;
+import com.epam.esm.exception.GetParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.AbstractService;
@@ -24,7 +26,9 @@ import javax.validation.constraints.Positive;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -38,9 +42,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 public class TagController {
 
-    private static final String TAGS_PATH = "/tags/";
-
-    private AbstractService<TagDTO> service;
+    private TagService service;
 
     /**
      * Sets {@link AbstractService} object.
@@ -48,7 +50,7 @@ public class TagController {
      * @param service the {@link AbstractService} object
      */
     @Autowired
-    public void setService(AbstractService<TagDTO> service) {
+    public void setService(TagService service) {
         this.service = service;
     }
 
@@ -76,11 +78,10 @@ public class TagController {
      */
     @RequestMapping(value = "/{tagId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public RepresentationModel readTag(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int tagId) {
+    public RepresentationModel<TagDTO> readTag(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int tagId) {
         TagDTO tag = service.read(tagId);
-        Link deleteLink = linkTo(methodOn(TagController.class).deleteTag(tag)).withRel("delete");
-        Link selflink = linkTo(TagController.class).slash(tag.getId()).withSelfRel();
-        tag.add(deleteLink, selflink);
+        Link selfLink = linkTo(TagController.class).slash(tag.getId()).withSelfRel();
+        tag.add(selfLink);
         return tag;
     }
 
@@ -108,30 +109,40 @@ public class TagController {
     @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readAllTags(
-            @RequestParam(value = "page", defaultValue = "1") @Positive @Digits(integer = 4, fraction = 0) int page,
-            @RequestParam(value = "size", defaultValue = "2") @Positive @Digits(integer = 4, fraction = 0) int size
+            @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
+            @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
-        int lastPage = service.getLastPage(size);
-        if (page > lastPage) {
-            throw new ResourceNotFoundException();
-        }
-        List<TagDTO> tags = service.readPaginated(page, size);
-        tags = tags.stream()
-                .map(t -> t
-                        .add(linkTo(TagController.class).slash(t.getId()).withSelfRel()))
-                .collect(Collectors.toList());
-        CollectionModel result = CollectionModel.of(tags);
-        if (hasPrevious(page)) {
-            result.add(buildLinkToPage(page - 1, size, "prev"));
-        }
-        if (hasNext(page, size)) {
-            result.add(buildLinkToPage(page + 1, size, "next"));
+        List<TagDTO> tags;
+        CollectionModel result;
+        if (Stream.of(page, size).allMatch(Objects::isNull)) {
+            tags = service.readAll();
+            tags = buildSelfLinks(tags);
+            result = CollectionModel.of(tags);
+        } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
+            throw new GetParamIsNotPresent();
+        } else {
+            int lastPage = service.getLastPage(size);
+            if (page > lastPage) {
+                throw new ResourceNotFoundException();
+            }
+            tags = service.readPaginated(page, size);
+            tags = buildSelfLinks(tags);
+            result = CollectionModel.of(tags);
+            if (hasPrevious(page)) {
+                result.add(linkTo(methodOn(TagController.class).readAllTags(page - 1, size)).withRel("prev"));
+            }
+            if (hasNext(page, size)) {
+                result.add(linkTo(methodOn(TagController.class).readAllTags(page + 1, size)).withRel("next"));
+            }
         }
         return result;
     }
 
-    private Link buildLinkToPage(int page, int size, String rel) {
-        return linkTo(methodOn(TagController.class).readAllTags(page, size)).withRel(rel);
+    private List<TagDTO> buildSelfLinks(List<TagDTO> tags) {
+        return tags.stream()
+                .map(t -> t
+                        .add(linkTo(TagController.class).slash(t.getId()).withSelfRel()))
+                .collect(Collectors.toList());
     }
 
     private boolean hasNext(int page, int size) {

@@ -117,8 +117,8 @@ class TagControllerTest {
 
         mockMvc.perform(get(TAGS_PATH))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].name").value("name1"))
-                .andExpect(jsonPath("$.[1].name").value("name2"))
+                .andExpect(jsonPath("$._embedded.tags.[0].name").value("name1"))
+                .andExpect(jsonPath("$._embedded.tags.[1].name").value("name2"))
                 .andExpect(status().isOk());
     }
 

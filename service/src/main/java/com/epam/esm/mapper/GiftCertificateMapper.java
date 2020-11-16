@@ -1,6 +1,7 @@
 package com.epam.esm.mapper;
 
 import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 
@@ -32,8 +33,8 @@ public class GiftCertificateMapper {
         certificate.setDuration(dto.getDuration());
         Set<Tag> tags = new HashSet<>();
         if (dto.getTags() != null) {
-            for (String tag : dto.getTags()) {
-                tags.add(new Tag(tag));
+            for (TagDTO tag : dto.getTags()) {
+                tags.add(TagMapper.toEntity(tag));
             }
         }
         certificate.setTags(tags);
@@ -58,10 +59,10 @@ public class GiftCertificateMapper {
             dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
         }
         dto.setDuration(entity.getDuration());
-        Set<String> tags = new HashSet<>();
+        Set<TagDTO> tags = new HashSet<>();
         if (entity.getTags() != null) {
             for (Tag tag : entity.getTags()) {
-                tags.add(tag.getName());
+                tags.add(TagMapper.toDto(tag));
             }
         }
         dto.setTags(tags);

@@ -1,9 +1,10 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exception.DuplicateCertificateException;
 import com.epam.esm.exception.NoCertificateException;
-import com.epam.esm.service.AbstractService;
+import com.epam.esm.service.impl.GiftCertificateService;
 import com.epam.esm.util.ErrorMessageManager;
 import com.epam.esm.util.SearchCriteria;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +37,7 @@ class GiftCertificateControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AbstractService<GiftCertificateDTO> service;
+    private GiftCertificateService service;
 
     @Test
     public void testCreateCertificate() throws Exception {
@@ -107,13 +108,13 @@ class GiftCertificateControllerTest {
                         new GiftCertificateDTO(
                         2, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
                 ));
-        Mockito.when(service.readByParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
+        Mockito.when(service.readWithParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
 
 
         mockMvc.perform(get(CERTIFICATES_PATH))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].name").value("Test certificate1"))
-                .andExpect(jsonPath("$.[1].name").value("Test certificate2"))
+                .andExpect(jsonPath("$._embedded.certificates.[0].name").value("Test certificate1"))
+                .andExpect(jsonPath("$._embedded.certificates.[1].name").value("Test certificate2"))
                 .andExpect(status().isOk());
     }
 
@@ -143,7 +144,9 @@ class GiftCertificateControllerTest {
 
     @Test
     public void testUpdateCertificate() throws Exception {
-        Set<String> tags = new HashSet<>(Arrays.asList("tagOne", "tagTwo"));
+        TagDTO one = new TagDTO(1, "tagOne");
+        TagDTO two = new TagDTO(2, "tagTwo");
+        Set<TagDTO> tags = new HashSet<>(Arrays.asList(one, two));
         GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, tags);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -162,12 +165,12 @@ class GiftCertificateControllerTest {
                         new GiftCertificateDTO(
                                 100, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
                 ));
-        Mockito.when(service.readByParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
+        Mockito.when(service.readWithParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
 
         mockMvc.perform(get(CERTIFICATES_PATH + "?sort=date_asc"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].name").value("Test certificate1"))
-                .andExpect(jsonPath("$.[1].name").value("Test certificate2"))
+                .andExpect(jsonPath("$._embedded.certificates.[0].name").value("Test certificate1"))
+                .andExpect(jsonPath("$._embedded.certificates.[1].name").value("Test certificate2"))
                 .andExpect(status().isOk());
     }
 

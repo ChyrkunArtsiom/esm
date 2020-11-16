@@ -30,8 +30,8 @@ class GiftCertificateDAOTest {
     @Transactional
     public void testCreate() {
         Set<Tag> tags = new HashSet<>();
-        tags.add(new Tag("thirdtag"));
-        GiftCertificate certificate = new GiftCertificate("test3", "test",
+        tags.add(new Tag("fifth"));
+        GiftCertificate certificate = new GiftCertificate("test5", "test",
                 1.0, null, null, 1, tags);
         assertNotNull(dao.create(certificate));
     }
@@ -53,8 +53,8 @@ class GiftCertificateDAOTest {
     public void testReadByParams() {
         GiftCertificate certificate = new GiftCertificate("test1", "Test description 1",
                 1.0, null, null, 1, null);
-        SearchCriteria criteria = new SearchCriteria("", "test1", "", "date_desc");
-        List<GiftCertificate> certificates = dao.readByParams(criteria);
+        SearchCriteria criteria = new SearchCriteria("firsttag", null, null, "name_asc");
+        List<GiftCertificate> certificates = dao.readByParams(criteria, null, null);
         assertEquals(certificates.get(0), certificate);
     }
 
@@ -63,6 +63,15 @@ class GiftCertificateDAOTest {
     public void testReadAll() {
         List<GiftCertificate> certificates = dao.readAll();
         assertEquals(certificates.size(), 2);
+    }
+
+    @Test
+    @Transactional
+    public void testReadPaginated() {
+        int page = 2;
+        int size = 2;
+        List<GiftCertificate> certificates = dao.readPaginated(page, size);
+        assertEquals(certificates.size(), size);
     }
 
     @Test

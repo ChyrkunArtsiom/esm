@@ -124,12 +124,18 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         }
     }
 
-    @Override
+    /**
+     * Gets the list of {@link GiftCertificateDTO} objects by parameters.
+     * They are the fields of {@link SearchCriteria} class.
+     *
+     * @param criteria the {@link SearchCriteria} object
+     * @return the list of {@link GiftCertificateDTO} objects
+     */
     @Transactional(readOnly = true)
-    public List<GiftCertificateDTO> readByParams(SearchCriteria criteria) {
+    public List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
         List<GiftCertificateDTO> dtos;
         SearchCriteriaValidator.isValid(criteria);
-        List<GiftCertificate> certificates = dao.readByParams(criteria);
+        List<GiftCertificate> certificates = dao.readByParams(criteria, page, size);
         dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
         return dtos;
     }
@@ -150,12 +156,26 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         return newSetOfTags;
     }
 
-    @Override
+    /**
+     * Gets the list of {@link GiftCertificateDTO} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link GiftCertificateDTO} objects
+     */
     public List<GiftCertificateDTO> readPaginated(int page, int size) {
-        return null;
+        List<GiftCertificateDTO> certificates;
+        List<GiftCertificate> entities = dao.readPaginated(page, size);
+        certificates = entities.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
+        return certificates;
     }
 
-    @Override
+    /**
+     * Gets a number of last page of objects.
+     *
+     * @param size the size of page
+     * @return the number of last page
+     */
     public int getLastPage(int size) {
         return dao.getLastPage(size);
     }

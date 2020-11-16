@@ -1,6 +1,8 @@
 package com.epam.esm.dto;
 
 import com.epam.esm.validator.ValidationMessageManager;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
@@ -13,7 +15,8 @@ import java.util.Set;
 /**
  * Data transfer object of {@link com.epam.esm.entity.GiftCertificate}.
  */
-public class GiftCertificateDTO {
+@Relation(itemRelation = "certificate", collectionRelation = "certificates")
+public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> {
 
     private Integer id;
 
@@ -43,7 +46,7 @@ public class GiftCertificateDTO {
     private Integer duration;
 
     /** A set of tag names. */
-    private Set<String> tags;
+    private Set<TagDTO> tags;
 
     /**
      * Empty constructor.
@@ -59,10 +62,10 @@ public class GiftCertificateDTO {
      * @param description the string of description
      * @param price       the BigDecimal of price
      * @param duration    the duration
-     * @param tags        the list of tag names
+     * @param tags        the list of {@link TagDTO} objects
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
-                              Integer duration, Set<String> tags) {
+                              Integer duration, Set<TagDTO> tags) {
         setId(id);
         this.name = name;
         this.description = description;
@@ -81,10 +84,10 @@ public class GiftCertificateDTO {
      * @param createDate     the string of date of creation
      * @param lastUpdateDate the string of date of last update
      * @param duration       the duration
-     * @param tags           the list of tag names
+     * @param tags           the list of {@link TagDTO} objects
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
-                              String lastUpdateDate, Integer duration, Set<String> tags) {
+                              String lastUpdateDate, Integer duration, Set<TagDTO> tags) {
         setId(id);
         this.name = name;
         this.description = description;
@@ -151,11 +154,11 @@ public class GiftCertificateDTO {
         this.duration = duration;
     }
 
-    public Set<String> getTags() {
+    public Set<TagDTO> getTags() {
         return tags;
     }
 
-    public void setTags(Set<String> tags) {
+    public void setTags(Set<TagDTO> tags) {
         this.tags = tags;
     }
 

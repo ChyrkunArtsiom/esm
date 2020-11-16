@@ -20,6 +20,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
+import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
@@ -37,24 +40,6 @@ import java.util.Set;
 @ComponentScan(basePackageClasses = TagDAO.class)
 @EntityScan(basePackageClasses = GiftCertificate.class)
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
-
-    private final static String GET_TAGS_BY_CERTIFICATE_SQL = "SELECT name FROM esm_module2.tags " +
-            "INNER JOIN esm_module2.certificate_tag ON tags.id = certificate_tag.tag_id WHERE certificate_id = (?)";
-
-    private final static String GET_CERTIFICATES_BY_PARAMS_WITH_TAGS_SQL =
-            "SELECT DISTINCT certificates.id, certificates.name, " +
-            "description, price, create_date, last_update_date, duration " +
-            "FROM esm_module2.certificates INNER JOIN esm_module2.certificate_tag " +
-            "ON certificates.id = certificate_tag.certificate_id INNER JOIN esm_module2.tags " +
-            "ON certificate_tag.tag_id = tags.id";
-
-    private final static String GET_CERTIFICATES_BY_PARAMS_WITHOUT_TAGS_SQL =
-            "SELECT DISTINCT certificates.id, certificates.name, " +
-            "description, price, create_date, last_update_date, duration " +
-            "FROM esm_module2.certificates";
-
-    @Autowired
-    private JdbcTemplate template;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -103,7 +88,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     @Override
     public List<GiftCertificate> readAll() {
         TypedQuery<GiftCertificate> query = entityManager.createQuery(
-                "SELECT c FROM certificates c", GiftCertificate.class);
+                "SELECT c FROM certificates c ORDER BY c.id", GiftCertificate.class);
         return query.getResultList();
     }
 
@@ -114,27 +99,87 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
      * @param criteria the {@link SearchCriteria} object
      * @return the list of {@link GiftCertificate} objects
      */
-    public List<GiftCertificate> readByParams(SearchCriteria criteria) {
-        List<GiftCertificate> certificates = new ArrayList<>();
-        List<String> criteriaTypes = new ArrayList<>();
-        if (!criteria.getTagName().isEmpty()) {
-            criteriaTypes.add(criteria.getTagName());
+    public List<GiftCertificate> readByParams(SearchCriteria criteria, Integer page, Integer size) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> query = builder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> root = query.from(GiftCertificate.class);
+        Join<GiftCertificate, Tag> tags = root.join("tags");
+        In<String> inTags = builder.in(tags.get("name"));
+        String[] tagNames = new String[0];
+        if (criteria.getTagNames() != null) {
+            tagNames = criteria.getTagNames().split(",");
         }
-        if (!criteria.getName().isEmpty()) {
-            criteriaTypes.add("%" + criteria.getName() + "%");
-        }
-        if (!criteria.getDescription().isEmpty()) {
-            criteriaTypes.add("%" + criteria.getDescription() + "%");
-        }
-        Object[] params = criteriaTypes.toArray();
-        RowMapper<List<GiftCertificate>> rowMapper = getRowMapper();
 
-        try {
-            certificates = template.queryForObject(generateQuery(criteria), params, rowMapper);
-            return certificates;
-        } catch (EmptyResultDataAccessException e) {
-            return certificates;
+        query.select(root).distinct(true).from(GiftCertificate.class);
+        List<Predicate> predicates = new ArrayList<>();
+        //WHERE clause for certificate name
+        if (criteria.getName() != null) {
+            Predicate predicateForName = builder.like(root.get("name"), "%" + criteria.getName() + "%");
+            predicates.add(predicateForName);
         }
+        //WHERE clause for certificate description
+        if (criteria.getDescription() != null) {
+            Predicate predicateForDescription =
+                    builder.like(root.get("description"), "%" + criteria.getDescription() + "%");
+            predicates.add(predicateForDescription);
+        }
+        //WHERE clause for tag names
+        if (criteria.getTagNames() != null) {
+            for (String tagName : tagNames) {
+                inTags.value(tagName);
+            }
+            predicates.add(inTags);
+        }
+        Predicate[] predArray = new Predicate[predicates.size()];
+        predicates.toArray(predArray);
+        query.where(predArray);
+        Order order = getOrder(builder, root, criteria.getSort());
+        query.orderBy(order);
+
+        //GROUP BY and HAVING
+        if (criteria.getTagNames() != null) {
+            query.groupBy(root.get("id"));
+            query.having(builder.equal(builder.count(root.get("id")), tagNames.length));
+        }
+
+        TypedQuery<GiftCertificate> typedQuery = entityManager.createQuery(query);
+        if (page != null) {
+            typedQuery.setFirstResult((page - 1) * size);
+        }
+        if (size != null) {
+            typedQuery.setMaxResults(size);
+        }
+        return typedQuery.getResultList();
+    }
+
+    private Order getOrder(CriteriaBuilder builder, Root root, String sort) {
+        String[] typeOrder = sort.split("_");
+        SortType sortType = SortType.valueOf(typeOrder[0].toUpperCase());
+        SortOrder sortOrder = SortOrder.valueOf(typeOrder[1].toUpperCase());
+        Expression expression = null;
+        Order order = null;
+
+        switch (sortType) {
+            case NAME: {
+                expression = root.get("name");
+                break;
+            }
+            case DATE: {
+                expression = root.get("create_date");
+                break;
+            }
+        }
+        switch (sortOrder) {
+            case ASC: {
+                order = builder.asc(expression);
+                break;
+            }
+            case DESC: {
+                order = builder.desc(expression);
+                break;
+            }
+        }
+        return order;
     }
 
     @Override
@@ -160,107 +205,28 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
-    private GiftCertificate mapToCertificate(ResultSet rs) throws SQLException {
-        GiftCertificate certificate = new GiftCertificate();
-        certificate.setId(rs.getInt("id"));
-        certificate.setName(rs.getString("name"));
-        certificate.setDescription(rs.getString("description"));
-        certificate.setPrice(rs.getDouble("price"));
-        certificate.setCreateDate(rs.getObject("create_date", OffsetDateTime.class));
-        certificate.setLastUpdateDate(rs.getObject("last_update_date", OffsetDateTime.class));
-        certificate.setDuration(rs.getInt("duration"));
-        return certificate;
-    }
 
-    private Set<Tag> readTagsByCertificateId(int id) {
-        Set<Tag> tags = new HashSet<>();
-        Object[] params = new Object[] {id};
-        try {
-            tags = template.query(GET_TAGS_BY_CERTIFICATE_SQL, params, getResultSetExtractor());
-            return tags;
-        } catch (EmptyResultDataAccessException e) {
-            return tags;
-        }
-    }
-
-    private String generateQuery(SearchCriteria criteria) {
-        StringBuilder query = new StringBuilder();
-        boolean hasWhere = false;
-        if (!criteria.getTagName().isEmpty()) {
-            query.append(GET_CERTIFICATES_BY_PARAMS_WITH_TAGS_SQL);
-            query.append(" WHERE ");
-            query.append("tags.name = (?)");
-            hasWhere = true;
-        } else {
-            query.append(GET_CERTIFICATES_BY_PARAMS_WITHOUT_TAGS_SQL);
-        }
-        if (!criteria.getName().isEmpty()) {
-            if (!hasWhere) {
-                query.append(" WHERE ");
-                query.append("certificates.name LIKE (?)");
-                hasWhere = true;
-            } else {
-                query.append("AND certificates.name LIKE (?)");
-            }
-        }
-        if (!criteria.getDescription().isEmpty()) {
-            if (!hasWhere) {
-                query.append(" WHERE ");
-                query.append("description LIKE (?)");
-            } else {
-                query.append("AND description LIKE (?)");
-            }
-        }
-        if (!criteria.getSort().isEmpty()) {
-            String[] sort = criteria.getSort().split("_");
-            query.append(" ORDER BY ");
-            SortType sortType = SortType.valueOf(sort[0].toUpperCase());
-            SortOrder order = SortOrder.valueOf(sort[1].toUpperCase());
-            switch (sortType) {
-                case NAME: {
-                    query.append("certificates.name");
-                    break;
-                }
-                case DATE: {
-                    query.append("create_date");
-                    break;
-                }
-            }
-            query.append(" ").append(order);
-        }
-        return query.toString();
-    }
-
-    private RowMapper<List<GiftCertificate>> getRowMapper() {
-        return (rs, rowNum) -> {
-            List<GiftCertificate> rows = new ArrayList<>();
-            do {
-                GiftCertificate certificate = mapToCertificate(rs);
-                certificate.setTags(readTagsByCertificateId(certificate.getId()));
-                rows.add(certificate);
-            } while (rs.next());
-            return rows;
-        };
-    }
-
-    private ResultSetExtractor<Set<Tag>> getResultSetExtractor() {
-        return resultSet -> {
-            Set<Tag> tags = new HashSet<>();
-            while (resultSet.next()) {
-                Tag tag = new Tag(/*resultSet.getInt("id"),*/ resultSet.getString("name"));
-                tags.add(tag);
-            }
-            return tags;
-        };
-    }
-
-    @Override
     public List<GiftCertificate> readPaginated(int page, int size) {
-        return null;
+        TypedQuery<GiftCertificate> query = entityManager.createQuery(
+                "SELECT c FROM certificates c ORDER BY c.id", GiftCertificate.class);
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+        return query.getResultList();
     }
 
-    @Override
+    /**
+     * Gets a number of last page of objects.
+     *
+     * @param size the size of page
+     * @return the number of last page
+     */
     public int getLastPage(int size) {
-        return 0;
+        Query query = entityManager.createQuery("SELECT count(c.id) FROM certificates c");
+        Long count = (Long)query.getSingleResult();
+        int pages = count.intValue()/size;
+        if (count % size > 0) {
+            pages++;
+        }
+        return pages;
     }
 }
