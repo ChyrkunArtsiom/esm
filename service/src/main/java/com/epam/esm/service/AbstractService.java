@@ -1,7 +1,5 @@
 package com.epam.esm.service;
 
-import com.epam.esm.util.SearchCriteria;
-
 import java.util.List;
 
 /**

@@ -101,24 +101,6 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    public void testReadAllCertificates() throws Exception {
-        List<GiftCertificateDTO> dtos = new ArrayList<>(
-                Arrays.asList(new GiftCertificateDTO(
-                        1, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
-                        new GiftCertificateDTO(
-                        2, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
-                ));
-        Mockito.when(service.readWithParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
-
-
-        mockMvc.perform(get(CERTIFICATES_PATH))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$._embedded.certificates.[0].name").value("Test certificate1"))
-                .andExpect(jsonPath("$._embedded.certificates.[1].name").value("Test certificate2"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     public void testDeleteCertificate() throws Exception {
         GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
@@ -161,17 +143,30 @@ class GiftCertificateControllerTest {
     public void testReadByParams() throws Exception {
         List<GiftCertificateDTO> dtos = new ArrayList<>(
                 Arrays.asList(new GiftCertificateDTO(
-                                100, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
+                                1, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
                         new GiftCertificateDTO(
-                                100, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
+                                2, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
                 ));
-        Mockito.when(service.readWithParams(Mockito.any(SearchCriteria.class))).thenReturn(dtos);
+        Mockito.when(service.readWithParams(
+                Mockito.any(SearchCriteria.class),
+                Mockito.nullable(Integer.class),
+                Mockito.nullable(Integer.class)))
+                .thenReturn(dtos);
 
-        mockMvc.perform(get(CERTIFICATES_PATH + "?sort=date_asc"))
+        mockMvc.perform(get(CERTIFICATES_PATH))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$._embedded.certificates.[0].name").value("Test certificate1"))
-                .andExpect(jsonPath("$._embedded.certificates.[1].name").value("Test certificate2"))
+                .andExpect(jsonPath("$._embedded.certificates.[0].name")
+                        .value("Test certificate1"))
+                .andExpect(jsonPath("$._embedded.certificates.[1].name")
+                        .value("Test certificate2"))
                 .andExpect(status().isOk());
+
+        Mockito.verify(service,
+                Mockito.times(1))
+                .readWithParams(
+                        Mockito.any(SearchCriteria.class),
+                        Mockito.nullable(Integer.class),
+                        Mockito.nullable(Integer.class));
     }
 
 

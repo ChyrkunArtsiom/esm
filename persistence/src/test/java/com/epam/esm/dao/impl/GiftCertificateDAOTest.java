@@ -11,7 +11,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,8 +52,8 @@ class GiftCertificateDAOTest {
     public void testReadByParams() {
         GiftCertificate certificate = new GiftCertificate("test1", "Test description 1",
                 1.0, null, null, 1, null);
-        SearchCriteria criteria = new SearchCriteria("firsttag", null, null, "name_asc");
-        List<GiftCertificate> certificates = dao.readByParams(criteria, null, null);
+        SearchCriteria criteria = new SearchCriteria("firsttag,secondtag", "tes", "Test", "name_asc");
+        List<GiftCertificate> certificates = dao.readByParams(criteria, 1, 1);
         assertEquals(certificates.get(0), certificate);
     }
 
@@ -62,7 +61,7 @@ class GiftCertificateDAOTest {
     @Transactional(readOnly = true)
     public void testReadAll() {
         List<GiftCertificate> certificates = dao.readAll();
-        assertEquals(certificates.size(), 2);
+        assertEquals(certificates.size(), 4);
     }
 
     @Test

@@ -9,28 +9,18 @@ import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.util.SortOrder;
 import com.epam.esm.util.SortType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
 import javax.persistence.criteria.*;
 import javax.persistence.criteria.CriteriaBuilder.In;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
@@ -96,52 +86,20 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
      * Gets the list of {@link GiftCertificate} objects by parameters.
      * They are the fields of {@link SearchCriteria} class.
      *
-     * @param criteria the {@link SearchCriteria} object
+     * @param searchCriteria the {@link SearchCriteria} object
      * @return the list of {@link GiftCertificate} objects
      */
-    public List<GiftCertificate> readByParams(SearchCriteria criteria, Integer page, Integer size) {
+    public List<GiftCertificate> readByParams(SearchCriteria searchCriteria, Integer page, Integer size) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> query = builder.createQuery(GiftCertificate.class);
         Root<GiftCertificate> root = query.from(GiftCertificate.class);
-        Join<GiftCertificate, Tag> tags = root.join("tags");
-        In<String> inTags = builder.in(tags.get("name"));
-        String[] tagNames = new String[0];
-        if (criteria.getTagNames() != null) {
-            tagNames = criteria.getTagNames().split(",");
-        }
 
-        query.select(root).distinct(true).from(GiftCertificate.class);
-        List<Predicate> predicates = new ArrayList<>();
-        //WHERE clause for certificate name
-        if (criteria.getName() != null) {
-            Predicate predicateForName = builder.like(root.get("name"), "%" + criteria.getName() + "%");
-            predicates.add(predicateForName);
-        }
-        //WHERE clause for certificate description
-        if (criteria.getDescription() != null) {
-            Predicate predicateForDescription =
-                    builder.like(root.get("description"), "%" + criteria.getDescription() + "%");
-            predicates.add(predicateForDescription);
-        }
-        //WHERE clause for tag names
-        if (criteria.getTagNames() != null) {
-            for (String tagName : tagNames) {
-                inTags.value(tagName);
-            }
-            predicates.add(inTags);
-        }
-        Predicate[] predArray = new Predicate[predicates.size()];
-        predicates.toArray(predArray);
-        query.where(predArray);
-        Order order = getOrder(builder, root, criteria.getSort());
+        query.select(root).distinct(true);
+        buildQuery(root, query, searchCriteria);
+
+        Order order = getOrder(builder, root, searchCriteria.getSort());
         query.orderBy(order);
-
-        //GROUP BY and HAVING
-        if (criteria.getTagNames() != null) {
-            query.groupBy(root.get("id"));
-            query.having(builder.equal(builder.count(root.get("id")), tagNames.length));
-        }
-
+        //Pagination
         TypedQuery<GiftCertificate> typedQuery = entityManager.createQuery(query);
         if (page != null) {
             typedQuery.setFirstResult((page - 1) * size);
@@ -220,13 +178,56 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
      * @param size the size of page
      * @return the number of last page
      */
-    public int getLastPage(int size) {
-        Query query = entityManager.createQuery("SELECT count(c.id) FROM certificates c");
-        Long count = (Long)query.getSingleResult();
+    public int getLastPage(SearchCriteria searchCriteria, Integer size) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        //Outer SELECT COUNT query
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<GiftCertificate> certificateRoot = query.from(GiftCertificate.class);
+        //Inner SELECT query
+        Subquery<GiftCertificate> subquery = query.subquery(GiftCertificate.class);
+        Root<GiftCertificate> innerRoot = subquery.from(GiftCertificate.class);
+
+        subquery.select(innerRoot).distinct(true);
+        query.select(builder.count(certificateRoot)).where(builder.in(certificateRoot).value(subquery));
+        buildQuery(innerRoot, subquery, searchCriteria);
+
+        Long count = entityManager.createQuery(query).getSingleResult();
         int pages = count.intValue()/size;
         if (count % size > 0) {
             pages++;
         }
         return pages;
+    }
+
+    private <T extends AbstractQuery<GiftCertificate>> void buildQuery(Root<GiftCertificate> root, T query, SearchCriteria searchCriteria) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        Join<GiftCertificate, Tag> tags = root.join("tags");
+        List<Predicate> predicates = new ArrayList<>();
+        //WHERE clause for certificate name
+        if (!searchCriteria.getName().isEmpty()) {
+            Predicate predicateForName = builder.like(root.get("name"), "%" + searchCriteria.getName() + "%");
+            predicates.add(predicateForName);
+        }
+        //WHERE clause for certificate description
+        if (!searchCriteria.getDescription().isEmpty()) {
+            Predicate predicateForDescription =
+                    builder.like(root.get("description"), "%" + searchCriteria.getDescription() + "%");
+            predicates.add(predicateForDescription);
+        }
+        //WHERE clause for tag names
+        if (!searchCriteria.getTagNames().isEmpty()) {
+            In<String> inTags = builder.in(tags.get("name"));
+            String[] tagNames = searchCriteria.getTagNames().split(",");
+            for (String tagName : tagNames) {
+                inTags.value(tagName);
+            }
+            predicates.add(inTags);
+            //GROUP BY and HAVING
+            query.groupBy(root.get("id"));
+            query.having(builder.equal(builder.count(root.get("id")), tagNames.length));
+        }
+        Predicate[] predArray = new Predicate[predicates.size()];
+        predicates.toArray(predArray);
+        query.where(predArray);
     }
 }

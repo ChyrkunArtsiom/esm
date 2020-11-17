@@ -176,7 +176,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
      * @param size the size of page
      * @return the number of last page
      */
-    public int getLastPage(int size) {
-        return dao.getLastPage(size);
+    public int getLastPage(SearchCriteria searchCriteria, Integer size) {
+        return dao.getLastPage(searchCriteria, size);
     }
 }

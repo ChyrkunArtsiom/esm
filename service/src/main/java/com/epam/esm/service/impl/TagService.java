@@ -5,7 +5,6 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;

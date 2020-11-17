@@ -113,34 +113,39 @@ public class GiftCertificateController {
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readCertificatesByParams(
-            @RequestParam(value = "tag", required = false) String tagName,
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "sort", defaultValue = "name_asc") String sort,
+            @RequestParam(value = "tag", required = false, defaultValue = "") String tagName,
+            @RequestParam(value = "name", required = false, defaultValue = "") String name,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            @RequestParam(value = "sort", required = false, defaultValue = "name_asc") String sort,
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
             @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
         List<GiftCertificateDTO> certificates;
         CollectionModel result;
+        SearchCriteria searchCriteria = new SearchCriteria(tagName, name, description, sort);
         if (Stream.of(page, size).allMatch(Objects::isNull)) {
-            certificates = service.readWithParams(new SearchCriteria(tagName, name, description, sort), page, size);
+            certificates = service.readWithParams(new SearchCriteria(tagName, name, description, sort), null, null);
             certificates = buildSelfLinks(certificates);
             result = CollectionModel.of(certificates);
         } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
             throw new GetParamIsNotPresent();
         } else {
-            int lastPage = service.getLastPage(size);
+            int lastPage = service.getLastPage(searchCriteria, size);
             if (page > lastPage) {
                 throw new ResourceNotFoundException();
             }
-            certificates = service.readWithParams(new SearchCriteria(tagName, name, description, sort), page, size);
+            certificates = service.readWithParams(searchCriteria, page, size);
             certificates = buildSelfLinks(certificates);
             result = CollectionModel.of(certificates);
             if (hasPrevious(page)) {
-                result.add(linkTo(methodOn(TagController.class).readAllTags(page - 1, size)).withRel("prev"));
+                result.add(linkTo(methodOn(GiftCertificateController.class)
+                        .readCertificatesByParams(tagName, name, description, sort, page - 1, size))
+                        .withRel("prev"));
             }
-            if (hasNext(page, size)) {
-                result.add(linkTo(methodOn(TagController.class).readAllTags(page + 1, size)).withRel("next"));
+            if (hasNext(page, lastPage)) {
+                result.add(linkTo(methodOn(GiftCertificateController.class)
+                        .readCertificatesByParams(tagName, name, description, sort, page + 1, size))
+                        .withRel("next"));
             }
         }
 
@@ -177,8 +182,7 @@ public class GiftCertificateController {
         }
     }
 
-    private boolean hasNext(int page, int size) {
-        int lastPage = service.getLastPage(size);
+    private boolean hasNext(int page, int lastPage) {
         return page < lastPage;
     }
 

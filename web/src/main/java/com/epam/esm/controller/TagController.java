@@ -1,8 +1,6 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.exception.GetParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
@@ -18,13 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -128,6 +123,7 @@ public class TagController {
             tags = service.readPaginated(page, size);
             tags = buildSelfLinks(tags);
             result = CollectionModel.of(tags);
+
             if (hasPrevious(page)) {
                 result.add(linkTo(methodOn(TagController.class).readAllTags(page - 1, size)).withRel("prev"));
             }
