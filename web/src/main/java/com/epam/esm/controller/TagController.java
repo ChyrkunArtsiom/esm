@@ -4,7 +4,6 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exception.GetParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
-import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -100,10 +99,10 @@ public class TagController {
      *
      * @return the list of {@link TagDTO} objects.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
-    public CollectionModel readAllTags(
+    public CollectionModel readAll(
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
             @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
@@ -125,10 +124,10 @@ public class TagController {
             result = CollectionModel.of(tags);
 
             if (hasPrevious(page)) {
-                result.add(linkTo(methodOn(TagController.class).readAllTags(page - 1, size)).withRel("prev"));
+                result.add(linkTo(methodOn(TagController.class).readAll(page - 1, size)).withRel("prev"));
             }
             if (hasNext(page, size)) {
-                result.add(linkTo(methodOn(TagController.class).readAllTags(page + 1, size)).withRel("next"));
+                result.add(linkTo(methodOn(TagController.class).readAll(page + 1, size)).withRel("next"));
             }
         }
         return result;

@@ -67,3 +67,35 @@ create unique index users_name_uindex
     on esm_module2.users (name);
 
 CREATE SEQUENCE esm_module2.users_id_seq START WITH 1 INCREMENT BY 1;
+
+create table esm_module2.orders
+(
+    id            serial                   not null,
+    cost          integer                  not null,
+    purchase_date timestamp with time zone not null,
+    user_id       integer                  not null,
+    constraint orders_pk
+        primary key (id),
+    constraint orders_users_id_fk
+        foreign key (user_id) references esm_module2.users
+            on update cascade on delete cascade
+);
+
+create unique index orders_id_uindex
+    on esm_module2.orders (id);
+
+CREATE SEQUENCE esm_module2.orders_id_seq START WITH 1 INCREMENT BY 1;
+
+create table esm_module2.certificate_order
+(
+    certificate_id integer not null,
+    order_id       integer not null,
+    constraint certificate_order_pk
+        primary key (certificate_id, order_id),
+    constraint certificate_order_certificates_id_fk
+        foreign key (certificate_id) references esm_module2.certificates
+            on update cascade on delete cascade,
+    constraint certificate_order_orders_id_fk
+        foreign key (order_id) references esm_module2.orders
+            on update cascade on delete cascade
+);

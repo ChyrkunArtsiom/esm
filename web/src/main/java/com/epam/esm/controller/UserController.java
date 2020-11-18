@@ -4,7 +4,6 @@ import com.epam.esm.dto.UserDTO;
 import com.epam.esm.exception.GetParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
-import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -62,7 +60,7 @@ public class UserController {
      *
      * @return the list of {@link UserDTO} objects.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readAllUsers(

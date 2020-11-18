@@ -1,7 +1,6 @@
 package com.epam.esm.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -18,7 +17,7 @@ public class GiftCertificate {
 
     @Id
     @SequenceGenerator(
-            name = "certificates_id_seq", sequenceName = "esm_module2.certificates_id_seq", allocationSize = 1)
+            name = "certificates_id_seq", schema = "esm_module2", sequenceName = "certificates_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "certificates_id_seq")
     private Integer id;
 
@@ -46,7 +45,7 @@ public class GiftCertificate {
     private Integer duration;
 
     /** A set of tag names. */
-    @ManyToMany(/*fetch = FetchType.EAGER, */cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "certificate_tag", schema = "esm_module2",
             joinColumns = @JoinColumn(name = "certificate_id"),
@@ -58,25 +57,6 @@ public class GiftCertificate {
      * Empty constructor.
      */
     public GiftCertificate() {
-    }
-
-    /**
-     * Constructor without dates.
-     *
-     * @param name        the string of name
-     * @param description the string of description
-     * @param price       the Double of price
-     * @param duration    the duration
-     * @param tags        the list of tag names
-     */
-    public GiftCertificate(String name, String description, Double price, Integer duration, Set<Tag> tags) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.duration = duration;
-        if (tags != null) {
-            this.tags = new HashSet<>(tags);
-        }
     }
 
     /**

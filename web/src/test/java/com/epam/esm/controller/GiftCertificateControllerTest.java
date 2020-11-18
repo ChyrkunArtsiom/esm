@@ -12,11 +12,11 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,7 +27,6 @@ import java.util.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = GiftCertificateController.class)
 @AutoConfigureMockMvc
 class GiftCertificateControllerTest {
@@ -48,7 +47,7 @@ class GiftCertificateControllerTest {
         Mockito.when(service.create(Mockito.any(GiftCertificateDTO.class))).thenReturn(certificateDTO);
 
         mockMvc.perform(post(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$.name").value("Test certificate"))
                 .andExpect(status().isOk());
     }
@@ -78,7 +77,7 @@ class GiftCertificateControllerTest {
         Mockito.when(service.read(certificateDTO.getId())).thenReturn(certificateDTO);
 
         mockMvc.perform(get(CERTIFICATES_PATH + "/1"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$.name").value(certificateDTO.getName()))
                 .andExpect(jsonPath("$.description").value(certificateDTO.getDescription()))
                 .andExpect(status().isOk());
@@ -153,7 +152,7 @@ class GiftCertificateControllerTest {
                 .thenReturn(dtos);
 
         mockMvc.perform(get(CERTIFICATES_PATH))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$._embedded.certificates.[0].name")
                         .value("Test certificate1"))
                 .andExpect(jsonPath("$._embedded.certificates.[1].name")

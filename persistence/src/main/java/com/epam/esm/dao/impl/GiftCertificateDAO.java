@@ -27,7 +27,6 @@ import java.util.List;
  */
 @Repository
 @EnableAutoConfiguration
-@ComponentScan(basePackageClasses = TagDAO.class)
 @EntityScan(basePackageClasses = GiftCertificate.class)
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 

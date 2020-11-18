@@ -34,4 +34,9 @@ public class ErrorCodesManager {
      * Indicates that {@link com.epam.esm.entity.User} object not found.
      */
     public final static int USER_DOESNT_EXIST = 40403;
+
+    /**
+     * Indicates that {@link com.epam.esm.entity.Order} object not found.
+     */
+    public final static int ORDER_DOESNT_EXIST = 40404;
 }

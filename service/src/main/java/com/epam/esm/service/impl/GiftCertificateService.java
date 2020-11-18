@@ -47,6 +47,11 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         this.dao = dao;
     }
 
+    /**
+     * Sets {@link TagDAO} object.
+     *
+     * @param tagDAO the {@link TagDAO} object
+     */
     @Autowired
     public void setTagDAO(TagDAO tagDAO) {
         this.tagDAO = tagDAO;

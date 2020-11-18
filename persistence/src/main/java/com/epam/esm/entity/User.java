@@ -3,6 +3,9 @@ package com.epam.esm.entity;
 import javax.persistence.*;
 import java.util.Objects;
 
+/**
+ * Class for User entity.
+ */
 @Entity(name = "users")
 @Table(name = "users", schema = "esm_module2")
 public class User {

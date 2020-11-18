@@ -23,7 +23,6 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UserController.class)
 @AutoConfigureMockMvc
 public class UserControllerTest {
@@ -72,7 +71,7 @@ public class UserControllerTest {
 
 
         mockMvc.perform(get(USERS_PATH))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$._embedded.users.[0].name").value("name1"))
                 .andExpect(jsonPath("$._embedded.users.[1].name").value("name2"))
                 .andExpect(status().isOk());

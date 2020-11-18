@@ -54,9 +54,9 @@ class GiftCertificateServiceTest {
                         new GiftCertificate(
                                 "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
         Mockito.when(dao.readAll()).thenReturn(entities);
-        List<GiftCertificateDTO> tags = service.readAll();
+        List<GiftCertificateDTO> services = service.readAll();
         Mockito.verify(dao, Mockito.times(1)).readAll();
-        assertTrue(tags.size() > 0);
+        assertTrue(services.size() > 0);
     }
 
     @Test
@@ -70,10 +70,10 @@ class GiftCertificateServiceTest {
                 Mockito.any(SearchCriteria.class), Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(entities);
 
         SearchCriteria criteria = new SearchCriteria("", "Test certificate", "", "name_asc");
-        List<GiftCertificateDTO> tags = service.readWithParams(criteria, 1, 1);
+        List<GiftCertificateDTO> services = service.readWithParams(criteria, 1, 1);
         Mockito.verify(dao, Mockito.times(1))
                 .readByParams(Mockito.any(SearchCriteria.class), Mockito.anyInt(), Mockito.anyInt());
-        assertTrue(tags.size() > 0);
+        assertTrue(services.size() > 0);
     }
 
     @Test

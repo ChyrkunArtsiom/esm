@@ -6,7 +6,6 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exception.GetParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
-import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.GiftCertificateService;
 import com.epam.esm.util.SearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,7 @@ public class GiftCertificateController {
      * @param dto the {@link GiftCertificateDTO} object.
      * @return the {@link ResponseEntity} object with {@link GiftCertificateDTO} object, headers and http status
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
     public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto) {
         GiftCertificateDTO createdCertificate = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
@@ -75,7 +74,7 @@ public class GiftCertificateController {
      * @param certificateId the {@link GiftCertificateDTO} object id
      * @return the {@link GiftCertificateDTO} object
      */
-    @RequestMapping(value = "/{certificateId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{certificateId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public RepresentationModel<GiftCertificateDTO> readCertificate(
             @PathVariable @Positive @Digits(integer = 4, fraction = 0) int certificateId) {
@@ -110,7 +109,7 @@ public class GiftCertificateController {
      * @param sort        the sort parameter
      * @return the list of {@link GiftCertificateDTO} objects.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readCertificatesByParams(
             @RequestParam(value = "tag", required = false, defaultValue = "") String tagName,
@@ -168,9 +167,10 @@ public class GiftCertificateController {
     }
 
     private List<GiftCertificateDTO> buildSelfLinks(List<GiftCertificateDTO> certificates) {
-        return certificates.stream()
-                .peek(this::buildTagsSelfLink)
-                .collect(Collectors.toList());
+        return certificates.stream().peek(c -> {
+            c.add(linkTo(GiftCertificateController.class).slash(c.getId()).withSelfRel());
+            buildTagsSelfLink(c);
+        }).collect(Collectors.toList());
     }
 
     private void buildTagsSelfLink(GiftCertificateDTO certificate) {

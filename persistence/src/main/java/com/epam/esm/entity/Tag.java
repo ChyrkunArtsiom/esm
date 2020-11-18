@@ -1,7 +1,6 @@
 package com.epam.esm.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**

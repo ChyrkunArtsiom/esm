@@ -54,7 +54,9 @@ public class GiftCertificateMapper {
         dto.setDescription(entity.getDescription());
         dto.setPrice(BigDecimal.valueOf(entity.getPrice()));
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        dto.setCreateDate(entity.getCreateDate().format(df));
+        if (entity.getCreateDate() != null) {
+            dto.setCreateDate(entity.getCreateDate().format(df));
+        }
         if (entity.getLastUpdateDate() != null) {
             dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
         }

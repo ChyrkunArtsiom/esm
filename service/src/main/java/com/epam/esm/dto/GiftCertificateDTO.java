@@ -66,7 +66,7 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
                               Integer duration, Set<TagDTO> tags) {
-        setId(id);
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
@@ -88,7 +88,7 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
                               String lastUpdateDate, Integer duration, Set<TagDTO> tags) {
-        setId(id);
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;

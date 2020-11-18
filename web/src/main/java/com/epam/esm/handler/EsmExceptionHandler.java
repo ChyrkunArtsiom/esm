@@ -7,7 +7,6 @@ import com.epam.esm.validator.ValidationMessageManager;
 import org.hibernate.StaleObjectStateException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -19,7 +18,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -60,7 +58,7 @@ public class EsmExceptionHandler {
      * @param request the {@link WebRequest} object
      * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
      */
-    @ExceptionHandler({NoTagException.class, NoCertificateException.class, NoUserException.class})
+    @ExceptionHandler({NoTagException.class, NoCertificateException.class, NoUserException.class, NoOrderException.class})
     public ResponseEntity<ErrorManager> entityNotFound(DAOException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
@@ -75,6 +73,10 @@ public class EsmExceptionHandler {
             }
             case 40403: {
                 error.setErrorMessage(String.format(manager.getMessage("userDoesntExist"), ex.getName()));
+                break;
+            }
+            case 40404: {
+                error.setErrorMessage(String.format(manager.getMessage("orderDoesntExist"), ex.getName()));
                 break;
             }
         }

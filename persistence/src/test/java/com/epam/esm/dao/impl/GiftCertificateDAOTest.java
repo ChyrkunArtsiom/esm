@@ -54,7 +54,7 @@ class GiftCertificateDAOTest {
                 1.0, null, null, 1, null);
         SearchCriteria criteria = new SearchCriteria("firsttag,secondtag", "tes", "Test", "name_asc");
         List<GiftCertificate> certificates = dao.readByParams(criteria, 1, 1);
-        assertEquals(certificates.get(0), certificate);
+        assertEquals(certificate.getName(), certificates.get(0).getName());
     }
 
     @Test

@@ -20,6 +20,7 @@ public class UserMapper {
             entity.setId(dto.getId());
         }
         entity.setName(dto.getName());
+        entity.setPassword(dto.getPassword());
         return entity;
     }
 

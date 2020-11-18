@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +26,6 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TagController.class)
 @AutoConfigureMockMvc
 class TagControllerTest {
@@ -115,7 +113,7 @@ class TagControllerTest {
 
 
         mockMvc.perform(get(TAGS_PATH))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$._embedded.tags.[0].name").value("name1"))
                 .andExpect(jsonPath("$._embedded.tags.[1].name").value("name2"))
                 .andExpect(status().isOk());
