@@ -27,7 +27,7 @@ import java.util.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = GiftCertificateController.class)
 @AutoConfigureMockMvc
 class GiftCertificateControllerTest {
@@ -86,15 +86,14 @@ class GiftCertificateControllerTest {
 
     @Test
     public void testReadMissingCertificate() throws Exception {
-        GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
-                100, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
-        NoCertificateException ex = new NoCertificateException(certificateDTO.getName(), 40402);
-        Mockito.when(service.read(certificateDTO.getId())).thenThrow(ex);
+        String id = "1";
+        NoCertificateException ex = new NoCertificateException(id, 40402);
+        Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
         String errorMessage = String.format(manager.getMessage("certificateDoesntExist"), ex.getName());
 
-        mockMvc.perform(get(CERTIFICATES_PATH + "/100"))
+        mockMvc.perform(get(CERTIFICATES_PATH + "/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.errorMessage").value(errorMessage))
                 .andExpect(status().isNotFound());

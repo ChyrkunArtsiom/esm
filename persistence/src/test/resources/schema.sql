@@ -49,4 +49,21 @@ create table esm_module2.certificate_tag
     constraint certificate_tag_certificates_id_fk
         foreign key (certificate_id) references esm_module2.certificates
             on update cascade on delete cascade
-)
+);
+
+create table esm_module2.users
+(
+    id       serial      not null,
+    name     varchar(45) not null,
+    password varchar(45) not null,
+    constraint users_pk
+        primary key (id)
+);
+
+create unique index users_id_uindex
+    on esm_module2.users (id);
+
+create unique index users_name_uindex
+    on esm_module2.users (name);
+
+CREATE SEQUENCE esm_module2.users_id_seq START WITH 1 INCREMENT BY 1;

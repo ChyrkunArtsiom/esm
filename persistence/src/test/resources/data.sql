@@ -16,3 +16,6 @@ VALUES (1, 1),
        (3, 1),
        (4, 1),
        (4, 2);
+INSERT INTO esm_module2.users (id, name, password)
+VALUES (NEXTVAL('esm_module2.users_id_seq'), 'user1', 'password1'),
+       (NEXTVAL('esm_module2.users_id_seq'), 'user2', 'password2')

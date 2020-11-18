@@ -44,9 +44,9 @@ public class GiftCertificateController {
     private GiftCertificateService service;
 
     /**
-     * Sets {@link AbstractService} object.
+     * Sets {@link GiftCertificateService} object.
      *
-     * @param service the {@link AbstractService} object
+     * @param service the {@link GiftCertificateService} object
      */
     @Autowired
     public void setService(GiftCertificateService service) {

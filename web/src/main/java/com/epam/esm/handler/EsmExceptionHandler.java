@@ -39,22 +39,6 @@ public class EsmExceptionHandler {
     }
 
     /**
-     * Handles {@link UnsupportedOperationException} exception.
-     *
-     * @return the {@link ResponseEntity} object with headers and http status
-     */
-    @ExceptionHandler({UnsupportedOperationException.class,})
-    public ResponseEntity<?> unsupportedOperation() {
-        HttpHeaders headers = new HttpHeaders();
-        Set<HttpMethod> allowedMethods = new HashSet<>();
-        allowedMethods.add(HttpMethod.GET);
-        allowedMethods.add(HttpMethod.DELETE);
-        allowedMethods.add(HttpMethod.POST);
-        headers.setAllow(allowedMethods);
-        return new ResponseEntity<>(headers, HttpStatus.METHOD_NOT_ALLOWED);
-    }
-
-    /**
      * Handles {@link DuplicateCertificateException} and {@link DuplicateTagException} exceptions.
      *
      * @param ex      the exception
@@ -76,7 +60,7 @@ public class EsmExceptionHandler {
      * @param request the {@link WebRequest} object
      * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
      */
-    @ExceptionHandler({NoTagException.class, NoCertificateException.class})
+    @ExceptionHandler({NoTagException.class, NoCertificateException.class, NoUserException.class})
     public ResponseEntity<ErrorManager> entityNotFound(DAOException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
@@ -87,6 +71,10 @@ public class EsmExceptionHandler {
             }
             case 40402: {
                 error.setErrorMessage(String.format(manager.getMessage("certificateDoesntExist"), ex.getName()));
+                break;
+            }
+            case 40403: {
+                error.setErrorMessage(String.format(manager.getMessage("userDoesntExist"), ex.getName()));
                 break;
             }
         }

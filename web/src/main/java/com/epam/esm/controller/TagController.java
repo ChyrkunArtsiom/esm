@@ -40,9 +40,9 @@ public class TagController {
     private TagService service;
 
     /**
-     * Sets {@link AbstractService} object.
+     * Sets {@link TagService} object.
      *
-     * @param service the {@link AbstractService} object
+     * @param service the {@link TagService} object
      */
     @Autowired
     public void setService(TagService service) {

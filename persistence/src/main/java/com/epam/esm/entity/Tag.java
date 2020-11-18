@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 @Entity(name = "tags")
 @Table(name = "tags", schema = "esm_module2")
-public class Tag implements Serializable {
+public class Tag {
 
     @Id
     @SequenceGenerator(name = "tags_id_seq", schema = "esm_module2", sequenceName = "tags_id_seq", allocationSize = 1)

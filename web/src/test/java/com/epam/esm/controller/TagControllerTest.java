@@ -27,7 +27,7 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TagController.class)
 @AutoConfigureMockMvc
 class TagControllerTest {
@@ -74,9 +74,8 @@ class TagControllerTest {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
-        Mockito.when(service.create(Mockito.any(TagDTO.class))).thenThrow(UnsupportedOperationException.class);
 
-        mockMvc.perform(post(TAGS_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(put(TAGS_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isMethodNotAllowed());
 
     }
@@ -94,14 +93,14 @@ class TagControllerTest {
 
     @Test
     public void testReadMissingTag() throws Exception {
-        TagDTO tagDTO = new TagDTO(100, "testingname");
-        NoTagException ex = new NoTagException(tagDTO.getName(), 40401);
-        Mockito.when(service.read(tagDTO.getId())).thenThrow(ex);
+        String id = "1";
+        NoTagException ex = new NoTagException("1", 40401);
+        Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
-        String errorMessage = String.format(manager.getMessage("tagDoesntExist"), ex.getName());
+        String errorMessage = String.format(manager.getMessage("tagDoesntExist"), id);
 
-        mockMvc.perform(get(TAGS_PATH + "/100"))
+        mockMvc.perform(get(TAGS_PATH + "/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.errorMessage").value(errorMessage))
                 .andExpect(status().isNotFound());

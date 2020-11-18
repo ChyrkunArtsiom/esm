@@ -63,7 +63,7 @@ class TagServiceTest {
     public void testRead() {
         TagDTO dto = new TagDTO(1, "testtag");
         Mockito.when(dao.read(Mockito.anyInt())).thenReturn(TagMapper.toEntity(dto));
-        TagDTO tag = service.read(4);
+        TagDTO tag = service.read(1);
         assertEquals(dto, tag);
         Mockito.verify(dao, Mockito.times(1)).read(Mockito.anyInt());
     }

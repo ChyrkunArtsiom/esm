@@ -53,7 +53,7 @@ public class TagDAO implements AbstractDAO<Tag> {
             query.setParameter("name", name);
             return query.getSingleResult();
         } catch (NoResultException ex) {
-            throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", name), ex,
+            throw new NoTagException(String.format("Tag with name = {%s} doesn't exist.", name), ex,
                     name, ErrorCodesManager.TAG_DOESNT_EXIST);
         }
     }

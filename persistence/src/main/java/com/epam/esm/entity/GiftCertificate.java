@@ -14,7 +14,7 @@ import java.util.Set;
  */
 @Entity(name = "certificates")
 @Table(name = "certificates", schema = "esm_module2")
-public class GiftCertificate implements Serializable {
+public class GiftCertificate {
 
     @Id
     @SequenceGenerator(
