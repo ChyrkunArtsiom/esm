@@ -11,14 +11,11 @@ import com.epam.esm.util.SortOrder;
 import com.epam.esm.util.SortType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
 import javax.persistence.criteria.*;
 import javax.persistence.criteria.CriteriaBuilder.In;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +33,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
     @Override
     public GiftCertificate create(GiftCertificate giftCertificate) {
         try{
-            OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
-            giftCertificate.setCreateDate(currentTime);
             entityManager.persist(giftCertificate);
             entityManager.flush();
             return giftCertificate;
@@ -141,8 +136,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
-        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
-        giftCertificate.setLastUpdateDate(currentTime);
         GiftCertificate updatedCertificate = entityManager.merge(giftCertificate);
         entityManager.flush();
         return updatedCertificate;

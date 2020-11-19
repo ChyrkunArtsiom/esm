@@ -1,8 +1,11 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Positive;
 import java.util.Objects;
 
 /**
@@ -11,7 +14,9 @@ import java.util.Objects;
 @Relation(itemRelation = "user", collectionRelation = "users")
 public class UserDTO extends RepresentationModel<UserDTO> {
 
-    private Integer id;
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID, groups = OrderValidation.class)
+    @Positive(message = ValidationMessageManager.ID_INVALID, groups = OrderValidation.class)
+    private int id;
 
     private String name;
 

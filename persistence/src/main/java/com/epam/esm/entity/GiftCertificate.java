@@ -2,6 +2,7 @@ package com.epam.esm.entity;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Objects;
@@ -61,6 +62,32 @@ public class GiftCertificate {
 
     /**
      * Constructor with all fields.
+     *
+     * @param id             the id
+     * @param name           the string of name
+     * @param description    the string of description
+     * @param price          the Double of price
+     * @param createDate     the OffSetDateTime of date of creation
+     * @param lastUpdateDate the OffSetDateTime of date of last update
+     * @param duration       the duration
+     * @param tags           the list of tag names
+     */
+    public GiftCertificate(Integer id, String name, String description, Double price,
+                           OffsetDateTime createDate, OffsetDateTime lastUpdateDate, Integer duration, Set<Tag> tags) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.createDate = createDate;
+        this.lastUpdateDate = lastUpdateDate;
+        this.duration = duration;
+        if (tags != null) {
+            this.tags = new HashSet<>(tags);
+        }
+    }
+
+    /**
+     * Constructor without id.
      *
      * @param name           the string of name
      * @param description    the string of description
@@ -196,5 +223,17 @@ public class GiftCertificate {
         return String.format("GiftCertificate: {id: %d, name: %s, description: %s, " +
                         "price: %f, created: %s, updated: %s, duration: %d}",
                 getId(), getName(), getDescription(), getPrice(), created, updated, getDuration());
+    }
+
+    @PrePersist
+    public void onPrePersist() {
+        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setCreateDate(currentTime);
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setLastUpdateDate(currentTime);
     }
 }

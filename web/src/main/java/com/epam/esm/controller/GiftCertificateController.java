@@ -62,9 +62,10 @@ public class GiftCertificateController {
     public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto) {
         GiftCertificateDTO createdCertificate = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
-        Link selfLink = linkTo(TagController.class).slash(createdCertificate.getId()).withSelfRel();
+        Link selfLink = linkTo(GiftCertificateController.class).slash(createdCertificate.getId()).withSelfRel();
         headers.setLocation(selfLink.toUri());
         createdCertificate.add(selfLink);
+        buildTagsSelfLink(createdCertificate);
         return new ResponseEntity<>(createdCertificate, headers, HttpStatus.OK);
     }
 
@@ -159,8 +160,14 @@ public class GiftCertificateController {
      */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
     public ResponseEntity<?> updateCertificate(@RequestBody GiftCertificateDTO dto) {
-        if (service.update(dto) != null) {
-            return new ResponseEntity<>(HttpStatus.CREATED);
+        GiftCertificateDTO created = service.update(dto);
+        if (created != null) {
+            HttpHeaders headers = new HttpHeaders();
+            Link selfLink = linkTo(GiftCertificateController.class).slash(created.getId()).withSelfRel();
+            headers.setLocation(selfLink.toUri());
+            created.add(selfLink);
+            buildTagsSelfLink(created);
+            return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

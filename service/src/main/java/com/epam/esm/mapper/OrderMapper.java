@@ -27,10 +27,8 @@ public class OrderMapper {
         User user = UserMapper.toEntity(dto.getUser());
         order.setUser(user);
         List<GiftCertificate> certificates = new ArrayList<>();
-        if (dto.getCertificates() != null) {
-            for (GiftCertificateDTO certificate : dto.getCertificates()) {
-                certificates.add(GiftCertificateMapper.toEntity(certificate));
-            }
+        for (GiftCertificateDTO certificate : dto.getCertificates()) {
+            certificates.add(GiftCertificateMapper.toEntity(certificate));
         }
         order.setCertificates(certificates);
         return order;

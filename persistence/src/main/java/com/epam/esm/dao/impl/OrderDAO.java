@@ -2,17 +2,14 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoOrderException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import java.util.List;
 
 @Repository
@@ -25,7 +22,9 @@ public class OrderDAO implements AbstractDAO<Order> {
 
     @Override
     public Order create(Order entity) {
-        return null;
+        entityManager.persist(entity);
+        entityManager.flush();
+        return entity;
     }
 
     @Override
@@ -47,12 +46,34 @@ public class OrderDAO implements AbstractDAO<Order> {
 
     @Override
     public Order update(Order entity) {
-        return null;
+        Order updatedOrder = entityManager.merge(entity);
+        entityManager.flush();
+        return updatedOrder;
     }
 
     @Override
     public boolean delete(Order entity) {
-        return false;
+        try {
+            TypedQuery<Order> query = entityManager.createQuery(
+                    "SELECT o FROM orders o WHERE o.id=:id", Order.class);
+            query.setParameter("id", entity.getId());
+            Order toDelete = query.getSingleResult();
+            entityManager.remove(toDelete);
+            return true;
+        } catch (NoResultException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Gets a list of most frequent tags from a user, who has the most expensive amount of orders.
+     *
+     * @return the list of {@link Tag} objects
+     */
+    public List<Tag> getMostFrequentTags() {
+        Query query = entityManager.createNativeQuery(
+                "SELECT id, name FROM get_most_popular_tags_for_richest_client()", Tag.class);
+        return (List<Tag>)query.getResultList();
     }
 
     @Override

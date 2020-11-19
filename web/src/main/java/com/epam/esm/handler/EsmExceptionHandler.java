@@ -159,6 +159,18 @@ public class EsmExceptionHandler {
                         responseMessage.append(" ").append(manager.getMessage("durationInvalid"));
                         break;
                     }
+                    case ValidationMessageManager.ORDER_BLANK_USER: {
+                        responseMessage.append(" ").append(manager.getMessage("orderUserBlank"));
+                        break;
+                    }
+                    case ValidationMessageManager.ORDER_BLANK_OR_EMPTY_CERTIFICATES: {
+                        responseMessage.append(" ").append(manager.getMessage("orderCertificatesBlank"));
+                        break;
+                    }
+                    case ValidationMessageManager.ID_INVALID: {
+                        responseMessage.append(" ").append(manager.getMessage("invalidId"));
+                        break;
+                    }
                 }
             }
         }
@@ -178,6 +190,21 @@ public class EsmExceptionHandler {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
         error.setErrorMessage(String.format(manager.getMessage("argumentWrongType"), ex.getValue()));
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles {@link OrderHasMissingArgumentException} exception.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
+    @ExceptionHandler(OrderHasMissingArgumentException.class)
+    public ResponseEntity<ErrorManager> orderHasMissingArguments(ServiceException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+        ErrorManager error = new ErrorManager();
+        error.setErrorMessage(String.format(manager.getMessage("orderHasMissingArguments"), ex.getValue()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 

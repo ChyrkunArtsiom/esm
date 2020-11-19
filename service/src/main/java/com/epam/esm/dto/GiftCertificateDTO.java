@@ -18,6 +18,8 @@ import java.util.Set;
 @Relation(itemRelation = "certificate", collectionRelation = "certificates")
 public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> {
 
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID, groups = OrderValidation.class)
+    @Positive(message = ValidationMessageManager.ID_INVALID, groups = OrderValidation.class)
     private Integer id;
 
     @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)

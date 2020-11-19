@@ -13,7 +13,6 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,7 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @ComponentScan(basePackageClasses = {TagService.class, EsmExceptionHandler.class})
 @RequestMapping("/tags")
-@Validated
+/*@Validated*/
 public class TagController {
 
     private TagService service;

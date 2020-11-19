@@ -71,7 +71,7 @@ CREATE SEQUENCE esm_module2.users_id_seq START WITH 1 INCREMENT BY 1;
 create table esm_module2.orders
 (
     id            serial                   not null,
-    cost          integer                  not null,
+    cost          double precision         not null,
     purchase_date timestamp with time zone not null,
     user_id       integer                  not null,
     constraint orders_pk
