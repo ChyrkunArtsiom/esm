@@ -1,10 +1,8 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.entity.Order;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,7 +14,7 @@ public class OrderDTO extends RepresentationModel<OrderDTO> {
 
     private Integer id;
 
-    private Integer cost;
+    private Double cost;
 
     private String purchaseDate;
 
@@ -39,7 +37,7 @@ public class OrderDTO extends RepresentationModel<OrderDTO> {
      * @param user         the {@link UserDTO} object
      * @param certificates the list of {@link GiftCertificateDTO} objects
      */
-    public OrderDTO(Integer id, Integer cost, String purchaseDate, UserDTO user, List<GiftCertificateDTO> certificates) {
+    public OrderDTO(Integer id, Double cost, String purchaseDate, UserDTO user, List<GiftCertificateDTO> certificates) {
         this.id = id;
         this.cost = cost;
         this.purchaseDate = purchaseDate;
@@ -55,11 +53,11 @@ public class OrderDTO extends RepresentationModel<OrderDTO> {
         this.id = id;
     }
 
-    public Integer getCost() {
+    public Double getCost() {
         return cost;
     }
 
-    public void setCost(Integer cost) {
+    public void setCost(Double cost) {
         this.cost = cost;
     }
 
@@ -107,7 +105,7 @@ public class OrderDTO extends RepresentationModel<OrderDTO> {
 
     @Override
     public String toString() {
-        return String.format("Order: {id: %d, cost: %d, purchase date: %s, ",
+        return String.format("Order: {id: %d, cost: %f, purchase date: %s, ",
                 getId(), getCost(), purchaseDate);
     }
 }

@@ -182,6 +182,21 @@ public class EsmExceptionHandler {
     }
 
     /**
+     * Handles {@link OrderHasMissingArgumentException} exception.
+     *
+     * @param ex      the exception
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
+    @ExceptionHandler(OrderHasMissingArgumentException.class)
+    public ResponseEntity<ErrorManager> orderHasMissingArguments(ServiceException ex, WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+        ErrorManager error = new ErrorManager();
+        error.setErrorMessage(String.format(manager.getMessage("orderHasMissingArguments"), ex.getValue()));
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handles {@link ServiceException} exception.
      *
      * @param ex      the exception

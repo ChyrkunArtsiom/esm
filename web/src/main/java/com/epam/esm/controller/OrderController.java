@@ -3,8 +3,6 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.dto.UserDTO;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.GetParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
@@ -14,13 +12,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -49,6 +48,24 @@ public class OrderController {
     @Autowired
     public void setService(OrderService service) {
         this.service = service;
+    }
+
+    /**
+     * Creates {@link OrderDTO} object. Returns location and status.
+     *
+     * @param dto the {@link OrderDTO} object.
+     * @return the {@link ResponseEntity} object with {@link OrderDTO} object, headers and http status
+     */
+    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
+    public ResponseEntity<OrderDTO> createCertificate(@RequestBody OrderDTO dto) {
+        OrderDTO createdOrder = service.create(dto);
+        HttpHeaders headers = new HttpHeaders();
+        Link selfLink = linkTo(OrderController.class).slash(createdOrder.getId()).withSelfRel();
+        headers.setLocation(selfLink.toUri());
+        createdOrder.add(selfLink);
+        buildUserSelfLink(createdOrder);
+        buildCertificatesSelfLinks(createdOrder);
+        return new ResponseEntity<>(createdOrder, headers, HttpStatus.OK);
     }
 
     /**
@@ -105,6 +122,27 @@ public class OrderController {
                 result.add(linkTo(methodOn(OrderController.class).readAll(page + 1, size)).withRel("next"));
             }
         }
+        return result;
+    }
+
+    /**
+     * Gets a list of most frequent tags from a user, who has the most expensive amount of orders.
+     *
+     * @return the list of {@link TagDTO} objects
+     */
+    @RequestMapping(value = "/most_frequent_tag", method = RequestMethod.GET, produces = "application/hal+json")
+    @ResponseStatus(HttpStatus.OK)
+    public CollectionModel getMostFrequentTags() {
+        List<TagDTO> tags;
+        CollectionModel result;
+            tags = service.getMostFrequentTags();
+            tags = tags.stream()
+                    .peek(t -> t
+                            .add(linkTo(TagController.class)
+                                    .slash(t.getId())
+                                    .withSelfRel()))
+                    .collect(Collectors.toList());
+            result = CollectionModel.of(tags);
         return result;
     }
 

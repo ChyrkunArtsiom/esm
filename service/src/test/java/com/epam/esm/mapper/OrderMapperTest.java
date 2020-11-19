@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderMapperTest {
     private static OrderDTO dto;
@@ -28,8 +28,8 @@ class OrderMapperTest {
         GiftCertificate certificate = new GiftCertificate(
                 "certificate", "description", 100.0, date, null, 10, null);
         GiftCertificateDTO certificateDTO = GiftCertificateMapper.toDto(certificate);
-        dto = new OrderDTO(1, 10, date.toString(), userDTO, Arrays.asList(certificateDTO, certificateDTO));
-        entity = new Order(10, date, userEntity, Arrays.asList(certificate, certificate));
+        dto = new OrderDTO(1, 10.0, date.toString(), userDTO, Arrays.asList(certificateDTO, certificateDTO));
+        entity = new Order(10.0, date, userEntity, Arrays.asList(certificate, certificate));
 
     }
 

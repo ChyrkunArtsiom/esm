@@ -50,7 +50,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public RepresentationModel<UserDTO> readUser(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int userId) {
         UserDTO user = service.read(userId);
-        Link selfLink = linkTo(TagController.class).slash(user.getId()).withSelfRel();
+        Link selfLink = linkTo(UserController.class).slash(user.getId()).withSelfRel();
         user.add(selfLink);
         return user;
     }

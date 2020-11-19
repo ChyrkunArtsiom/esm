@@ -62,9 +62,10 @@ public class GiftCertificateController {
     public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto) {
         GiftCertificateDTO createdCertificate = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
-        Link selfLink = linkTo(TagController.class).slash(createdCertificate.getId()).withSelfRel();
+        Link selfLink = linkTo(GiftCertificateController.class).slash(createdCertificate.getId()).withSelfRel();
         headers.setLocation(selfLink.toUri());
         createdCertificate.add(selfLink);
+        buildTagsSelfLink(createdCertificate);
         return new ResponseEntity<>(createdCertificate, headers, HttpStatus.OK);
     }
 

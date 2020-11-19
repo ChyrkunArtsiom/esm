@@ -2,6 +2,7 @@ package com.epam.esm.entity;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +21,7 @@ public class Order {
     private Integer id;
 
     @Column(name = "cost", nullable = false)
-    private Integer cost;
+    private Double cost;
 
     @Column(name = "purchase_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime purchaseDate;
@@ -51,7 +52,7 @@ public class Order {
      * @param user          the user
      * @param certificates  the certificates
      */
-    public Order(Integer cost, OffsetDateTime purchaseDate, User user, List<GiftCertificate> certificates) {
+    public Order(Double cost, OffsetDateTime purchaseDate, User user, List<GiftCertificate> certificates) {
         this.cost = cost;
         this.purchaseDate = purchaseDate;
         this.user = user;
@@ -66,11 +67,11 @@ public class Order {
         this.id = id;
     }
 
-    public Integer getCost() {
+    public Double getCost() {
         return cost;
     }
 
-    public void setCost(Integer cost) {
+    public void setCost(Double cost) {
         this.cost = cost;
     }
 
@@ -123,7 +124,26 @@ public class Order {
         if (getPurchaseDate() != null) {
             purchaseDate = getPurchaseDate().format(df);
         }
-        return String.format("Order: {id: %d, cost: %d, purchase date: %s, ",
+        return String.format("Order: {id: %d, cost: %f, purchase date: %s, ",
                 getId(), getCost(), purchaseDate);
+    }
+
+    @PrePersist
+    public void onPrePersist() {
+        Double cost = 0.0;
+        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setPurchaseDate(currentTime);
+        for (GiftCertificate certificate : this.getCertificates()) {
+            cost = cost + certificate.getPrice();
+        }
+        this.setCost(cost);
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        for (GiftCertificate certificate : this.getCertificates()) {
+            cost = cost + certificate.getPrice();
+        }
+        this.setCost(cost);
     }
 }
