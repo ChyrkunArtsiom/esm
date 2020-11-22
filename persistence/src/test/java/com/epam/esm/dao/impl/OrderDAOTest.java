@@ -35,6 +35,17 @@ class OrderDAOTest {
     private GiftCertificateDAO certificateDAO;
 
     @Test
+    @Transactional
+    public void testCreate() {
+        User user = userDAO.read(1);
+        GiftCertificate certificate = certificateDAO.read(1);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        Order order = new Order( 10.0, date, user, Arrays.asList(certificate));
+        assertNotNull(dao.create(order));
+    }
+
+    @Test
     public void testRead() {
         Order order = dao.read(1);
         assertNotNull(order);
@@ -57,6 +68,16 @@ class OrderDAOTest {
 
     @Test
     @Transactional
+    public void testUpdate() {
+        Order order = dao.read(1);
+        User user = userDAO.read(2);
+        order.setUser(user);
+        Order oldOrder = dao.update(order);
+        assertNotNull(oldOrder);
+    }
+
+    @Test
+    @Transactional
     public void testDelete() {
         Order order = new Order();
         order.setId(1);
@@ -65,23 +86,8 @@ class OrderDAOTest {
 
     @Test
     @Transactional
-    public void testCreate() {
-        User user = userDAO.read(1);
-        GiftCertificate certificate = certificateDAO.read(1);
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
-        Order order = new Order( 10.0, date, user, Arrays.asList(certificate));
-        assertNotNull(dao.create(order));
-    }
-
-    @Test
-    @Transactional
-    public void testUpdate() {
-        Order order = dao.read(1);
-        User user = userDAO.read(2);
-        order.setUser(user);
-        Order oldOrder = dao.update(order);
-        assertNotNull(oldOrder);
+    public void testDeleteById() {
+        assertTrue(dao.delete(1));
     }
 
     //TODO: H2 doesn't support plsql functions. Have to change

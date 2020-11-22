@@ -45,6 +45,27 @@ public class OrderDAO implements AbstractDAO<Order> {
     }
 
     @Override
+    public List<Order> readAll() {
+        TypedQuery<Order> query = entityManager.createQuery(
+                "SELECT o FROM orders o ORDER BY o.id", Order.class);
+        return query.getResultList();
+    }
+
+    /**
+     * Gets the list of {@link Order} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link Order} objects
+     */
+    public List<Order> readPaginated(Integer page, Integer size) {
+        TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM orders o ORDER BY o.id", Order.class);
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+        return query.getResultList();
+    }
+
+    @Override
     public Order update(Order entity) {
         Order updatedOrder = entityManager.merge(entity);
         entityManager.flush();
@@ -65,6 +86,17 @@ public class OrderDAO implements AbstractDAO<Order> {
         }
     }
 
+    @Override
+    public boolean delete(int id) {
+        try {
+            Order order = read(id);
+            entityManager.remove(order);
+            return true;
+        } catch (NoResultException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     /**
      * Gets a list of most frequent tags from a user, who has the most expensive amount of orders.
      *
@@ -74,27 +106,6 @@ public class OrderDAO implements AbstractDAO<Order> {
         Query query = entityManager.createNativeQuery(
                 "SELECT id, name FROM get_most_popular_tags_for_richest_client()", Tag.class);
         return (List<Tag>)query.getResultList();
-    }
-
-    @Override
-    public List<Order> readAll() {
-        TypedQuery<Order> query = entityManager.createQuery(
-                "SELECT o FROM orders o ORDER BY o.id", Order.class);
-        return query.getResultList();
-    }
-
-    /**
-     * Gets the list of {@link Order} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link Order} objects
-     */
-    public List<Order> readPaginated(Integer page, Integer size) {
-        TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM orders o ORDER BY o.id", Order.class);
-        query.setFirstResult((page - 1) * size);
-        query.setMaxResults(size);
-        return query.getResultList();
     }
 
     /**

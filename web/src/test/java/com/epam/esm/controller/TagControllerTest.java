@@ -36,7 +36,7 @@ class TagControllerTest {
     private TagService service;
 
     @Test
-    public void testCreateTag() throws Exception {
+    public void testPostTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -49,7 +49,7 @@ class TagControllerTest {
     }
 
     @Test
-    public void testCreateExistingTag() throws Exception {
+    public void testPostExistingTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -66,7 +66,7 @@ class TagControllerTest {
     }
 
     @Test
-    public void testPutMethod() throws Exception {
+    public void testPutTag() throws Exception {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
@@ -77,7 +77,7 @@ class TagControllerTest {
     }
 
     @Test
-    public void testReadTag() throws Exception {
+    public void testGetTag() throws Exception {
         TagDTO tagDTO = new TagDTO(1, "testingname");
         Mockito.when(service.read(tagDTO.getId())).thenReturn(tagDTO);
 
@@ -88,7 +88,7 @@ class TagControllerTest {
     }
 
     @Test
-    public void testReadMissingTag() throws Exception {
+    public void testGetMissingTag() throws Exception {
         String id = "1";
         NoTagException ex = new NoTagException("1", 40401);
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
@@ -104,7 +104,7 @@ class TagControllerTest {
     }
 
     @Test
-    public void testReadAllTags() throws Exception {
+    public void testGetAllTags() throws Exception {
         List<TagDTO> dtos = new ArrayList<>(
                 Arrays.asList(new TagDTO(1, "name1"), new TagDTO(2, "name2")));
         Mockito.when(service.readAll()).thenReturn(dtos);
@@ -125,6 +125,13 @@ class TagControllerTest {
         Mockito.when(service.delete(Mockito.any(TagDTO.class))).thenReturn(true);
 
         mockMvc.perform(delete(TAGS_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteTagByUrlId() throws Exception {
+        Mockito.when(service.delete(Mockito.anyInt())).thenReturn(true);
+        mockMvc.perform(delete(TAGS_PATH + "/1"))
                 .andExpect(status().isNoContent());
     }
 

@@ -35,6 +35,23 @@ class GiftCertificateServiceTest {
     private GiftCertificateService service;
 
     @Test
+    public void testCreate() {
+        TagDTO firstTag = new TagDTO(1, "firsttag");
+        TagDTO secondTag = new TagDTO(2, "secondtag");
+        Set<TagDTO> tags = new HashSet<>(Arrays.asList(firstTag, secondTag));
+        GiftCertificateDTO dto = new GiftCertificateDTO(4, "test", "test",
+                BigDecimal.valueOf(1.0), 1, tags);
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        entity.setCreateDate(OffsetDateTime.now());
+        Mockito.when(tagDAO.read(firstTag.getName())).thenReturn(TagMapper.toEntity(firstTag));
+        Mockito.when(tagDAO.read(secondTag.getName())).thenReturn(TagMapper.toEntity(secondTag));
+        Mockito.when(dao.create(Mockito.any(GiftCertificate.class))).thenReturn(entity);
+        assertEquals(dto, service.create(dto));
+        Mockito.verify(tagDAO, Mockito.times(2)).read(Mockito.anyString());
+        Mockito.verify(dao, Mockito.times(1)).create(Mockito.any(GiftCertificate.class));
+    }
+
+    @Test
     public void testRead() {
         GiftCertificateDTO dto = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
@@ -77,32 +94,6 @@ class GiftCertificateServiceTest {
     }
 
     @Test
-    public void testDelete() {
-        GiftCertificateDTO certificateDTO = new GiftCertificateDTO(4, "test", "test",
-                BigDecimal.valueOf(1.0), 1, null);
-        Mockito.when(dao.delete(Mockito.any(GiftCertificate.class))).thenReturn(true);
-        assertTrue(service.delete(certificateDTO));
-        Mockito.verify(dao, Mockito.times(1)).delete(Mockito.any(GiftCertificate.class));
-    }
-
-    @Test
-    public void testCreate() {
-        TagDTO firstTag = new TagDTO(1, "firsttag");
-        TagDTO secondTag = new TagDTO(2, "secondtag");
-        Set<TagDTO> tags = new HashSet<>(Arrays.asList(firstTag, secondTag));
-        GiftCertificateDTO dto = new GiftCertificateDTO(4, "test", "test",
-                BigDecimal.valueOf(1.0), 1, tags);
-        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
-        entity.setCreateDate(OffsetDateTime.now());
-        Mockito.when(tagDAO.read(firstTag.getName())).thenReturn(TagMapper.toEntity(firstTag));
-        Mockito.when(tagDAO.read(secondTag.getName())).thenReturn(TagMapper.toEntity(secondTag));
-        Mockito.when(dao.create(Mockito.any(GiftCertificate.class))).thenReturn(entity);
-        assertEquals(dto, service.create(dto));
-        Mockito.verify(tagDAO, Mockito.times(2)).read(Mockito.anyString());
-        Mockito.verify(dao, Mockito.times(1)).create(Mockito.any(GiftCertificate.class));
-    }
-
-    @Test
     public void testUpdate() {
         TagDTO rest = new TagDTO(1, "rest");
         TagDTO testTag = new TagDTO(2, "tagtagtest");
@@ -132,4 +123,19 @@ class GiftCertificateServiceTest {
                 () -> service.update(certificate));
     }
 
+    @Test
+    public void testDelete() {
+        GiftCertificateDTO certificateDTO = new GiftCertificateDTO(4, "test", "test",
+                BigDecimal.valueOf(1.0), 1, null);
+        Mockito.when(dao.delete(Mockito.any(GiftCertificate.class))).thenReturn(true);
+        assertTrue(service.delete(certificateDTO));
+        Mockito.verify(dao, Mockito.times(1)).delete(Mockito.any(GiftCertificate.class));
+    }
+
+    @Test
+    public void testDeleteById() {
+        Mockito.when(dao.delete(Mockito.anyInt())).thenReturn(true);
+        assertTrue(service.delete(1));
+        Mockito.verify(dao, Mockito.times(1)).delete(Mockito.anyInt());
+    }
 }

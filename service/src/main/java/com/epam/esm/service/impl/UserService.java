@@ -38,16 +38,6 @@ public class UserService implements AbstractService<UserDTO> {
     }
 
     @Override
-    public UserDTO update(UserDTO entity) {
-        throw new UnsupportedOperationException("User is not supported by update method.");
-    }
-
-    @Override
-    public boolean delete(UserDTO dto) {
-        throw new UnsupportedOperationException("User is not supported by delete method.");
-    }
-
-    @Override
     public List<UserDTO> readAll() {
         List<UserDTO> dtos;
         List<User> entities = dao.readAll();
@@ -67,6 +57,21 @@ public class UserService implements AbstractService<UserDTO> {
         List<User> entities = dao.readPaginated(page, size);
         dtos = entities.stream().map(UserMapper::toDto).collect(Collectors.toList());
         return dtos;
+    }
+
+    @Override
+    public UserDTO update(UserDTO entity) {
+        throw new UnsupportedOperationException("User is not supported by update method.");
+    }
+
+    @Override
+    public boolean delete(UserDTO dto) {
+        throw new UnsupportedOperationException("User is not supported by delete method.");
+    }
+
+    @Override
+    public boolean delete(int id) {
+        throw new UnsupportedOperationException("User is not supported by delete method.");
     }
 
     /**

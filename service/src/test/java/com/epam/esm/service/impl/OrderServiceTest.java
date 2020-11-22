@@ -11,6 +11,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
+import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.mapper.OrderMapper;
 import com.epam.esm.mapper.UserMapper;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -107,6 +108,58 @@ class OrderServiceTest {
         List<OrderDTO> tags = service.readPaginated(page, size);
         Mockito.verify(dao, Mockito.times(1)).readPaginated(page, size);
         assertEquals(tags.size(), size);
+    }
+
+    @Test
+    public void testUpdate() {
+        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(
+                1, "certificate", "description", BigDecimal.valueOf(100.0),
+                date.toString(), date.toString(), 10, null);
+        OrderDTO order = new OrderDTO(1, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
+        Mockito.when(dao.read(Mockito.anyInt())).thenReturn(OrderMapper.toEntity(order));
+        Mockito.when(userDAO.read(Mockito.anyInt())).thenReturn(UserMapper.toEntity(userDTO));
+        Mockito.when(certificateDAO.read(Mockito.anyInt())).thenReturn(GiftCertificateMapper.toEntity(certificate));
+        Mockito.when(dao.update(OrderMapper.toEntity(order))).thenReturn(OrderMapper.toEntity(order));
+        assertNull(service.update(order));
+        Mockito.verify(userDAO, Mockito.times(1)).read(Mockito.anyInt());
+        Mockito.verify(certificateDAO, Mockito.times(2)).read(Mockito.anyInt());
+    }
+
+    @Test
+    public void testUpdateWhenIdNotPresent() {
+        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(
+                1, "certificate", "description", BigDecimal.valueOf(100.0),
+                date.toString(), date.toString(), 10, null);
+        OrderDTO order = new OrderDTO(null, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
+        assertThrows(ArgumentIsNotPresent.class,
+                () -> service.update(order));
+    }
+
+    @Test
+    public void testDelete() {
+        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(
+                1, "certificate", "description", BigDecimal.valueOf(100.0),
+                date.toString(), date.toString(), 10, null);
+        OrderDTO order = new OrderDTO(1, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
+        Mockito.when(dao.delete(Mockito.any(Order.class))).thenReturn(true);
+        assertTrue(service.delete(order));
+        Mockito.verify(dao, Mockito.times(1)).delete(Mockito.any(Order.class));
+    }
+
+    @Test
+    public void testDeleteById() {
+        Mockito.when(dao.delete(Mockito.anyInt())).thenReturn(true);
+        assertTrue(service.delete(1));
+        Mockito.verify(dao, Mockito.times(1)).delete(Mockito.anyInt());
     }
 
     @Test

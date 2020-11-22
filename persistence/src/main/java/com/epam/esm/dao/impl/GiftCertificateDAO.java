@@ -155,14 +155,24 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         }
     }
 
+    @Override
+    public boolean delete(int id) {
+        try {
+            GiftCertificate certificate = read(id);
+            entityManager.remove(certificate);
+            return true;
+        } catch (NoResultException | IllegalArgumentException e) {
+            return false;
+        }
+    }
 
-    public List<GiftCertificate> readPaginated(int page, int size) {
+/*    public List<GiftCertificate> readPaginated(int page, int size) {
         TypedQuery<GiftCertificate> query = entityManager.createQuery(
                 "SELECT c FROM certificates c ORDER BY c.id", GiftCertificate.class);
         query.setFirstResult((page - 1) * size);
         query.setMaxResults(size);
         return query.getResultList();
-    }
+    }*/
 
     /**
      * Gets a number of last page of objects.

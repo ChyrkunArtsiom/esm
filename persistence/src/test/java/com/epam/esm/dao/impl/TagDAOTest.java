@@ -35,6 +35,12 @@ class TagDAOTest {
     }
 
     @Test
+    public void testReadAll() {
+        List<Tag> tags = dao.readAll();
+        assertTrue(tags.size() > 0);
+    }
+
+    @Test
     public void testReadByName() {
         Tag tag = dao.read("firsttag");
         assertNotNull(tag);
@@ -48,9 +54,9 @@ class TagDAOTest {
     }
 
     @Test
-    public void testReadAll() {
-        List<Tag> tags = dao.readAll();
-        assertTrue(tags.size() > 0);
+    @Transactional
+    public void testDeleteById() {
+        assertTrue(dao.delete(1));
     }
 
     @Test

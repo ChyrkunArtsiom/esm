@@ -5,6 +5,7 @@ import com.epam.esm.util.ErrorManager;
 import com.epam.esm.util.ErrorMessageManager;
 import com.epam.esm.validator.ValidationMessageManager;
 import org.hibernate.StaleObjectStateException;
+import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -96,7 +97,8 @@ public class EsmExceptionHandler {
         String errorMessage = "";
         if (!violations.isEmpty()) {
             StringBuilder builder = new StringBuilder();
-            violations.forEach(violation -> builder.append(" ").append(violation.getMessage()));
+            violations.forEach(violation -> builder.append(((PathImpl)violation.getPropertyPath()).getLeafNode().getName())
+                    .append(" ").append(violation.getMessage()).append(". "));
             errorMessage = builder.toString().trim();
         }
         error.setErrorMessage(errorMessage);

@@ -28,6 +28,14 @@ class TagServiceTest {
     private TagService service;
 
     @Test
+    public void testCreate() {
+        TagDTO dto = new TagDTO(1, "testtag");
+        Mockito.when(dao.create(Mockito.any(Tag.class))).thenReturn(TagMapper.toEntity(dto));
+        assertEquals(dto, service.create(dto));
+        Mockito.verify(dao, Mockito.times(1)).create(Mockito.any(Tag.class));
+    }
+
+    @Test
     public void testReadAll() {
         List<Tag> entities = new ArrayList<>(
                 Arrays.asList(new Tag("name1"), new Tag("name2")));
@@ -49,14 +57,6 @@ class TagServiceTest {
         List<TagDTO> tags = service.readPaginated(page, size);
         Mockito.verify(dao, Mockito.times(1)).readPaginated(page, size);
         assertEquals(tags.size(), size);
-    }
-
-    @Test
-    public void testCreate() {
-        TagDTO dto = new TagDTO(1, "testtag");
-        Mockito.when(dao.create(Mockito.any(Tag.class))).thenReturn(TagMapper.toEntity(dto));
-        assertEquals(dto, service.create(dto));
-        Mockito.verify(dao, Mockito.times(1)).create(Mockito.any(Tag.class));
     }
 
     @Test

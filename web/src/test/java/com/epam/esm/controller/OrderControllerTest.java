@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = OrderController.class)
@@ -42,7 +41,7 @@ public class OrderControllerTest {
     private OrderService service;
 
     @Test
-    public void testCreateCertificate() throws Exception {
+    public void testPostOrder() throws Exception {
         UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
@@ -61,7 +60,7 @@ public class OrderControllerTest {
     }
 
     @Test
-    public void testRead() throws Exception {
+    public void testGetOrder() throws Exception {
         UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
@@ -78,7 +77,7 @@ public class OrderControllerTest {
     }
 
     @Test
-    public void testReadMissing() throws Exception {
+    public void testGetMissingOrder() throws Exception {
         String id = "1";
         NoOrderException ex = new NoOrderException("1", 40404);
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
@@ -94,7 +93,7 @@ public class OrderControllerTest {
     }
 
     @Test
-    public void testReadAll() throws Exception {
+    public void testGetAllOrders() throws Exception {
         UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
@@ -110,6 +109,66 @@ public class OrderControllerTest {
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$._embedded.orders.[0].user.name").value("user"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testPutOrder() throws Exception {
+        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(
+                1, "certificate", "description", BigDecimal.valueOf(100.0),
+                date.toString(), date.toString(), 10, null);
+        OrderDTO order = new OrderDTO(1, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(order);
+        Mockito.when(service.update(Mockito.any(OrderDTO.class))).thenReturn(null);
+
+        mockMvc.perform(put(ORDERS_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteOrder() throws Exception {
+        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(
+                1, "certificate", "description", BigDecimal.valueOf(100.0),
+                date.toString(), date.toString(), 10, null);
+        OrderDTO order = new OrderDTO(1, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(order);
+        Mockito.when(service.delete(Mockito.any(OrderDTO.class))).thenReturn(true);
+
+        mockMvc.perform(delete(ORDERS_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteMissingOrder() throws Exception {
+        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
+        GiftCertificateDTO certificate = new GiftCertificateDTO(
+                1, "certificate", "description", BigDecimal.valueOf(100.0),
+                date.toString(), date.toString(), 10, null);
+        OrderDTO order = new OrderDTO(1, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(order);
+        Mockito.when(service.delete(Mockito.any(OrderDTO.class))).thenReturn(false);
+
+        mockMvc.perform(delete(ORDERS_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteOrderByUrlId() throws Exception {
+        Mockito.when(service.delete(Mockito.anyInt())).thenReturn(true);
+        mockMvc.perform(delete(ORDERS_PATH + "/1"))
+                .andExpect(status().isNoContent());
     }
 
     @Test

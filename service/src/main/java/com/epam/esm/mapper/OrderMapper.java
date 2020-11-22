@@ -22,16 +22,21 @@ public class OrderMapper {
      * @return the {@link Order} object
      */
     public static Order toEntity(OrderDTO dto) {
-        Order order = new Order();
-        order.setCost(dto.getCost());
-        User user = UserMapper.toEntity(dto.getUser());
-        order.setUser(user);
-        List<GiftCertificate> certificates = new ArrayList<>();
-        for (GiftCertificateDTO certificate : dto.getCertificates()) {
-            certificates.add(GiftCertificateMapper.toEntity(certificate));
+        Order entity = new Order();
+        entity.setId(dto.getId());
+        entity.setCost(dto.getCost());
+        if (dto.getUser() != null) {
+            User user = UserMapper.toEntity(dto.getUser());
+            entity.setUser(user);
         }
-        order.setCertificates(certificates);
-        return order;
+        List<GiftCertificate> certificates = new ArrayList<>();
+        if (dto.getCertificates() != null) {
+            for (GiftCertificateDTO certificate : dto.getCertificates()) {
+                certificates.add(GiftCertificateMapper.toEntity(certificate));
+            }
+        }
+        entity.setCertificates(certificates);
+        return entity;
     }
 
     /**

@@ -59,6 +59,26 @@ public class TagDAO implements AbstractDAO<Tag> {
     }
 
     @Override
+    public List<Tag> readAll() {
+        TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t ORDER BY t.id", Tag.class);
+        return query.getResultList();
+    }
+
+    /**
+     * Gets the list of {@link Tag} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link Tag} objects
+     */
+    public List<Tag> readPaginated(Integer page, Integer size) {
+        TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t ORDER BY t.id", Tag.class);
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+        return query.getResultList();
+    }
+
+    @Override
     public Tag update(Tag tag) {
         throw new UnsupportedOperationException("Tag is not supported by update method.");
     }
@@ -77,23 +97,14 @@ public class TagDAO implements AbstractDAO<Tag> {
     }
 
     @Override
-    public List<Tag> readAll() {
-        TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t ORDER BY t.id", Tag.class);
-        return query.getResultList();
-    }
-
-    /**
-     * Gets the list of {@link Tag} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link Tag} objects
-     */
-    public List<Tag> readPaginated(Integer page, Integer size) {
-        TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t ORDER BY t.id", Tag.class);
-        query.setFirstResult((page - 1) * size);
-        query.setMaxResults(size);
-        return query.getResultList();
+    public boolean delete(int id) {
+        try {
+            Tag tag = read(id);
+            entityManager.remove(tag);
+            return true;
+        } catch (NoResultException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**

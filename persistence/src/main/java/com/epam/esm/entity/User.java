@@ -46,6 +46,7 @@ public class User {
      * @param password  the password
      */
     public User(Integer id, String name, char[] password) {
+        this.id = id;
         this.name = name;
         this.password = password;
     }

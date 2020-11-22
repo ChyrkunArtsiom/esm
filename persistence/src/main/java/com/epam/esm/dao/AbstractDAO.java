@@ -49,6 +49,14 @@ public interface AbstractDAO<T> {
     boolean delete(T entity);
 
     /**
+     * Deletes entity. Returns {@code true} if entity was deleted.
+     *
+     * @param id the id of {@link T} object to delete
+     * @return {@code true} if entity was deleted
+     */
+    boolean delete(int id);
+
+    /**
      * Reads all {@link T} objects.
      *
      * @return the list of {@link T} object

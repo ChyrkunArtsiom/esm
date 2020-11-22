@@ -41,6 +41,14 @@ public interface AbstractService<U> {
     boolean delete(U dto);
 
     /**
+     * Deletes entity. Returns {@code true} if entity was deleted.
+     *
+     * @param id the id of {@link U} object
+     * @return {@code true} if entity was deleted
+     */
+    boolean delete(int id);
+
+    /**
      * Reads all {@link U} objects.
      *
      * @return the list of {@link U} object

@@ -33,7 +33,7 @@ public class UserControllerTest {
     private UserService service;
 
     @Test
-    public void testReadTag() throws Exception {
+    public void testGetUser() throws Exception {
         UserDTO userDTO = new UserDTO(1, "name", "password".toCharArray());
         Mockito.when(service.read(userDTO.getId())).thenReturn(userDTO);
 
@@ -44,7 +44,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testReadMissingTag() throws Exception {
+    public void testGetMissingUser() throws Exception {
         String id = "1";
         NoUserException ex = new NoUserException(id, 40403);
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
@@ -60,7 +60,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testReadAllTags() throws Exception {
+    public void testGetAllUsers() throws Exception {
         List<UserDTO> dtos = new ArrayList<>(
                 Arrays.asList(
                         new UserDTO(1, "name1", "password1".toCharArray()),

@@ -30,8 +30,8 @@ public class UserServiceTest {
     @Test
     public void testReadAll() {
         List<User> entities = new ArrayList<>(Arrays.asList(
-                new User("name1", "password1".toCharArray()),
-                new User("name2", "password2".toCharArray())));
+                new User(1, "name1", "password1".toCharArray()),
+                new User(2, "name2", "password2".toCharArray())));
         Mockito.when(dao.readAll()).thenReturn(entities);
 
         List<UserDTO> users = service.readAll();
@@ -44,8 +44,8 @@ public class UserServiceTest {
         int page = 1;
         int size = 2;
         List<User> entities = new ArrayList<>(Arrays.asList(
-                new User("name1", "password1".toCharArray()),
-                new User("name2", "password2".toCharArray())));
+                new User(1, "name1", "password1".toCharArray()),
+                new User(2, "name2", "password2".toCharArray())));
         Mockito.when(dao.readPaginated(page, size)).thenReturn(entities);
 
         List<UserDTO> users = service.readPaginated(page, size);

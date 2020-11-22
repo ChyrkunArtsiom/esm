@@ -52,16 +52,6 @@ public class UserDAO implements AbstractDAO<User> {
     }
 
     @Override
-    public User update(User entity) {
-        throw new UnsupportedOperationException("User is not supported by update method.");
-    }
-
-    @Override
-    public boolean delete(User entity) {
-        throw new UnsupportedOperationException("User is not supported by delete method.");
-    }
-
-    @Override
     public List<User> readAll() {
         TypedQuery<User> query = entityManager.createQuery("SELECT u FROM users u ORDER BY u.id", User.class);
         return query.getResultList();
@@ -79,6 +69,21 @@ public class UserDAO implements AbstractDAO<User> {
         query.setFirstResult((page - 1) * size);
         query.setMaxResults(size);
         return query.getResultList();
+    }
+
+    @Override
+    public User update(User entity) {
+        throw new UnsupportedOperationException("User is not supported by update method.");
+    }
+
+    @Override
+    public boolean delete(User entity) {
+        throw new UnsupportedOperationException("User is not supported by delete method.");
+    }
+
+    @Override
+    public boolean delete(int id) {
+        throw new UnsupportedOperationException("User is not supported by delete method.");
     }
 
     /**

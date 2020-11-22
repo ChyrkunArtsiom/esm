@@ -13,6 +13,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,7 +33,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @ComponentScan(basePackageClasses = {TagService.class, EsmExceptionHandler.class})
 @RequestMapping("/tags")
-/*@Validated*/
+@Validated
 public class TagController {
 
     private TagService service;
@@ -71,26 +72,11 @@ public class TagController {
      */
     @RequestMapping(value = "/{tagId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public RepresentationModel<TagDTO> readTag(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int tagId) {
+    public RepresentationModel<TagDTO> readTag(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int tagId) {
         TagDTO tag = service.read(tagId);
         Link selfLink = linkTo(TagController.class).slash(tag.getId()).withSelfRel();
         tag.add(selfLink);
         return tag;
-    }
-
-    /**
-     * Deletes {@link TagDTO} object.
-     *
-     * @param dto the {@link TagDTO} object to delete
-     * @return the {@link ResponseEntity} object with http status
-     */
-    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteTag(@Valid @RequestBody TagDTO dto) {
-        if (service.delete(dto)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
     }
 
     /**
@@ -101,7 +87,7 @@ public class TagController {
     @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
-    public CollectionModel readAll(
+    public CollectionModel readAllTags(
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
             @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
@@ -123,13 +109,43 @@ public class TagController {
             result = CollectionModel.of(tags);
 
             if (hasPrevious(page)) {
-                result.add(linkTo(methodOn(TagController.class).readAll(page - 1, size)).withRel("prev"));
+                result.add(linkTo(methodOn(TagController.class).readAllTags(page - 1, size)).withRel("prev"));
             }
             if (hasNext(page, size)) {
-                result.add(linkTo(methodOn(TagController.class).readAll(page + 1, size)).withRel("next"));
+                result.add(linkTo(methodOn(TagController.class).readAllTags(page + 1, size)).withRel("next"));
             }
         }
         return result;
+    }
+
+    /**
+     * Deletes {@link TagDTO} object.
+     *
+     * @param dto the {@link TagDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
+    public ResponseEntity<?> deleteTag(@Valid @RequestBody TagDTO dto) {
+        if (service.delete(dto)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Deletes {@link TagDTO} object.
+     *
+     * @param tagId the id of {@link TagDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(value = "/{tagId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteTagByUrlId(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int tagId) {
+        if (service.delete(tagId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     private List<TagDTO> buildSelfLinks(List<TagDTO> tags) {

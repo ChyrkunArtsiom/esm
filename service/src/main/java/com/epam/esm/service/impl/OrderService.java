@@ -83,10 +83,23 @@ public class OrderService implements AbstractService<OrderDTO> {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public OrderDTO read(int id) {
         Order order = dao.read(id);
         return OrderMapper.toDto(order);
+    }
+
+    /**
+     * Gets the list of {@link OrderDTO} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link OrderDTO} objects
+     */
+    public List<OrderDTO> readPaginated(Integer page, Integer size) {
+        List<OrderDTO> dtos;
+        List<Order> entities = dao.readPaginated(page, size);
+        dtos = entities.stream().map(OrderMapper::toDto).collect(Collectors.toList());
+        return dtos;
     }
 
     @Override
@@ -126,24 +139,16 @@ public class OrderService implements AbstractService<OrderDTO> {
     }
 
     @Override
+    @Transactional
+    public boolean delete(int id) {
+        return dao.delete(id);
+    }
+
+    @Override
     public List<OrderDTO> readAll() {
         List<OrderDTO> dtos;
         List<Order> orders = dao.readAll();
         dtos = orders.stream().map(OrderMapper::toDto).collect(Collectors.toList());
-        return dtos;
-    }
-
-    /**
-     * Gets the list of {@link OrderDTO} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link OrderDTO} objects
-     */
-    public List<OrderDTO> readPaginated(Integer page, Integer size) {
-        List<OrderDTO> dtos;
-        List<Order> entities = dao.readPaginated(page, size);
-        dtos = entities.stream().map(OrderMapper::toDto).collect(Collectors.toList());
         return dtos;
     }
 

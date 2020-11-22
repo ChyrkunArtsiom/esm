@@ -78,27 +78,12 @@ public class GiftCertificateController {
     @RequestMapping(value = "/{certificateId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public RepresentationModel<GiftCertificateDTO> readCertificate(
-            @PathVariable @Positive @Digits(integer = 4, fraction = 0) int certificateId) {
+            @PathVariable @Positive @Digits(integer = 10, fraction = 0) int certificateId) {
         GiftCertificateDTO certificate = service.read(certificateId);
         Link selfLink = linkTo(GiftCertificateController.class).slash(certificate.getId()).withSelfRel();
         certificate.add(selfLink);
         buildTagsSelfLink(certificate);
         return certificate;
-    }
-
-    /**
-     * Deletes {@link GiftCertificateDTO} object.
-     *
-     * @param dto the {@link GiftCertificateDTO} object to delete
-     * @return the {@link ResponseEntity} object with http status
-     */
-    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
-        if (service.delete(dto)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
     }
 
     /**
@@ -170,6 +155,36 @@ public class GiftCertificateController {
             return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
+
+    /**
+     * Deletes {@link GiftCertificateDTO} object.
+     *
+     * @param dto the {@link GiftCertificateDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
+    public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
+        if (service.delete(dto)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Deletes {@link GiftCertificateDTO} object.
+     *
+     * @param tagId the id of {@link GiftCertificateDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(value = "/{tagId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteCertificateByUrlId(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int tagId) {
+        if (service.delete(tagId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

@@ -37,7 +37,7 @@ class GiftCertificateControllerTest {
     private GiftCertificateService service;
 
     @Test
-    public void testCreateCertificate() throws Exception {
+    public void testPostCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.55), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -51,7 +51,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    public void testCreateExistingCertificate() throws Exception {
+    public void testPostExistingCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -69,7 +69,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    public void testReadCertificate() throws Exception {
+    public void testGetCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         Mockito.when(service.read(certificateDTO.getId())).thenReturn(certificateDTO);
@@ -82,7 +82,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    public void testReadMissingCertificate() throws Exception {
+    public void testGetMissingCertificate() throws Exception {
         String id = "1";
         NoCertificateException ex = new NoCertificateException(id, 40402);
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
@@ -97,46 +97,7 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    public void testDeleteCertificate() throws Exception {
-        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
-                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(giftCertificateDTO);
-        Mockito.when(service.delete(Mockito.any(GiftCertificateDTO.class))).thenReturn(true);
-
-        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    public void testDeleteMissingCertificate() throws Exception {
-        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
-                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(giftCertificateDTO);
-        Mockito.when(service.delete(Mockito.any(GiftCertificateDTO.class))).thenReturn(false);
-
-        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void testUpdateCertificate() throws Exception {
-        TagDTO one = new TagDTO(1, "tagOne");
-        TagDTO two = new TagDTO(2, "tagTwo");
-        Set<TagDTO> tags = new HashSet<>(Arrays.asList(one, two));
-        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
-                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, tags);
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(giftCertificateDTO);
-        Mockito.when(service.update(Mockito.any(GiftCertificateDTO.class))).thenReturn(null);
-
-        mockMvc.perform(put(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    public void testReadByParams() throws Exception {
+    public void testGetCertificatesByParams() throws Exception {
         List<GiftCertificateDTO> dtos = new ArrayList<>(
                 Arrays.asList(new GiftCertificateDTO(
                                 1, "Test certificate1", "Description", BigDecimal.valueOf(1.5), 10, null),
@@ -165,5 +126,49 @@ class GiftCertificateControllerTest {
                         Mockito.nullable(Integer.class));
     }
 
+    @Test
+    public void testPutCertificate() throws Exception {
+        TagDTO one = new TagDTO(1, "tagOne");
+        TagDTO two = new TagDTO(2, "tagTwo");
+        Set<TagDTO> tags = new HashSet<>(Arrays.asList(one, two));
+        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
+                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, tags);
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(giftCertificateDTO);
+        Mockito.when(service.update(Mockito.any(GiftCertificateDTO.class))).thenReturn(null);
 
+        mockMvc.perform(put(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteCertificate() throws Exception {
+        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
+                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(giftCertificateDTO);
+        Mockito.when(service.delete(Mockito.any(GiftCertificateDTO.class))).thenReturn(true);
+
+        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteMissingCertificate() throws Exception {
+        GiftCertificateDTO giftCertificateDTO = new GiftCertificateDTO(
+                1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(giftCertificateDTO);
+        Mockito.when(service.delete(Mockito.any(GiftCertificateDTO.class))).thenReturn(false);
+
+        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteCertificateByUrlId() throws Exception {
+        Mockito.when(service.delete(Mockito.anyInt())).thenReturn(true);
+        mockMvc.perform(delete(CERTIFICATES_PATH + "/1"))
+                .andExpect(status().isNoContent());
+    }
 }

@@ -64,14 +64,14 @@ class GiftCertificateDAOTest {
         assertEquals(certificates.size(), 4);
     }
 
-    @Test
+/*    @Test
     @Transactional
     public void testReadPaginated() {
         int page = 2;
         int size = 2;
         List<GiftCertificate> certificates = dao.readPaginated(page, size);
         assertEquals(certificates.size(), size);
-    }
+    }*/
 
     @Test
     @Transactional
@@ -91,5 +91,11 @@ class GiftCertificateDAOTest {
         GiftCertificate certificate = new GiftCertificate("test2", "after updating",
                 null, null, null, null, null);
         assertTrue(dao.delete(certificate));
+    }
+
+    @Test
+    @Transactional
+    public void testDeleteById() {
+        assertTrue(dao.delete(1));
     }
 }

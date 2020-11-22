@@ -58,7 +58,7 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with {@link OrderDTO} object, headers and http status
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
-    public ResponseEntity<OrderDTO> createCertificate(@Validated(value = OrderValidation.class) @RequestBody OrderDTO dto) {
+    public ResponseEntity<OrderDTO> createOrder(@Validated(value = OrderValidation.class) @RequestBody OrderDTO dto) {
         OrderDTO createdOrder = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
         Link selfLink = linkTo(OrderController.class).slash(createdOrder.getId()).withSelfRel();
@@ -77,8 +77,8 @@ public class OrderController {
      */
     @RequestMapping(value = "/{orderId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public RepresentationModel<OrderDTO> read(
-            @PathVariable @Positive @Digits(integer = 4, fraction = 0) int orderId) {
+    public RepresentationModel<OrderDTO> readOrder(
+            @PathVariable @Positive @Digits(integer = 10, fraction = 0) int orderId) {
         OrderDTO order = service.read(orderId);
         Link selfLink = linkTo(OrderController.class).slash(order.getId()).withSelfRel();
         order.add(selfLink);
@@ -95,7 +95,7 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
-    public CollectionModel readAll(
+    public CollectionModel readAllOrders(
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
             @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
@@ -117,10 +117,10 @@ public class OrderController {
             result = CollectionModel.of(orders);
 
             if (hasPrevious(page)) {
-                result.add(linkTo(methodOn(OrderController.class).readAll(page - 1, size)).withRel("prev"));
+                result.add(linkTo(methodOn(OrderController.class).readAllOrders(page - 1, size)).withRel("prev"));
             }
             if (hasNext(page, size)) {
-                result.add(linkTo(methodOn(OrderController.class).readAll(page + 1, size)).withRel("next"));
+                result.add(linkTo(methodOn(OrderController.class).readAllOrders(page + 1, size)).withRel("next"));
             }
         }
         return result;
@@ -133,7 +133,7 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
-    public ResponseEntity<?> updateCertificate(@RequestBody OrderDTO dto) {
+    public ResponseEntity<?> updateOrder(@RequestBody OrderDTO dto) {
         OrderDTO created = service.update(dto);
         if (created != null) {
             HttpHeaders headers = new HttpHeaders();
@@ -145,6 +145,36 @@ public class OrderController {
             return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
+
+    /**
+     * Deletes {@link OrderDTO} object.
+     *
+     * @param dto the {@link OrderDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
+    public ResponseEntity<?> deleteOrder(@RequestBody OrderDTO dto) {
+        if (service.delete(dto)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Deletes {@link OrderDTO} object.
+     *
+     * @param tagId the id of {@link OrderDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(value = "/{tagId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteOrderByUrlId(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int tagId) {
+        if (service.delete(tagId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

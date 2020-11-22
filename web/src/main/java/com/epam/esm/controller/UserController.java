@@ -11,6 +11,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Digits;
@@ -26,6 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @ComponentScan(basePackageClasses = {UserService.class, EsmExceptionHandler.class})
 @RequestMapping("/users")
+@Validated
 public class UserController {
 
     private UserService service;
@@ -48,7 +50,7 @@ public class UserController {
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public RepresentationModel<UserDTO> readUser(@PathVariable @Positive @Digits(integer = 4, fraction = 0) int userId) {
+    public RepresentationModel<UserDTO> readUser(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int userId) {
         UserDTO user = service.read(userId);
         Link selfLink = linkTo(UserController.class).slash(user.getId()).withSelfRel();
         user.add(selfLink);

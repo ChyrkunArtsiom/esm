@@ -67,17 +67,6 @@ public class TagService implements AbstractService<TagDTO> {
         return dtos;
     }
 
-    @Override
-    public TagDTO update(TagDTO dto) {
-        throw new UnsupportedOperationException("Tag is not supported by update method.");
-    }
-
-    @Override
-    public boolean delete(TagDTO dto) {
-        Tag entity = TagMapper.toEntity(dto);
-        return dao.delete(entity);
-    }
-
     /**
      * Gets the list of {@link TagDTO} objects by page and size.
      *
@@ -90,6 +79,24 @@ public class TagService implements AbstractService<TagDTO> {
         List<Tag> entities = dao.readPaginated(page, size);
         dtos = entities.stream().map(TagMapper::toDto).collect(Collectors.toList());
         return dtos;
+    }
+
+    @Override
+    public TagDTO update(TagDTO dto) {
+        throw new UnsupportedOperationException("Tag is not supported by update method.");
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(TagDTO dto) {
+        Tag entity = TagMapper.toEntity(dto);
+        return dao.delete(entity);
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(int id) {
+        return dao.delete(id);
     }
 
     /**

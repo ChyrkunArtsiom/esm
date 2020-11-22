@@ -58,32 +58,6 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public GiftCertificateDTO read(int id) {
-        GiftCertificate certificate = dao.read(id);
-        return GiftCertificateMapper.toDto(certificate);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<GiftCertificateDTO> readAll() {
-        List<GiftCertificateDTO> dtos;
-        List<GiftCertificate> certificates = dao.readAll();
-        dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
-        return dtos;
-    }
-
-    @Override
-    @Transactional
-    public boolean delete(GiftCertificateDTO dto) {
-        if (dto.getName() == null) {
-            throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
-        }
-        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
-        return dao.delete(entity);
-    }
-
-    @Override
     @Transactional
     public GiftCertificateDTO create(GiftCertificateDTO dto) {
         GiftCertificateDTOValidator.isValid(dto);
@@ -94,6 +68,36 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         }
         entity = dao.create(entity);
         return GiftCertificateMapper.toDto(entity);
+    }
+
+    @Override
+    public GiftCertificateDTO read(int id) {
+        GiftCertificate certificate = dao.read(id);
+        return GiftCertificateMapper.toDto(certificate);
+    }
+
+    @Override
+    public List<GiftCertificateDTO> readAll() {
+        List<GiftCertificateDTO> dtos;
+        List<GiftCertificate> certificates = dao.readAll();
+        dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
+        return dtos;
+    }
+
+    /**
+     * Gets the list of {@link GiftCertificateDTO} objects by parameters.
+     * They are the fields of {@link SearchCriteria} class.
+     *
+     * @param criteria the {@link SearchCriteria} object
+     * @return the list of {@link GiftCertificateDTO} objects
+     */
+    /*    @Transactional(readOnly = true)*/
+    public List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
+        List<GiftCertificateDTO> dtos;
+        SearchCriteriaValidator.isValid(criteria);
+        List<GiftCertificate> certificates = dao.readByParams(criteria, page, size);
+        dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
+        return dtos;
     }
 
     @Override
@@ -129,20 +133,20 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         }
     }
 
-    /**
-     * Gets the list of {@link GiftCertificateDTO} objects by parameters.
-     * They are the fields of {@link SearchCriteria} class.
-     *
-     * @param criteria the {@link SearchCriteria} object
-     * @return the list of {@link GiftCertificateDTO} objects
-     */
-    @Transactional(readOnly = true)
-    public List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
-        List<GiftCertificateDTO> dtos;
-        SearchCriteriaValidator.isValid(criteria);
-        List<GiftCertificate> certificates = dao.readByParams(criteria, page, size);
-        dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
-        return dtos;
+    @Override
+    @Transactional
+    public boolean delete(GiftCertificateDTO dto) {
+        if (dto.getName() == null) {
+            throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
+        }
+        GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
+        return dao.delete(entity);
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(int id) {
+        return dao.delete(id);
     }
 
     private Set<Tag> checkTags(GiftCertificate certificate) {
@@ -159,20 +163,6 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
             }
         }
         return newSetOfTags;
-    }
-
-    /**
-     * Gets the list of {@link GiftCertificateDTO} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link GiftCertificateDTO} objects
-     */
-    public List<GiftCertificateDTO> readPaginated(int page, int size) {
-        List<GiftCertificateDTO> certificates;
-        List<GiftCertificate> entities = dao.readPaginated(page, size);
-        certificates = entities.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
-        return certificates;
     }
 
     /**
