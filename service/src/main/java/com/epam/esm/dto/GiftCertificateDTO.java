@@ -1,34 +1,49 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.dto.validationmarkers.*;
 import com.epam.esm.validator.ValidationMessageManager;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Data transfer object of {@link com.epam.esm.entity.GiftCertificate}.
  */
-public class GiftCertificateDTO {
+@Relation(itemRelation = "certificate", collectionRelation = "certificates")
+public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> {
 
+    @NotNull(groups = OrderPostValidation.class, message = ValidationMessageManager.ID_INVALID)
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID, groups = OrderPostValidation.class)
+    @Positive(message = ValidationMessageManager.ID_INVALID, groups = {OrderPostValidation.class, OrderPutValidation.class})
     private Integer id;
 
-    @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)
-    @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE)
+    @NotNull(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME,
+            groups = {PostValidation.class, PutValidation.class, DeleteValidation.class})
+    @Pattern(regexp = "^[\\w\\W]{3,45}$", message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE,
+            groups = {PostValidation.class, PutValidation.class, DeleteValidation.class})
     private String name;
 
     /** A string of description. */
-    @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION)
-    @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE)
+    @NotNull(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION,
+            groups = PostValidation.class)
+    @Pattern(regexp = "^[\\w\\W]{3,45}$", message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE,
+            groups = {PostValidation.class, PutValidation.class})
     private String description;
 
     /** A BigDecimal of price. */
-    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
-    @Positive(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
+    @NotNull(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID, groups = PostValidation.class)
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
+    @Positive(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
     private BigDecimal price;
 
     /** A string of date of creation. */
@@ -38,12 +53,17 @@ public class GiftCertificateDTO {
     private String lastUpdateDate;
 
     /** A duration in days. */
-    @Digits(integer = 10, fraction = 0, message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
-    @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
+    @NotNull(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID,
+            groups = PostValidation.class)
+    @Digits(integer = 10, fraction = 0, message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
+    @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
     private Integer duration;
 
-    /** A list of tag names. */
-    private List<String> tags;
+    /** A set of tag names. */
+    @Valid
+    private Set<TagDTO> tags;
 
     /**
      * Empty constructor.
@@ -59,11 +79,11 @@ public class GiftCertificateDTO {
      * @param description the string of description
      * @param price       the BigDecimal of price
      * @param duration    the duration
-     * @param tags        the list of tag names
+     * @param tags        the list of {@link TagDTO} objects
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price,
-                              Integer duration, List<String> tags) {
-        setId(id);
+                              Integer duration, Set<TagDTO> tags) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
@@ -81,11 +101,11 @@ public class GiftCertificateDTO {
      * @param createDate     the string of date of creation
      * @param lastUpdateDate the string of date of last update
      * @param duration       the duration
-     * @param tags           the list of tag names
+     * @param tags           the list of {@link TagDTO} objects
      */
     public GiftCertificateDTO(Integer id, String name, String description, BigDecimal price, String createDate,
-                              String lastUpdateDate, Integer duration, List<String> tags) {
-        setId(id);
+                              String lastUpdateDate, Integer duration, Set<TagDTO> tags) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
@@ -151,11 +171,11 @@ public class GiftCertificateDTO {
         this.duration = duration;
     }
 
-    public List<String> getTags() {
+    public Set<TagDTO> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(Set<TagDTO> tags) {
         this.tags = tags;
     }
 

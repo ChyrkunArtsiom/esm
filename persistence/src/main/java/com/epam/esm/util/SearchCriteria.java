@@ -5,7 +5,7 @@ package com.epam.esm.util;
  */
 public class SearchCriteria {
     /** A name of tag. */
-    private String tagName;
+    private String tagNames;
     /** A name of {@link com.epam.esm.entity.GiftCertificate} object. */
     private String name;
     /** A description. */
@@ -16,24 +16,24 @@ public class SearchCriteria {
     /**
      * Constructor with all fields.
      *
-     * @param tagName     the name of tag
+     * @param tagNames     the name of tag
      * @param name        the name of {@link com.epam.esm.entity.GiftCertificate} object
      * @param description the description
      * @param sort        the parameter sorted by and order
      */
-    public SearchCriteria(String tagName, String name, String description, String sort) {
-        this.tagName = tagName;
+    public SearchCriteria(String tagNames, String name, String description, String sort) {
+        this.tagNames = tagNames;
         this.name = name;
         this.description = description;
         this.sort = sort;
     }
 
-    public String getTagName() {
-        return tagName;
+    public String getTagNames() {
+        return tagNames;
     }
 
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
+    public void setTagNames(String tagNames) {
+        this.tagNames = tagNames;
     }
 
     public String getName() {

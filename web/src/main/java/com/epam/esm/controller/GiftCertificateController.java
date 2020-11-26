@@ -2,24 +2,36 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.dto.TagDTO;
+import com.epam.esm.dto.validationmarkers.DeleteValidation;
+import com.epam.esm.dto.validationmarkers.PostValidation;
+import com.epam.esm.dto.validationmarkers.PutValidation;
+import com.epam.esm.exception.PageParamIsNotPresent;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
-import com.epam.esm.service.AbstractService;
 import com.epam.esm.service.impl.GiftCertificateService;
 import com.epam.esm.util.SearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
-import java.net.URI;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Class controller for interacting with {@link GiftCertificateDTO} objects.
@@ -30,17 +42,15 @@ import java.util.List;
 @Validated
 public class GiftCertificateController {
 
-    private AbstractService<GiftCertificateDTO> service;
-
-    private static final String CERTIFICATES_PATH = "/certificates/";
+    private GiftCertificateService service;
 
     /**
-     * Sets {@link AbstractService} object.
+     * Sets {@link GiftCertificateService} object.
      *
-     * @param service the {@link AbstractService} object
+     * @param service the {@link GiftCertificateService} object
      */
     @Autowired
-    public void setService(AbstractService<GiftCertificateDTO> service) {
+    public void setService(GiftCertificateService service) {
         this.service = service;
     }
 
@@ -48,16 +58,16 @@ public class GiftCertificateController {
      * Creates {@link GiftCertificateDTO} object. Returns location and status.
      *
      * @param dto the {@link GiftCertificateDTO} object.
-     * @param ucb the {@link UriComponentsBuilder} which creates URI of created object
      * @return the {@link ResponseEntity} object with {@link GiftCertificateDTO} object, headers and http status
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-    public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto,
-                                                                UriComponentsBuilder ucb) {
+    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
+    public ResponseEntity<GiftCertificateDTO> createCertificate(@Validated(value = PostValidation.class) @RequestBody GiftCertificateDTO dto) {
         GiftCertificateDTO createdCertificate = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
-        URI locationUri = ucb.path(CERTIFICATES_PATH).path(String.valueOf(createdCertificate.getId())).build().toUri();
-        headers.setLocation(locationUri);
+        Link selfLink = linkTo(GiftCertificateController.class).slash(createdCertificate.getId()).withSelfRel();
+        headers.setLocation(selfLink.toUri());
+        createdCertificate.add(selfLink);
+        buildTagsSelfLink(createdCertificate);
         return new ResponseEntity<>(createdCertificate, headers, HttpStatus.OK);
     }
 
@@ -67,26 +77,15 @@ public class GiftCertificateController {
      * @param certificateId the {@link GiftCertificateDTO} object id
      * @return the {@link GiftCertificateDTO} object
      */
-    @RequestMapping(value = "/{certificateId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{certificateId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public GiftCertificateDTO readCertificate(
-            @PathVariable @Positive @Digits(integer = 4, fraction = 0) int certificateId) {
-        return service.read(certificateId);
-    }
-
-    /**
-     * Deletes {@link GiftCertificateDTO} object.
-     *
-     * @param dto the {@link GiftCertificateDTO} object to delete
-     * @return the {@link ResponseEntity} object with http status
-     */
-    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
-        if (service.delete(dto)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public RepresentationModel<GiftCertificateDTO> readCertificate(
+            @PathVariable @Positive @Digits(integer = 10, fraction = 0) int certificateId) {
+        GiftCertificateDTO certificate = service.read(certificateId);
+        Link selfLink = linkTo(GiftCertificateController.class).slash(certificate.getId()).withSelfRel();
+        certificate.add(selfLink);
+        buildTagsSelfLink(certificate);
+        return certificate;
     }
 
     /**
@@ -98,14 +97,46 @@ public class GiftCertificateController {
      * @param sort        the sort parameter
      * @return the list of {@link GiftCertificateDTO} objects.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public List<GiftCertificateDTO> readCertificatesByParams(
-            @RequestParam(value = "tag", defaultValue = "") String tagName,
-            @RequestParam(value = "name", defaultValue = "") String name,
-            @RequestParam(value = "description", defaultValue = "") String description,
-            @RequestParam(value = "sort", defaultValue = "name_asc") String sort) {
-        return service.readByParams(new SearchCriteria(tagName, name, description, sort));
+    public CollectionModel readCertificatesByParams(
+            @RequestParam(value = "tag", required = false, defaultValue = "") String tagName,
+            @RequestParam(value = "name", required = false, defaultValue = "") String name,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            @RequestParam(value = "sort", required = false, defaultValue = "name_asc") String sort,
+            @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
+            @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
+    ) {
+        List<GiftCertificateDTO> certificates;
+        CollectionModel result;
+        SearchCriteria searchCriteria = new SearchCriteria(tagName, name, description, sort);
+        if (Stream.of(page, size).allMatch(Objects::isNull)) {
+            certificates = service.readWithParams(new SearchCriteria(tagName, name, description, sort), null, null);
+            certificates = buildSelfLinks(certificates);
+            result = CollectionModel.of(certificates);
+        } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
+            throw new PageParamIsNotPresent();
+        } else {
+            int lastPage = service.getLastPage(searchCriteria, size);
+            if (page > lastPage) {
+                throw new ResourceNotFoundException();
+            }
+            certificates = service.readWithParams(searchCriteria, page, size);
+            certificates = buildSelfLinks(certificates);
+            result = CollectionModel.of(certificates);
+            if (hasPrevious(page)) {
+                result.add(linkTo(methodOn(GiftCertificateController.class)
+                        .readCertificatesByParams(tagName, name, description, sort, page - 1, size))
+                        .withRel("prev"));
+            }
+            if (hasNext(page, lastPage)) {
+                result.add(linkTo(methodOn(GiftCertificateController.class)
+                        .readCertificatesByParams(tagName, name, description, sort, page + 1, size))
+                        .withRel("next"));
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -115,12 +146,74 @@ public class GiftCertificateController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
-    public ResponseEntity<?> updateCertificate(@RequestBody GiftCertificateDTO dto) {
-        if (service.update(dto) != null) {
-            return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<?> updateCertificate(
+            @RequestBody @Validated(value = PutValidation.class) GiftCertificateDTO dto) {
+        GiftCertificateDTO created = service.update(dto);
+        if (created != null) {
+            HttpHeaders headers = new HttpHeaders();
+            Link selfLink = linkTo(GiftCertificateController.class).slash(created.getId()).withSelfRel();
+            headers.setLocation(selfLink.toUri());
+            created.add(selfLink);
+            buildTagsSelfLink(created);
+            return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+    }
+
+    /**
+     * Deletes {@link GiftCertificateDTO} object.
+     *
+     * @param dto the {@link GiftCertificateDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
+    public ResponseEntity<?> deleteCertificate(
+            @RequestBody @Validated (value = DeleteValidation.class) GiftCertificateDTO dto) {
+        if (service.delete(dto)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Deletes {@link GiftCertificateDTO} object.
+     *
+     * @param tagId the id of {@link GiftCertificateDTO} object to delete
+     * @return the {@link ResponseEntity} object with http status
+     */
+    @RequestMapping(value = "/{tagId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteCertificateByUrlId(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int tagId) {
+        if (service.delete(tagId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private List<GiftCertificateDTO> buildSelfLinks(List<GiftCertificateDTO> certificates) {
+        return certificates.stream().peek(c -> {
+            c.add(linkTo(GiftCertificateController.class).slash(c.getId()).withSelfRel());
+            buildTagsSelfLink(c);
+        }).collect(Collectors.toList());
+    }
+
+    private void buildTagsSelfLink(GiftCertificateDTO certificate) {
+        if (certificate.getTags() != null) {
+            Set<TagDTO> tags = certificate.getTags().stream().map(t ->
+                    t.add(linkTo(TagController.class).slash(t.getId()).withSelfRel()))
+                    .collect(Collectors.toSet());
+            certificate.setTags(tags);
+        }
+    }
+
+    private boolean hasNext(int page, int lastPage) {
+        return page < lastPage;
+    }
+
+    private boolean hasPrevious(int page) {
+        return page > 1;
     }
 
 }

@@ -10,8 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
-@ContextConfiguration(classes = TagService.class)
+@ExtendWith(MockitoExtension.class)
 class TagServiceTest {
 
     @Mock
@@ -29,17 +26,6 @@ class TagServiceTest {
 
     @InjectMocks
     private TagService service;
-
-    @Test
-    public void testReadAll() {
-        List<Tag> entities = new ArrayList<>(
-                Arrays.asList(new Tag(1, "name1"), new Tag(2, "name2")));
-        Mockito.when(dao.readAll()).thenReturn(entities);
-
-        List<TagDTO> tags = service.readAll();
-        Mockito.verify(dao, Mockito.times(1)).readAll();
-        assertTrue(tags.size() > 0);
-    }
 
     @Test
     public void testCreate() {
@@ -50,10 +36,34 @@ class TagServiceTest {
     }
 
     @Test
+    public void testReadAll() {
+        List<Tag> entities = new ArrayList<>(
+                Arrays.asList(new Tag("name1"), new Tag("name2")));
+        Mockito.when(dao.readAll()).thenReturn(entities);
+
+        List<TagDTO> tags = service.readAll();
+        Mockito.verify(dao, Mockito.times(1)).readAll();
+        assertTrue(tags.size() > 0);
+    }
+
+    @Test
+    public void testReadPaginated() {
+        int page = 1;
+        int size = 2;
+        List<Tag> entities = new ArrayList<>(
+                Arrays.asList(new Tag("name1"), new Tag("name2")));
+        Mockito.when(dao.readPaginated(page, size)).thenReturn(entities);
+
+        List<TagDTO> tags = service.readPaginated(page, size);
+        Mockito.verify(dao, Mockito.times(1)).readPaginated(page, size);
+        assertEquals(tags.size(), size);
+    }
+
+    @Test
     public void testRead() {
         TagDTO dto = new TagDTO(1, "testtag");
         Mockito.when(dao.read(Mockito.anyInt())).thenReturn(TagMapper.toEntity(dto));
-        TagDTO tag = service.read(4);
+        TagDTO tag = service.read(1);
         assertEquals(dto, tag);
         Mockito.verify(dao, Mockito.times(1)).read(Mockito.anyInt());
     }

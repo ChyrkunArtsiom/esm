@@ -4,19 +4,17 @@ import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TagDAO.class)
+@SpringBootTest(classes = TagDAO.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class TagDAOTest {
 
@@ -24,8 +22,9 @@ class TagDAOTest {
     private TagDAO dao;
 
     @Test
+    @Transactional
     public void testCreate() {
-        Tag tag = new Tag(3, "thirdtag");
+        Tag tag = new Tag( "fifth");
         assertNotNull(dao.create(tag));
     }
 
@@ -36,20 +35,35 @@ class TagDAOTest {
     }
 
     @Test
+    public void testReadAll() {
+        List<Tag> tags = dao.readAll();
+        assertTrue(tags.size() > 0);
+    }
+
+    @Test
     public void testReadByName() {
         Tag tag = dao.read("firsttag");
         assertNotNull(tag);
     }
 
     @Test
+    @Transactional
     public void testDelete() {
-        Tag tag = new Tag(3, "thirdtag");
+        Tag tag = new Tag( "secondtag");
         assertTrue(dao.delete(tag));
     }
 
     @Test
-    public void testReadAll() {
-        List<Tag> tags = dao.readAll();
-        assertTrue(tags.size() > 0);
+    @Transactional
+    public void testDeleteById() {
+        assertTrue(dao.delete(1));
+    }
+
+    @Test
+    public void testReadPaginated() {
+        int page = 2;
+        int size = 2;
+        List<Tag> tags = dao.readPaginated(page, size);
+        assertEquals(tags.size(), size);
     }
 }

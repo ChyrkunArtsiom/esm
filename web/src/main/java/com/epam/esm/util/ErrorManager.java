@@ -6,6 +6,8 @@ package com.epam.esm.util;
 public class ErrorManager {
     private String errorMessage;
 
+    private int errorCode;
+
     /**
      * Empty constructor.
      */
@@ -18,8 +20,9 @@ public class ErrorManager {
      *
      * @param errorMessage the string of error message
      */
-    public ErrorManager(String errorMessage) {
+    public ErrorManager(String errorMessage, int errorCode) {
         this.errorMessage = errorMessage;
+        this.errorCode = errorCode;
     }
 
     public String getErrorMessage() {
@@ -28,5 +31,13 @@ public class ErrorManager {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
     }
 }

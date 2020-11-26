@@ -1,7 +1,5 @@
 package com.epam.esm.service;
 
-import com.epam.esm.util.SearchCriteria;
-
 import java.util.List;
 
 /**
@@ -43,18 +41,17 @@ public interface AbstractService<U> {
     boolean delete(U dto);
 
     /**
+     * Deletes entity. Returns {@code true} if entity was deleted.
+     *
+     * @param id the id of {@link U} object
+     * @return {@code true} if entity was deleted
+     */
+    boolean delete(int id);
+
+    /**
      * Reads all {@link U} objects.
      *
      * @return the list of {@link U} object
      */
     List<U> readAll();
-
-    /**
-     * Gets the list of {@link U} objects by parameters.
-     * They are the fields of {@link SearchCriteria} class.
-     *
-     * @param criteria the {@link SearchCriteria} object
-     * @return the list of {@link U} objects
-     */
-    List<U> readByParams(SearchCriteria criteria);
 }

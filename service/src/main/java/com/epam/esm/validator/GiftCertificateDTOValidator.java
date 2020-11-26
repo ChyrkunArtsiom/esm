@@ -26,11 +26,11 @@ public class GiftCertificateDTOValidator {
      *
      * @param name the name of {@link GiftCertificateDTO} object
      * @throws CertificateNameIsNotValidException if name is not valid
-     * @throws ArgumentIsNotPresent if name is not present
+     * @throws ArgumentIsNotPresentException if name is not present
      */
     public static void isNameValid(String name) {
         if (name == null) {
-            throw new ArgumentIsNotPresent("name");
+            throw new ArgumentIsNotPresentException("name");
         }
         if (!name.matches("^[a-zA-ZА-Яа-я]{3,45}$")) {
             throw new CertificateNameIsNotValidException(name);
@@ -42,11 +42,11 @@ public class GiftCertificateDTOValidator {
      *
      * @param description the description of {@link GiftCertificateDTO} object.
      * @throws DescriptionIsNotValidException if description is not valid
-     * @throws ArgumentIsNotPresent if description is not present
+     * @throws ArgumentIsNotPresentException if description is not present
      */
     public static void isDescriptionValid(String description) {
         if (description == null) {
-            throw new ArgumentIsNotPresent("description");
+            throw new ArgumentIsNotPresentException("description");
         }
         if (!description.matches("^[\\w\\W]{3,45}$")) {
             throw new DescriptionIsNotValidException(description);
@@ -58,11 +58,11 @@ public class GiftCertificateDTOValidator {
      *
      * @param price the price of {@link GiftCertificateDTO} object
      * @throws PriceIsNotValidException if price is not valid
-     * @throws ArgumentIsNotPresent if price is not present
+     * @throws ArgumentIsNotPresentException if price is not present
      */
     public static void isPriceValid(BigDecimal price) {
         if (price == null) {
-            throw new ArgumentIsNotPresent("price");
+            throw new ArgumentIsNotPresentException("price");
         }
         if (price.intValue() < 0) {
             throw new PriceIsNotValidException(String.valueOf(price));
@@ -74,11 +74,11 @@ public class GiftCertificateDTOValidator {
      *
      * @param duration the duration of {@link GiftCertificateDTO} object
      * @throws DurationIsNotValidException if duration is not valid
-     * @throws ArgumentIsNotPresent if duration is not present
+     * @throws ArgumentIsNotPresentException if duration is not present
      */
     public static void isDurationValid(Integer duration) {
         if (duration == null) {
-            throw new ArgumentIsNotPresent("duration");
+            throw new ArgumentIsNotPresentException("duration");
         }
         if (duration <= 0) {
             throw new DurationIsNotValidException(String.valueOf(String.valueOf(duration)));

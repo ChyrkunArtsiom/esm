@@ -15,7 +15,12 @@ public class TagMapper {
      * @return the {@link Tag} object
      */
     public static Tag toEntity(TagDTO dto) {
-        return new Tag(dto.getId(), dto.getName());
+        Tag entity = new Tag();
+        if (dto.getId() != null) {
+            entity.setId(dto.getId());
+        }
+        entity.setName(dto.getName());
+        return entity;
     }
 
     /**

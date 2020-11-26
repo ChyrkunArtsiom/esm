@@ -5,11 +5,10 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.util.SearchCriteria;
-import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,8 +33,8 @@ public class TagService implements AbstractService<TagDTO> {
     }
 
     @Override
+    @Transactional
     public TagDTO create(TagDTO dto) {
-        TagDTOValidator.isValid(dto);
         Tag entity = TagMapper.toEntity(dto);
         entity = dao.create(entity);
         return TagMapper.toDto(entity);
@@ -66,19 +65,45 @@ public class TagService implements AbstractService<TagDTO> {
         return dtos;
     }
 
+    /**
+     * Gets the list of {@link TagDTO} objects by page and size.
+     *
+     * @param page the page number
+     * @param size the size
+     * @return the list of {@link TagDTO} objects
+     */
+    public List<TagDTO> readPaginated(Integer page, Integer size) {
+        List<TagDTO> dtos;
+        List<Tag> entities = dao.readPaginated(page, size);
+        dtos = entities.stream().map(TagMapper::toDto).collect(Collectors.toList());
+        return dtos;
+    }
+
     @Override
     public TagDTO update(TagDTO dto) {
         throw new UnsupportedOperationException("Tag is not supported by update method.");
     }
 
     @Override
+    @Transactional
     public boolean delete(TagDTO dto) {
         Tag entity = TagMapper.toEntity(dto);
         return dao.delete(entity);
     }
 
     @Override
-    public List<TagDTO> readByParams(SearchCriteria criteria) {
-        throw new UnsupportedOperationException("Tag is not supported by search method.");
+    @Transactional
+    public boolean delete(int id) {
+        return dao.delete(id);
+    }
+
+    /**
+     * Gets a number of last page of objects.
+     *
+     * @param size the size of page
+     * @return the number of last page
+     */
+    public int getLastPage(Integer size) {
+        return dao.getLastPage(size);
     }
 }

@@ -1,10 +1,14 @@
 package com.epam.esm.mapper;
 
 import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class that converts {@link GiftCertificate} and {@link GiftCertificateDTO} objects to each other.
@@ -19,7 +23,6 @@ public class GiftCertificateMapper {
      */
     public static GiftCertificate toEntity(GiftCertificateDTO dto) {
         GiftCertificate certificate = new GiftCertificate();
-        certificate.setId(dto.getId());
         certificate.setName(dto.getName());
         certificate.setDescription(dto.getDescription());
         if (dto.getPrice() != null) {
@@ -28,7 +31,13 @@ public class GiftCertificateMapper {
             certificate.setPrice(0.0);
         }
         certificate.setDuration(dto.getDuration());
-        certificate.setTags(dto.getTags());
+        Set<Tag> tags = new HashSet<>();
+        if (dto.getTags() != null) {
+            for (TagDTO tag : dto.getTags()) {
+                tags.add(TagMapper.toEntity(tag));
+            }
+        }
+        certificate.setTags(tags);
         return certificate;
     }
 
@@ -45,12 +54,20 @@ public class GiftCertificateMapper {
         dto.setDescription(entity.getDescription());
         dto.setPrice(BigDecimal.valueOf(entity.getPrice()));
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        dto.setCreateDate(entity.getCreateDate().format(df));
+        if (entity.getCreateDate() != null) {
+            dto.setCreateDate(entity.getCreateDate().format(df));
+        }
         if (entity.getLastUpdateDate() != null) {
             dto.setLastUpdateDate(entity.getLastUpdateDate().format(df));
         }
         dto.setDuration(entity.getDuration());
-        dto.setTags(entity.getTags());
+        Set<TagDTO> tags = new HashSet<>();
+        if (entity.getTags() != null) {
+            for (Tag tag : entity.getTags()) {
+                tags.add(TagMapper.toDto(tag));
+            }
+        }
+        dto.setTags(tags);
         return dto;
     }
 }
