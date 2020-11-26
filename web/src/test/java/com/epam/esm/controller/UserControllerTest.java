@@ -46,7 +46,7 @@ public class UserControllerTest {
     @Test
     public void testGetMissingUser() throws Exception {
         String id = "1";
-        NoUserException ex = new NoUserException(id, 40403);
+        NoUserException ex = new NoUserException(id);
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);

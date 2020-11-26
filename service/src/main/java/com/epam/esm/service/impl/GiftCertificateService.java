@@ -5,7 +5,6 @@ import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.exception.NoTagException;
 import com.epam.esm.mapper.GiftCertificateMapper;
@@ -20,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @ComponentScan(basePackageClasses = {GiftCertificateDAO.class, TagService.class})
+@Validated
 public class GiftCertificateService implements AbstractService<GiftCertificateDTO> {
 
     private GiftCertificateDAO dao;
@@ -60,7 +61,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     @Override
     @Transactional
     public GiftCertificateDTO create(GiftCertificateDTO dto) {
-        GiftCertificateDTOValidator.isValid(dto);
+		GiftCertificateDTOValidator.isValid(dto);
         dto.setDescription(InputSanitizer.sanitize(dto.getDescription()));
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
         if (entity.getTags() != null) {
@@ -91,7 +92,6 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
      * @param criteria the {@link SearchCriteria} object
      * @return the list of {@link GiftCertificateDTO} objects
      */
-    /*    @Transactional(readOnly = true)*/
     public List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
         List<GiftCertificateDTO> dtos;
         SearchCriteriaValidator.isValid(criteria);
@@ -103,42 +103,31 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     @Override
     @Transactional
     public GiftCertificateDTO update(GiftCertificateDTO dto) {
-        if (dto.getName() != null) {
-            GiftCertificateDTOValidator.isNameValid(dto.getName());
-            try {
-                GiftCertificate toUpdate = dao.read(dto.getName());
-                GiftCertificate substitute = GiftCertificateMapper.toEntity(dto);
-                if (dto.getPrice() != null) {
-                    GiftCertificateDTOValidator.isPriceValid(dto.getPrice());
-                    toUpdate.setPrice(substitute.getPrice());
-                }
-                if (dto.getDescription() != null) {
-                    GiftCertificateDTOValidator.isDescriptionValid(dto.getDescription());
-                    toUpdate.setDescription(substitute.getDescription());
-                }
-                if (dto.getDuration() != null) {
-                    GiftCertificateDTOValidator.isDurationValid(dto.getDuration());
-                    toUpdate.setDuration(substitute.getDuration());
-                }
-                if (dto.getTags() != null) {
-                    toUpdate.setTags(checkTags(substitute));
-                }
-                dao.update(toUpdate);
-                return null;
-            } catch (NoCertificateException ex) {
-                return create(dto);
+        try {
+            GiftCertificate toUpdate = dao.read(dto.getName());
+            GiftCertificate substitute = GiftCertificateMapper.toEntity(dto);
+            if (dto.getPrice() != null) {
+                toUpdate.setPrice(substitute.getPrice());
             }
-        } else {
-            throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
+            if (dto.getDescription() != null) {
+                toUpdate.setDescription(substitute.getDescription());
+            }
+            if (dto.getDuration() != null) {
+                toUpdate.setDuration(substitute.getDuration());
+            }
+            if (dto.getTags() != null) {
+                toUpdate.setTags(checkTags(substitute));
+            }
+            dao.update(toUpdate);
+            return null;
+        } catch (NoCertificateException ex) {
+            return create(dto);
         }
     }
 
     @Override
     @Transactional
     public boolean delete(GiftCertificateDTO dto) {
-        if (dto.getName() == null) {
-            throw new ArgumentIsNotPresent("Certificate name is not presented", "name");
-        }
         GiftCertificate entity = GiftCertificateMapper.toEntity(dto);
         return dao.delete(entity);
     }

@@ -5,51 +5,47 @@ package com.epam.esm.exception;
  */
 public class DuplicateTagException extends DAOException {
     /**
-     * Constructs a new exception with the specified name and code.
+     * Constructs a new exception with the specified name.
      *
      * @param name      the name
-     * @param errorCode the error code
      */
-    public DuplicateTagException(String name, int errorCode) {
-        super(name, errorCode);
+    public DuplicateTagException(String name) {
+        super(name);
     }
 
     /**
-     * Constructs a new exception with the specified detail message, name and code.
+     * Constructs a new exception with the specified detail message, name.
      *
      * @param message   the message
      * @param name      the name
-     * @param errorCode the error code
      */
-    public DuplicateTagException(String message, String name, int errorCode) {
-        super(message, name, errorCode);
+    public DuplicateTagException(String message, String name) {
+        super(message, name);
     }
 
     /**
-     * Constructs a new exception with the specified detail message, cause, name and code.
+     * Constructs a new exception with the specified detail message, cause, name.
      *
      * @param message   the message
      * @param cause     the cause
      * @param name      the name
-     * @param errorCode the error code
      */
-    public DuplicateTagException(String message, Throwable cause, String name, int errorCode) {
-        super(message, cause, name, errorCode);
+    public DuplicateTagException(String message, Throwable cause, String name) {
+        super(message, cause, name);
     }
 
     /**
-     * Constructs a new exception with the specified cause, name and code.
+     * Constructs a new exception with the specified cause, name.
      *
      * @param cause     the cause
      * @param name      the name
-     * @param errorCode the error code
      */
-    public DuplicateTagException(Throwable cause, String name, int errorCode) {
-        super(cause, name, errorCode);
+    public DuplicateTagException(Throwable cause, String name) {
+        super(cause, name);
     }
 
     /**
-     * Constructs a new exception with the specified detail message, cause, name and code,
+     * Constructs a new exception with the specified detail message, cause, name,
      * suppression enabled or disabled, and writable stack trace enabled or disabled.
      *
      * @param message            the message
@@ -57,9 +53,11 @@ public class DuplicateTagException extends DAOException {
      * @param enableSuppression  the enable suppression
      * @param writableStackTrace the writable stack trace
      * @param name               the name
-     * @param errorCode          the error code
      */
-    public DuplicateTagException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String name, int errorCode) {
-        super(message, cause, enableSuppression, writableStackTrace, name, errorCode);
+    public DuplicateTagException(String message, Throwable cause,
+                                 boolean enableSuppression,
+                                 boolean writableStackTrace,
+                                 String name) {
+        super(message, cause, enableSuppression, writableStackTrace, name);
     }
 }

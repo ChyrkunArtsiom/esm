@@ -1,12 +1,17 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.dto.validationmarkers.DeleteValidation;
+import com.epam.esm.dto.validationmarkers.OrderPostValidation;
+import com.epam.esm.dto.validationmarkers.OrderPutValidation;
 import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,18 +21,23 @@ import java.util.Objects;
 @Relation(itemRelation = "order", collectionRelation = "orders")
 public class OrderDTO extends RepresentationModel<OrderDTO> {
 
+    @NotNull(groups = {OrderPutValidation.class, DeleteValidation.class}, message = ValidationMessageManager.ID_INVALID)
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID,
+            groups = {OrderPutValidation.class, DeleteValidation.class})
+    @Positive(message = ValidationMessageManager.ID_INVALID,
+            groups = {OrderPutValidation.class, DeleteValidation.class})
     private Integer id;
 
     private Double cost;
 
     private String purchaseDate;
 
+    @NotNull(message = ValidationMessageManager.ORDER_BLANK_USER, groups = OrderPostValidation.class)
     @Valid
-    @NotNull(message = ValidationMessageManager.ORDER_BLANK_USER, groups = OrderValidation.class)
     private UserDTO user;
 
-    @NotNull(message = ValidationMessageManager.ORDER_BLANK_OR_EMPTY_CERTIFICATES, groups = OrderValidation.class)
-    @NotEmpty(message = ValidationMessageManager.ORDER_BLANK_OR_EMPTY_CERTIFICATES, groups = OrderValidation.class)
+    @NotNull(message = ValidationMessageManager.ORDER_BLANK_OR_EMPTY_CERTIFICATES, groups = OrderPostValidation.class)
+    @NotEmpty(message = ValidationMessageManager.ORDER_BLANK_OR_EMPTY_CERTIFICATES, groups = OrderPostValidation.class)
     @Valid
     private List<GiftCertificateDTO> certificates;
 

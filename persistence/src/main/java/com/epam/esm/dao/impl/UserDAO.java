@@ -2,8 +2,7 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.User;
-import com.epam.esm.exception.ErrorCodesManager;
-import com.epam.esm.exception.NoTagException;
+import com.epam.esm.exception.NoUserException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
@@ -31,8 +30,8 @@ public class UserDAO implements AbstractDAO<User> {
     public User read(int id) {
         User user = entityManager.find(User.class, id);
         if (user == null) {
-            throw new NoTagException(String.format("User with id = {%s} doesn't exist.", String.valueOf(id)),
-                    String.valueOf(id), ErrorCodesManager.USER_DOESNT_EXIST);
+            throw new NoUserException(String.format("User with id = {%s} doesn't exist.", String.valueOf(id)),
+                    String.valueOf(id));
         } else {
             return user;
         }
@@ -46,8 +45,8 @@ public class UserDAO implements AbstractDAO<User> {
             query.setParameter("name", name);
             return query.getSingleResult();
         } catch (NoResultException ex) {
-            throw new NoTagException(String.format("User with name = {%s} doesn't exist.", name), ex,
-                    name, ErrorCodesManager.USER_DOESNT_EXIST);
+            throw new NoUserException(String.format("User with name = {%s} doesn't exist.", name), ex,
+                    name);
         }
     }
 

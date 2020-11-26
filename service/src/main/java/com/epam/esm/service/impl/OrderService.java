@@ -10,12 +10,9 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
-import com.epam.esm.exception.ArgumentIsNotPresent;
-import com.epam.esm.exception.NoOrderException;
 import com.epam.esm.mapper.OrderMapper;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.validator.OrderDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
@@ -71,7 +68,6 @@ public class OrderService implements AbstractService<OrderDTO> {
     @Override
     @Transactional
     public OrderDTO create(OrderDTO dto) {
-        OrderDTOValidator.isOrderValid(dto);
         Order entity = OrderMapper.toEntity(dto);
         User user = userDAO.read(dto.getUser().getId());
         entity.setUser(user);
@@ -86,6 +82,14 @@ public class OrderService implements AbstractService<OrderDTO> {
     public OrderDTO read(int id) {
         Order order = dao.read(id);
         return OrderMapper.toDto(order);
+    }
+
+    @Override
+    public List<OrderDTO> readAll() {
+        List<OrderDTO> dtos;
+        List<Order> orders = dao.readAll();
+        dtos = orders.stream().map(OrderMapper::toDto).collect(Collectors.toList());
+        return dtos;
     }
 
     /**
@@ -105,35 +109,21 @@ public class OrderService implements AbstractService<OrderDTO> {
     @Override
     @Transactional
     public OrderDTO update(OrderDTO dto) {
-        if (dto.getId() != null) {
-            try {
-                Order toUpdate = dao.read(dto.getId());
-                if (dto.getUser() != null) {
-                    User user = userDAO.read(dto.getUser().getId());
-                    toUpdate.setUser(user);
-                }
-                if (dto.getCertificates() != null && dto.getCertificates().size() > 0) {
-                    toUpdate.setCertificates(checkCertificates(dto));
-                } else {
-                    throw new ArgumentIsNotPresent(
-                            "Certificates for the order are not presented.", "certificates");
-                }
-                dao.update(toUpdate);
-                return null;
-            } catch (NoOrderException ex) {
-                return create(dto);
-            }
-        } else {
-            throw new ArgumentIsNotPresent("Order id is not presented", "id");
+        Order toUpdate = dao.read(dto.getId());
+        if (dto.getUser() != null) {
+            User user = userDAO.read(dto.getUser().getId());
+            toUpdate.setUser(user);
         }
+        if (dto.getCertificates() != null && dto.getCertificates().size() > 0) {
+            toUpdate.setCertificates(checkCertificates(dto));
+        }
+        dao.update(toUpdate);
+        return null;
     }
 
     @Override
     @Transactional
     public boolean delete(OrderDTO dto) {
-        if (dto.getId() == null) {
-            throw new ArgumentIsNotPresent("Order id is not presented", "id");
-        }
         Order entity = OrderMapper.toEntity(dto);
         return dao.delete(entity);
     }
@@ -142,14 +132,6 @@ public class OrderService implements AbstractService<OrderDTO> {
     @Transactional
     public boolean delete(int id) {
         return dao.delete(id);
-    }
-
-    @Override
-    public List<OrderDTO> readAll() {
-        List<OrderDTO> dtos;
-        List<Order> orders = dao.readAll();
-        dtos = orders.stream().map(OrderMapper::toDto).collect(Collectors.toList());
-        return dtos;
     }
 
     /**

@@ -1,13 +1,15 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.dto.validationmarkers.*;
 import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Set;
@@ -18,22 +20,30 @@ import java.util.Set;
 @Relation(itemRelation = "certificate", collectionRelation = "certificates")
 public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> {
 
-    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID, groups = OrderValidation.class)
-    @Positive(message = ValidationMessageManager.ID_INVALID, groups = OrderValidation.class)
+    @NotNull(groups = OrderPostValidation.class, message = ValidationMessageManager.ID_INVALID)
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID, groups = OrderPostValidation.class)
+    @Positive(message = ValidationMessageManager.ID_INVALID, groups = {OrderPostValidation.class, OrderPutValidation.class})
     private Integer id;
 
-    @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME)
-    @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE)
+    @NotNull(message = ValidationMessageManager.BLANK_CERTIFICATE_NAME,
+            groups = {PostValidation.class, PutValidation.class, DeleteValidation.class})
+    @Pattern(regexp = "^[\\w\\W]{3,45}$", message = ValidationMessageManager.CERTIFICATE_NAME_WRONG_SIZE,
+            groups = {PostValidation.class, PutValidation.class, DeleteValidation.class})
     private String name;
 
     /** A string of description. */
-    @NotBlank(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION)
-    @Size(min = 3, max = 45, message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE)
+    @NotNull(message = ValidationMessageManager.BLANK_CERTIFICATE_DESCRIPTION,
+            groups = PostValidation.class)
+    @Pattern(regexp = "^[\\w\\W]{3,45}$", message = ValidationMessageManager.CERTIFICATE_DESCRIPTION_WRONG_SIZE,
+            groups = {PostValidation.class, PutValidation.class})
     private String description;
 
     /** A BigDecimal of price. */
-    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
-    @Positive(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID)
+    @NotNull(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID, groups = PostValidation.class)
+    @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
+    @Positive(message = ValidationMessageManager.CERTIFICATE_PRICE_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
     private BigDecimal price;
 
     /** A string of date of creation. */
@@ -43,11 +53,16 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
     private String lastUpdateDate;
 
     /** A duration in days. */
-    @Digits(integer = 10, fraction = 0, message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
-    @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID)
+    @NotNull(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID,
+            groups = PostValidation.class)
+    @Digits(integer = 10, fraction = 0, message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
+    @Positive(message = ValidationMessageManager.CERTIFICATE_DURATION_INVALID,
+            groups = {PostValidation.class, PutValidation.class})
     private Integer duration;
 
     /** A set of tag names. */
+    @Valid
     private Set<TagDTO> tags;
 
     /**

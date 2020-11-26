@@ -1,13 +1,13 @@
 package com.epam.esm.exception;
 
 /**
- * Thrown to indicate that one of parameters (page or size) is not present while other is presented during get method.
+ * Thrown to indicate that {@link com.epam.esm.sort.ExpressionTemplate} object cannot be created.
  */
-public class GetParamIsNotPresent extends RuntimeException {
+public class ExpressionTemplateException extends RuntimeException {
     /**
      * Constructs a new exception.
      */
-    public GetParamIsNotPresent() {
+    public ExpressionTemplateException() {
     }
 
     /**
@@ -15,26 +15,26 @@ public class GetParamIsNotPresent extends RuntimeException {
      *
      * @param message   the message
      */
-    public GetParamIsNotPresent(String message) {
+    public ExpressionTemplateException(String message) {
         super(message);
     }
 
     /**
      * Constructs a new exception with the specified detail message, cause.
      *
-     * @param message  the message
-     * @param cause    the cause
+     * @param message   the message
+     * @param cause     the cause
      */
-    public GetParamIsNotPresent(String message, Throwable cause) {
+    public ExpressionTemplateException(String message, Throwable cause) {
         super(message, cause);
     }
 
     /**
      * Constructs a new exception with the specified cause.
      *
-     * @param cause    the cause
+     * @param cause     the cause
      */
-    public GetParamIsNotPresent(Throwable cause) {
+    public ExpressionTemplateException(Throwable cause) {
         super(cause);
     }
 
@@ -47,7 +47,9 @@ public class GetParamIsNotPresent extends RuntimeException {
      * @param enableSuppression  the enable suppression
      * @param writableStackTrace the writable stack trace
      */
-    public GetParamIsNotPresent(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ExpressionTemplateException(String message, Throwable cause,
+                                       boolean enableSuppression,
+                                       boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -79,7 +79,7 @@ public class OrderControllerTest {
     @Test
     public void testGetMissingOrder() throws Exception {
         String id = "1";
-        NoOrderException ex = new NoOrderException("1", 40404);
+        NoOrderException ex = new NoOrderException("1");
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);

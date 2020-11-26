@@ -3,7 +3,7 @@ package com.epam.esm.exception;
 /**
  * Thrown to indicate that there is an argument which has to be presented but isn't.
  */
-public class ArgumentIsNotPresent extends RuntimeException {
+public class ArgumentIsNotPresentException extends RuntimeException {
     /** Argument which is not presented. */
     private String argument;
 
@@ -12,7 +12,7 @@ public class ArgumentIsNotPresent extends RuntimeException {
      *
      * @param argument the name of argument
      */
-    public ArgumentIsNotPresent(String argument) {
+    public ArgumentIsNotPresentException(String argument) {
         this.argument = argument;
     }
 
@@ -22,7 +22,7 @@ public class ArgumentIsNotPresent extends RuntimeException {
      * @param message   the message
      * @param argument  the name of argument
      */
-    public ArgumentIsNotPresent(String message, String argument) {
+    public ArgumentIsNotPresentException(String message, String argument) {
         super(message);
         this.argument = argument;
     }
@@ -34,7 +34,7 @@ public class ArgumentIsNotPresent extends RuntimeException {
      * @param cause    the cause
      * @param argument the name of argument
      */
-    public ArgumentIsNotPresent(String message, Throwable cause, String argument) {
+    public ArgumentIsNotPresentException(String message, Throwable cause, String argument) {
         super(message, cause);
         this.argument = argument;
     }
@@ -45,7 +45,7 @@ public class ArgumentIsNotPresent extends RuntimeException {
      * @param cause    the cause
      * @param argument the name of argument
      */
-    public ArgumentIsNotPresent(Throwable cause, String argument) {
+    public ArgumentIsNotPresentException(Throwable cause, String argument) {
         super(cause);
         this.argument = argument;
     }
@@ -60,7 +60,7 @@ public class ArgumentIsNotPresent extends RuntimeException {
      * @param writableStackTrace the writable stack trace
      * @param argument           the name of argument
      */
-    public ArgumentIsNotPresent(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String argument) {
+    public ArgumentIsNotPresentException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String argument) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.argument = argument;
     }

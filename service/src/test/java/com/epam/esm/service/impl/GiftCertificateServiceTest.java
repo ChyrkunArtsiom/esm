@@ -5,7 +5,6 @@ import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.util.SearchCriteria;
@@ -110,17 +109,6 @@ class GiftCertificateServiceTest {
         Mockito.verify(dao, Mockito.times(1)).read(Mockito.anyString());
         Mockito.verify(tagDAO, Mockito.times(2)).read(Mockito.anyString());
         Mockito.verify(dao, Mockito.times(1)).update(Mockito.any(GiftCertificate.class));
-    }
-
-    @Test
-    public void testUpdateWhenNameNotPresent() {
-        TagDTO rest = new TagDTO(1, "rest");
-        TagDTO testTag = new TagDTO(2, "tagtagtest");
-        Set<TagDTO> tags = new HashSet<>(Arrays.asList(rest, testTag));
-        GiftCertificateDTO certificate = new GiftCertificateDTO(0, null, "test",
-                BigDecimal.valueOf(1.0), 1, tags);
-        assertThrows(ArgumentIsNotPresent.class,
-                () -> service.update(certificate));
     }
 
     @Test

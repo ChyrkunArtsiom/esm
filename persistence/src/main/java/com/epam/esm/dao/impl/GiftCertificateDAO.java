@@ -4,11 +4,10 @@ import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.DuplicateCertificateException;
-import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoCertificateException;
+import com.epam.esm.sort.SortOrder;
+import com.epam.esm.sort.SortType;
 import com.epam.esm.util.SearchCriteria;
-import com.epam.esm.util.SortOrder;
-import com.epam.esm.util.SortType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
@@ -39,7 +38,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         } catch (PersistenceException ex) {
             throw new DuplicateCertificateException(
                     String.format("Certificate with name = {%s} already exists.", giftCertificate.getName()), ex,
-                    giftCertificate.getName(), ErrorCodesManager.DUPLICATE_CERTIFICATE);
+                    giftCertificate.getName());
         }
     }
 
@@ -49,7 +48,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         if (certificate == null) {
             throw new NoCertificateException(
                     String.format("Certificate with id = {%s} doesn't exist.", String.valueOf(id)),
-                    String.valueOf(id), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
+                    String.valueOf(id));
         } else {
             return certificate;
         }
@@ -65,7 +64,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         } catch (NoResultException ex) {
             throw new NoCertificateException(
                     String.format("Certificate with name = {%s} doesn't exist.", String.valueOf(name)), ex,
-                    String.valueOf(name), ErrorCodesManager.CERTIFICATE_DOESNT_EXIST);
+                    String.valueOf(name));
         }
     }
 
@@ -91,7 +90,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         query.select(root).distinct(true);
         buildQuery(root, query, searchCriteria);
 
-        Order order = getOrder(builder, root, searchCriteria.getSort());
+        Order order = buildOrder(builder, root, searchCriteria.getSort());
         query.orderBy(order);
         //Pagination
         TypedQuery<GiftCertificate> typedQuery = entityManager.createQuery(query);
@@ -104,32 +103,16 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         return typedQuery.getResultList();
     }
 
-    private Order getOrder(CriteriaBuilder builder, Root root, String sort) {
+    private Order buildOrder(CriteriaBuilder builder, Root root, String sort) {
         String[] typeOrder = sort.split("_");
         SortType sortType = SortType.valueOf(typeOrder[0].toUpperCase());
         SortOrder sortOrder = SortOrder.valueOf(typeOrder[1].toUpperCase());
-        Expression expression = null;
-        Order order = null;
-
-        switch (sortType) {
-            case NAME: {
-                expression = root.get("name");
-                break;
-            }
-            case DATE: {
-                expression = root.get("create_date");
-                break;
-            }
-        }
-        switch (sortOrder) {
-            case ASC: {
-                order = builder.asc(expression);
-                break;
-            }
-            case DESC: {
-                order = builder.desc(expression);
-                break;
-            }
+        Expression expression = sortType.getTemplate().buildExpression(root);
+        Order order;
+        if (sortOrder.equals(SortOrder.ASC)) {
+            order = builder.asc(expression);
+        } else {
+            order = builder.desc(expression);
         }
         return order;
     }
@@ -165,14 +148,6 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
             return false;
         }
     }
-
-/*    public List<GiftCertificate> readPaginated(int page, int size) {
-        TypedQuery<GiftCertificate> query = entityManager.createQuery(
-                "SELECT c FROM certificates c ORDER BY c.id", GiftCertificate.class);
-        query.setFirstResult((page - 1) * size);
-        query.setMaxResults(size);
-        return query.getResultList();
-    }*/
 
     /**
      * Gets a number of last page of objects.

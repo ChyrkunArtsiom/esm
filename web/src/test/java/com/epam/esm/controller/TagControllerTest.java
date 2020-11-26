@@ -53,7 +53,7 @@ class TagControllerTest {
         TagDTO tagDTO = new TagDTO(0, "testingname");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(tagDTO);
-        DuplicateTagException ex = new DuplicateTagException(tagDTO.getName(), 40901);
+        DuplicateTagException ex = new DuplicateTagException(tagDTO.getName());
         Mockito.when(service.create(Mockito.any(TagDTO.class))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
@@ -90,7 +90,7 @@ class TagControllerTest {
     @Test
     public void testGetMissingTag() throws Exception {
         String id = "1";
-        NoTagException ex = new NoTagException("1", 40401);
+        NoTagException ex = new NoTagException("1");
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);

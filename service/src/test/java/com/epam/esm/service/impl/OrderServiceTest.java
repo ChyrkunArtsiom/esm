@@ -11,7 +11,6 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
-import com.epam.esm.exception.ArgumentIsNotPresent;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.mapper.OrderMapper;
 import com.epam.esm.mapper.UserMapper;
@@ -126,19 +125,6 @@ class OrderServiceTest {
         assertNull(service.update(order));
         Mockito.verify(userDAO, Mockito.times(1)).read(Mockito.anyInt());
         Mockito.verify(certificateDAO, Mockito.times(2)).read(Mockito.anyInt());
-    }
-
-    @Test
-    public void testUpdateWhenIdNotPresent() {
-        UserDTO userDTO = new UserDTO(1, "user", "password".toCharArray());
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        OffsetDateTime date = OffsetDateTime.parse(OffsetDateTime.now().format(df));
-        GiftCertificateDTO certificate = new GiftCertificateDTO(
-                1, "certificate", "description", BigDecimal.valueOf(100.0),
-                date.toString(), date.toString(), 10, null);
-        OrderDTO order = new OrderDTO(null, 10.0, date.toString(), userDTO, Arrays.asList(certificate, certificate));
-        assertThrows(ArgumentIsNotPresent.class,
-                () -> service.update(order));
     }
 
     @Test

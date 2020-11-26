@@ -229,6 +229,7 @@ public class GiftCertificate {
     public void onPrePersist() {
         OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.setCreateDate(currentTime);
+        this.setLastUpdateDate(currentTime);
     }
 
     @PreUpdate

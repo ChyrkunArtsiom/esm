@@ -3,7 +3,6 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.DuplicateTagException;
-import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoTagException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -31,7 +30,7 @@ public class TagDAO implements AbstractDAO<Tag> {
             return tag;
         } catch (PersistenceException ex) {
             throw new DuplicateTagException(String.format("Tag with name = {%s} already exists.", tag.getName()), ex,
-                    tag.getName(), ErrorCodesManager.DUPLICATE_TAG);
+                    tag.getName());
         }
     }
 
@@ -40,7 +39,7 @@ public class TagDAO implements AbstractDAO<Tag> {
         Tag tag = entityManager.find(Tag.class, id);
         if (tag == null) {
             throw new NoTagException(String.format("Tag with id = {%s} doesn't exist.", String.valueOf(id)),
-                    String.valueOf(id), ErrorCodesManager.TAG_DOESNT_EXIST);
+                    String.valueOf(id));
         } else {
             return tag;
         }
@@ -54,7 +53,7 @@ public class TagDAO implements AbstractDAO<Tag> {
             return query.getSingleResult();
         } catch (NoResultException ex) {
             throw new NoTagException(String.format("Tag with name = {%s} doesn't exist.", name), ex,
-                    name, ErrorCodesManager.TAG_DOESNT_EXIST);
+                    name);
         }
     }
 

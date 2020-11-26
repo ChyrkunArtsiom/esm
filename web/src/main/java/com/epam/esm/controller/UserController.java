@@ -1,7 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.UserDTO;
-import com.epam.esm.exception.GetParamIsNotPresent;
+import com.epam.esm.exception.PageParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.impl.UserService;
@@ -76,7 +76,7 @@ public class UserController {
             users = buildSelfLinks(users);
             result = CollectionModel.of(users);
         } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
-            throw new GetParamIsNotPresent();
+            throw new PageParamIsNotPresent();
         } else {
             int lastPage = service.getLastPage(size);
             if (page > lastPage) {

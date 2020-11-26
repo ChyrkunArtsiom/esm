@@ -3,7 +3,10 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exception.GetParamIsNotPresent;
+import com.epam.esm.dto.validationmarkers.DeleteValidation;
+import com.epam.esm.dto.validationmarkers.PostValidation;
+import com.epam.esm.dto.validationmarkers.PutValidation;
+import com.epam.esm.exception.PageParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.impl.GiftCertificateService;
@@ -19,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 import java.util.List;
@@ -59,7 +61,7 @@ public class GiftCertificateController {
      * @return the {@link ResponseEntity} object with {@link GiftCertificateDTO} object, headers and http status
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
-    public ResponseEntity<GiftCertificateDTO> createCertificate(@Valid @RequestBody GiftCertificateDTO dto) {
+    public ResponseEntity<GiftCertificateDTO> createCertificate(@Validated(value = PostValidation.class) @RequestBody GiftCertificateDTO dto) {
         GiftCertificateDTO createdCertificate = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
         Link selfLink = linkTo(GiftCertificateController.class).slash(createdCertificate.getId()).withSelfRel();
@@ -113,7 +115,7 @@ public class GiftCertificateController {
             certificates = buildSelfLinks(certificates);
             result = CollectionModel.of(certificates);
         } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
-            throw new GetParamIsNotPresent();
+            throw new PageParamIsNotPresent();
         } else {
             int lastPage = service.getLastPage(searchCriteria, size);
             if (page > lastPage) {
@@ -144,7 +146,8 @@ public class GiftCertificateController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
-    public ResponseEntity<?> updateCertificate(@RequestBody GiftCertificateDTO dto) {
+    public ResponseEntity<?> updateCertificate(
+            @RequestBody @Validated(value = PutValidation.class) GiftCertificateDTO dto) {
         GiftCertificateDTO created = service.update(dto);
         if (created != null) {
             HttpHeaders headers = new HttpHeaders();
@@ -165,7 +168,8 @@ public class GiftCertificateController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteCertificate(@RequestBody GiftCertificateDTO dto) {
+    public ResponseEntity<?> deleteCertificate(
+            @RequestBody @Validated (value = DeleteValidation.class) GiftCertificateDTO dto) {
         if (service.delete(dto)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {

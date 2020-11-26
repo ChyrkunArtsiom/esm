@@ -1,11 +1,14 @@
 package com.epam.esm.dto;
 
+import com.epam.esm.dto.validationmarkers.DeleteValidation;
+import com.epam.esm.dto.validationmarkers.PostValidation;
+import com.epam.esm.dto.validationmarkers.PutValidation;
 import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
 import java.util.Objects;
 
 /**
@@ -16,8 +19,10 @@ public class TagDTO extends RepresentationModel<TagDTO> {
 
     private Integer id;
 
-    @NotBlank(message = ValidationMessageManager.BLANK_TAG_NAME)
-    @Size(min = 3, max = 45, message = ValidationMessageManager.TAG_NAME_WRONG_SIZE)
+    @NotBlank(message = ValidationMessageManager.BLANK_TAG_NAME,
+            groups = {PostValidation.class, PutValidation.class, DeleteValidation.class})
+    @Pattern(regexp = "^[a-zA-ZА-Яа-я]{3,45}$", message = ValidationMessageManager.TAG_INVALID_NAME,
+            groups = {PostValidation.class, PutValidation.class, DeleteValidation.class})
     private String name;
 
     /**

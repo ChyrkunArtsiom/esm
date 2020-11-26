@@ -3,8 +3,8 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.ErrorCodesManager;
 import com.epam.esm.exception.NoOrderException;
+import com.epam.esm.exception.OrderHasDuplicateCertificatesException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
@@ -23,7 +23,11 @@ public class OrderDAO implements AbstractDAO<Order> {
     @Override
     public Order create(Order entity) {
         entityManager.persist(entity);
-        entityManager.flush();
+        try {
+            entityManager.flush();
+        } catch (PersistenceException ex) {
+            throw new OrderHasDuplicateCertificatesException("Order has duplicate certificates.");
+        }
         return entity;
     }
 
@@ -33,7 +37,7 @@ public class OrderDAO implements AbstractDAO<Order> {
         if (order == null) {
             throw new NoOrderException(
                     String.format("Order with id = {%s} doesn't exist.", String.valueOf(id)),
-                    String.valueOf(id), ErrorCodesManager.ORDER_DOESNT_EXIST);
+                    String.valueOf(id));
         } else {
             return order;
         }
@@ -104,7 +108,7 @@ public class OrderDAO implements AbstractDAO<Order> {
      */
     public List<Tag> getMostFrequentTags() {
         Query query = entityManager.createNativeQuery(
-                "SELECT id, name FROM get_most_popular_tags_for_richest_client()", Tag.class);
+                "SELECT id, name FROM esm_module2.get_most_popular_tags_for_richest_client()", Tag.class);
         return (List<Tag>)query.getResultList();
     }
 

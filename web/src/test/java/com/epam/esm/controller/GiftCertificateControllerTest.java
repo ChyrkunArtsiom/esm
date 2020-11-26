@@ -56,7 +56,7 @@ class GiftCertificateControllerTest {
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(certificateDTO);
-        DuplicateCertificateException ex = new DuplicateCertificateException(certificateDTO.getName(), 40902);
+        DuplicateCertificateException ex = new DuplicateCertificateException(certificateDTO.getName());
         Mockito.when(service.create(Mockito.any(GiftCertificateDTO.class))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
@@ -84,7 +84,7 @@ class GiftCertificateControllerTest {
     @Test
     public void testGetMissingCertificate() throws Exception {
         String id = "1";
-        NoCertificateException ex = new NoCertificateException(id, 40402);
+        NoCertificateException ex = new NoCertificateException(id);
         Mockito.when(service.read(Integer.valueOf(id))).thenThrow(ex);
         String locale = "en_US";
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);

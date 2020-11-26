@@ -2,9 +2,11 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.OrderDTO;
-import com.epam.esm.dto.OrderValidation;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exception.GetParamIsNotPresent;
+import com.epam.esm.dto.validationmarkers.DeleteValidation;
+import com.epam.esm.dto.validationmarkers.OrderPostValidation;
+import com.epam.esm.dto.validationmarkers.OrderPutValidation;
+import com.epam.esm.exception.PageParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.impl.OrderService;
@@ -58,7 +60,7 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with {@link OrderDTO} object, headers and http status
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
-    public ResponseEntity<OrderDTO> createOrder(@Validated(value = OrderValidation.class) @RequestBody OrderDTO dto) {
+    public ResponseEntity<OrderDTO> createOrder(@Validated(value = OrderPostValidation.class) @RequestBody OrderDTO dto) {
         OrderDTO createdOrder = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
         Link selfLink = linkTo(OrderController.class).slash(createdOrder.getId()).withSelfRel();
@@ -106,7 +108,7 @@ public class OrderController {
             orders = buildSelfLinks(orders);
             result = CollectionModel.of(orders);
         } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
-            throw new GetParamIsNotPresent();
+            throw new PageParamIsNotPresent();
         } else {
             int lastPage = service.getLastPage(size);
             if (page > lastPage) {
@@ -133,7 +135,7 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
-    public ResponseEntity<?> updateOrder(@RequestBody OrderDTO dto) {
+    public ResponseEntity<?> updateOrder(@RequestBody @Validated(value = OrderPutValidation.class) OrderDTO dto) {
         OrderDTO created = service.update(dto);
         if (created != null) {
             HttpHeaders headers = new HttpHeaders();
@@ -155,7 +157,7 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteOrder(@RequestBody OrderDTO dto) {
+    public ResponseEntity<?> deleteOrder(@RequestBody @Validated(value = DeleteValidation.class) OrderDTO dto) {
         if (service.delete(dto)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {

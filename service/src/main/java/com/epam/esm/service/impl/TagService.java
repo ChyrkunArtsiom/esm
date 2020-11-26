@@ -5,7 +5,6 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
-import com.epam.esm.validator.TagDTOValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,6 @@ public class TagService implements AbstractService<TagDTO> {
     @Override
     @Transactional
     public TagDTO create(TagDTO dto) {
-        TagDTOValidator.isValid(dto);
         Tag entity = TagMapper.toEntity(dto);
         entity = dao.create(entity);
         return TagMapper.toDto(entity);

@@ -64,15 +64,6 @@ class GiftCertificateDAOTest {
         assertEquals(certificates.size(), 4);
     }
 
-/*    @Test
-    @Transactional
-    public void testReadPaginated() {
-        int page = 2;
-        int size = 2;
-        List<GiftCertificate> certificates = dao.readPaginated(page, size);
-        assertEquals(certificates.size(), size);
-    }*/
-
     @Test
     @Transactional
     public void testUpdate() {

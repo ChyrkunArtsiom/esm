@@ -1,7 +1,9 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exception.GetParamIsNotPresent;
+import com.epam.esm.dto.validationmarkers.DeleteValidation;
+import com.epam.esm.dto.validationmarkers.PostValidation;
+import com.epam.esm.exception.PageParamIsNotPresent;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.impl.TagService;
@@ -16,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 import java.util.List;
@@ -55,7 +56,7 @@ public class TagController {
      * @return the {@link RepresentationModel} object with {@link TagDTO} object, headers and http status
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
-    public ResponseEntity<TagDTO> createTag(@Valid @RequestBody TagDTO dto) {
+    public ResponseEntity<TagDTO> createTag(@Validated(value = PostValidation.class) @RequestBody TagDTO dto) {
         TagDTO createdTag = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
         Link selfLink = linkTo(TagController.class).slash(createdTag.getId()).withSelfRel();
@@ -98,7 +99,7 @@ public class TagController {
             tags = buildSelfLinks(tags);
             result = CollectionModel.of(tags);
         } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
-            throw new GetParamIsNotPresent();
+            throw new PageParamIsNotPresent();
         } else {
             int lastPage = service.getLastPage(size);
             if (page > lastPage) {
@@ -125,7 +126,7 @@ public class TagController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json")
-    public ResponseEntity<?> deleteTag(@Valid @RequestBody TagDTO dto) {
+    public ResponseEntity<?> deleteTag(@Validated(value = DeleteValidation.class) @RequestBody TagDTO dto) {
         if (service.delete(dto)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
