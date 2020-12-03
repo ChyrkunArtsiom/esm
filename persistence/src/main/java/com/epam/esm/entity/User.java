@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -21,6 +22,19 @@ public class User {
     @Column(nullable = false)
     private char[] password;
 
+    @Column(nullable = false, name = "first_name")
+    private String firstName;
+
+    @Column(nullable = false, name = "second_name")
+    private String secondName;
+
+    @Column(nullable = false, name = "birthday")
+    private LocalDate birthday;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false, name = "role_id", referencedColumnName = "id")
+    private Role role;
+
     /**
      * Empty constructor.
      */
@@ -28,27 +42,46 @@ public class User {
     }
 
     /**
-     * Constructor with name and password
+     * Constructor without an id
      *
-     * @param name      the name
-     * @param password  the password
+     * @param name       the name
+     * @param password   the password
+     * @param firstName  the first name
+     * @param secondName the second name
+     * @param birthday   the birthday
+     * @param role       the role
      */
-    public User(String name, char[] password) {
+    public User(String name, char[] password, String firstName,
+                String secondName, LocalDate birthday, Role role) {
         this.name = name;
         this.password = password;
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.birthday = birthday;
+        this.role = new Role(role);
     }
 
     /**
      * Constructor with all fields
      *
-     * @param id        the id
-     * @param name      the name
-     * @param password  the password
+     * @param id         the id
+     * @param name       the name
+     * @param password   the password
+     * @param firstName  the first name
+     * @param secondName the second name
+     * @param birthday   the birthday
+     * @param role       the {@link Role} object
      */
-    public User(Integer id, String name, char[] password) {
+    public User(Integer id, String name,
+                char[] password, String firstName,
+                String secondName, LocalDate birthday, Role role) {
         this.id = id;
         this.name = name;
         this.password = password;
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.birthday = birthday;
+        this.role = new Role(role);
     }
 
     public Integer getId() {
@@ -75,6 +108,38 @@ public class User {
         this.password = password;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -94,6 +159,7 @@ public class User {
 
     @Override
     public String toString() {
-        return String.format("User id: %d, name: %s", getId(), getName());
+        return String.format("User id: %d, username: %s, first name: %s, second name: %s, birthday: %s, role: {%s}",
+                getId(), getName(), getFirstName(), getSecondName(), getBirthday(), getRole());
     }
 }

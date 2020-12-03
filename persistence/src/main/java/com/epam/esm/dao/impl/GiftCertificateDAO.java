@@ -181,20 +181,20 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         Join<GiftCertificate, Tag> tags = root.join("tags");
         List<Predicate> predicates = new ArrayList<>();
         //WHERE clause for certificate name
-        if (!searchCriteria.getName().isEmpty()) {
+        if (searchCriteria.getName() != null) {
             Predicate predicateForName = builder.like(root.get("name"), "%" + searchCriteria.getName() + "%");
             predicates.add(predicateForName);
         }
         //WHERE clause for certificate description
-        if (!searchCriteria.getDescription().isEmpty()) {
+        if (searchCriteria.getDescription() != null) {
             Predicate predicateForDescription =
                     builder.like(root.get("description"), "%" + searchCriteria.getDescription() + "%");
             predicates.add(predicateForDescription);
         }
         //WHERE clause for tag names
-        if (!searchCriteria.getTagNames().isEmpty()) {
+        if (searchCriteria.getTag() != null) {
             In<String> inTags = builder.in(tags.get("name"));
-            String[] tagNames = searchCriteria.getTagNames().split(",");
+            String[] tagNames = searchCriteria.getTag().split(",");
             for (String tagName : tagNames) {
                 inTags.value(tagName);
             }

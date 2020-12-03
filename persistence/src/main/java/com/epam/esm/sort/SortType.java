@@ -28,7 +28,7 @@ public enum SortType {
             return template.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException |
                 InvocationTargetException | NoSuchMethodException ex) {
-            throw new ExpressionTemplateException("Cannot get exceptiontemplate");
+            throw new ExpressionTemplateException("Cannot get template");
         }
     }
 }

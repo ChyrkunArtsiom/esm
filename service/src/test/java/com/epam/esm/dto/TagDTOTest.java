@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class TagDTOTest {
 
     @Test
-    public void testEqualsSameTag() {
+    public void testEquals() {
         TagDTO tag = new TagDTO(1, "tag");
         assertEquals(tag, tag);
     }

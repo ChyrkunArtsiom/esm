@@ -51,13 +51,36 @@ create table esm_module2.certificate_tag
             on update cascade on delete cascade
 );
 
+create table esm_module2.roles
+(
+    id   serial      not null
+        constraint roles_pk
+            primary key,
+    name varchar(45) not null
+);
+
+create unique index roles_id_uindex
+    on esm_module2.roles (id);
+
+create unique index roles_name_uindex
+    on esm_module2.roles (name);
+
+CREATE SEQUENCE esm_module2.roles_id_seq START WITH 1 INCREMENT BY 1;
+
 create table esm_module2.users
 (
-    id       serial      not null,
-    name     varchar(45) not null,
-    password varchar(45) not null,
-    constraint users_pk
-        primary key (id)
+    id          serial      not null
+        constraint users_pk
+            primary key,
+    name        varchar(45) not null,
+    password    varchar(60) not null,
+    first_name  varchar(45) not null,
+    second_name varchar(45) not null,
+    role_id     integer     not null
+        constraint users_roles_id_fk
+            references esm_module2.roles
+            on update cascade on delete set null,
+    birthday    date        not null
 );
 
 create unique index users_id_uindex

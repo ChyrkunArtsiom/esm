@@ -1,7 +1,12 @@
 package com.epam.esm.mapper;
 
+import com.epam.esm.dto.RoleDTO;
 import com.epam.esm.dto.UserDTO;
+import com.epam.esm.dto.UserViewDTO;
+import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
+
+import java.time.LocalDate;
 
 /**
  * Class that converts {@link User} and {@link UserDTO} objects to each other.
@@ -20,7 +25,19 @@ public class UserMapper {
             entity.setId(dto.getId());
         }
         entity.setName(dto.getName());
-        entity.setPassword(dto.getPassword());
+        if (dto.getPassword() != null) {
+            entity.setPassword(dto.getPassword().toCharArray());
+        }
+        entity.setFirstName(dto.getFirstName());
+        entity.setSecondName(dto.getSecondName());
+        if (dto.getBirthday() != null) {
+            LocalDate date = LocalDate.parse(dto.getBirthday());
+            entity.setBirthday(date);
+        }
+        if (dto.getRole() != null) {
+            Role role = RoleMapper.toEntity(dto.getRole());
+            entity.setRole(role);
+        }
         return entity;
     }
 
@@ -31,6 +48,15 @@ public class UserMapper {
      * @return the {@link UserDTO} object
      */
     public static UserDTO toDto(User entity) {
-        return new UserDTO(entity.getId(), entity.getName(), entity.getPassword());
+        RoleDTO roleDTO = RoleMapper.toDto(entity.getRole());
+        return new UserDTO(entity.getId(), entity.getName(),
+                String.valueOf(entity.getPassword()), entity.getFirstName(),
+                entity.getSecondName(), entity.getBirthday().toString(), roleDTO);
+    }
+
+    public static UserViewDTO toUserViewDTO(User entity) {
+        return new UserViewDTO(entity.getId(), entity.getName(),
+                entity.getFirstName(),
+                entity.getSecondName(), entity.getBirthday().toString());
     }
 }

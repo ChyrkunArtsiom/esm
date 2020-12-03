@@ -2,6 +2,7 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.User;
+import com.epam.esm.exception.DuplicateUserException;
 import com.epam.esm.exception.NoUserException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -22,8 +23,16 @@ public class UserDAO implements AbstractDAO<User> {
     private EntityManager entityManager;
 
     @Override
-    public User create(User entity) {
-        throw new UnsupportedOperationException("User is not supported by create method.");
+    public User create(User user) {
+        try{
+            entityManager.persist(user);
+            entityManager.flush();
+            return user;
+        } catch (PersistenceException ex) {
+            throw new DuplicateUserException(
+                    String.format("User with name = {%s} already exists.", user.getName()), ex,
+                    user.getName());
+        }
     }
 
     @Override

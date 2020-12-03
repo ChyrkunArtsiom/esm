@@ -5,35 +5,35 @@ package com.epam.esm.util;
  */
 public class SearchCriteria {
     /** A name of tag. */
-    private String tagNames;
+    private String tag;
     /** A name of {@link com.epam.esm.entity.GiftCertificate} object. */
     private String name;
     /** A description. */
     private String description;
     /** A parameter sorted by and order. */
-    private String sort;
+    private String sort = "name_asc";
 
     /**
      * Constructor with all fields.
      *
-     * @param tagNames     the name of tag
+     * @param tag     the name of tag
      * @param name        the name of {@link com.epam.esm.entity.GiftCertificate} object
      * @param description the description
      * @param sort        the parameter sorted by and order
      */
-    public SearchCriteria(String tagNames, String name, String description, String sort) {
-        this.tagNames = tagNames;
+    public SearchCriteria(String tag, String name, String description, String sort) {
+        this.tag = tag;
         this.name = name;
         this.description = description;
-        this.sort = sort;
+        setSort(sort);
     }
 
-    public String getTagNames() {
-        return tagNames;
+    public String getTag() {
+        return tag;
     }
 
-    public void setTagNames(String tagNames) {
-        this.tagNames = tagNames;
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public String getName() {
@@ -57,6 +57,8 @@ public class SearchCriteria {
     }
 
     public void setSort(String sort) {
-        this.sort = sort;
+        if (sort != null && !sort.isEmpty()) {
+            this.sort = sort;
+        }
     }
 }

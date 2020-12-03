@@ -127,4 +127,17 @@ public class OrderDAO implements AbstractDAO<Order> {
         }
         return pages;
     }
+
+    /**
+     * Gets a list of {@link Order} objects by uesr id.
+     *
+     * @param userId the id of user
+     * @return the list of {@link Order} objects
+     */
+    public List<Order> readOrdersByUserId(int userId) {
+        TypedQuery<Order> query = entityManager.createQuery(
+                "SELECT o FROM orders o WHERE o.user.id =:user_id ORDER BY o.id", Order.class);
+        query.setParameter("user_id", userId);
+        return query.getResultList();
+    }
 }

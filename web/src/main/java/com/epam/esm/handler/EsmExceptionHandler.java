@@ -39,13 +39,14 @@ public class EsmExceptionHandler {
     }
 
     /**
-     * Handles {@link DuplicateCertificateException} and {@link DuplicateTagException} exceptions.
+     * Handles {@link DuplicateCertificateException}, {@link DuplicateTagException}
+     * and {@link DuplicateUserException} exceptions.
      *
      * @param ex      the exception
      * @param request the {@link WebRequest} object
      * @return the {@link ResponseEntity} object with headers, {@link ErrorManager} and http status
      */
-    @ExceptionHandler({DuplicateCertificateException.class, DuplicateTagException.class})
+    @ExceptionHandler({DuplicateCertificateException.class, DuplicateTagException.class, DuplicateUserException.class})
     public ResponseEntity<ErrorManager> duplicateEntity(DAOException ex, WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
         ErrorManager error = new ErrorManager();
@@ -194,21 +195,6 @@ public class EsmExceptionHandler {
     }
 
     /**
-     * Handles {@link PageParamIsNotPresent} exception.
-     *
-     * @param request the {@link WebRequest} object
-     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
-     */
-    @ExceptionHandler(PageParamIsNotPresent.class)
-    public ResponseEntity<ErrorManager> getParameterIsNotPresent(WebRequest request) {
-        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
-        ErrorManager error = new ErrorManager();
-        error.setErrorMessage(manager.getMessage("pageParamIsNotPresent"));
-        error.setErrorCode(ErrorCodesProvider.PAGE_PARAM_NOT_PRESENT);
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    /**
      * Handles {@link TemplateException} exception.
      *
      * @param request the {@link WebRequest} object
@@ -223,6 +209,13 @@ public class EsmExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+    /**
+     * Handles {@link OrderHasDuplicateCertificatesException} exception.
+     *
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
     @ExceptionHandler(OrderHasDuplicateCertificatesException.class)
     public ResponseEntity<ErrorManager> orderHasDuplicateCertificates(WebRequest request) {
         ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
@@ -230,6 +223,21 @@ public class EsmExceptionHandler {
         error.setErrorMessage(manager.getMessage("orderHasDuplicateCertificates"));
         error.setErrorCode(ErrorCodesProvider.INVALID_FIELD);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles {@link BadAuthenticationException} exception.
+     *
+     * @param request the {@link WebRequest} object
+     * @return the {@link ResponseEntity} object with {@link ErrorManager} and http status
+     */
+    @ExceptionHandler(BadAuthenticationException.class)
+    public ResponseEntity<ErrorManager> wrongUsernameOrPassword(WebRequest request) {
+        ErrorMessageManager manager = setLang(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+        ErrorManager error = new ErrorManager();
+        error.setErrorMessage(manager.getMessage("invalidUsernameOrPassword"));
+        error.setErrorCode(ErrorCodesProvider.UNAUTHORIZED);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
     private ErrorMessageManager setLang(String locale) {

@@ -84,11 +84,14 @@ class GiftCertificateServiceTest {
                                 "Test certificate", "Description", 1.5, OffsetDateTime.now(), null, 10, null)));
         Mockito.when(dao.readByParams(
                 Mockito.any(SearchCriteria.class), Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(entities);
+        Mockito.when(dao.getLastPage(Mockito.any(SearchCriteria.class), Mockito.anyInt())).thenReturn(2);
 
         SearchCriteria criteria = new SearchCriteria("", "Test certificate", "", "name_asc");
-        List<GiftCertificateDTO> services = service.readWithParams(criteria, 1, 1);
+        List<GiftCertificateDTO> services = service.readByParams(criteria, 1, 1);
         Mockito.verify(dao, Mockito.times(1))
                 .readByParams(Mockito.any(SearchCriteria.class), Mockito.anyInt(), Mockito.anyInt());
+        Mockito.verify(dao, Mockito.times(1))
+                .getLastPage(Mockito.any(SearchCriteria.class), Mockito.anyInt());
         assertTrue(services.size() > 0);
     }
 
