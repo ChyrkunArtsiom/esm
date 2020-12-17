@@ -5,6 +5,7 @@ import com.epam.esm.dao.impl.OrderDAO;
 import com.epam.esm.dao.impl.UserDAO;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.OrderDTO;
+import com.epam.esm.dto.OrderViewDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @ComponentScan(basePackageClasses = {OrderDAO.class})
-public class OrderService implements AbstractService<OrderDTO> {
+public class OrderService implements AbstractService<OrderViewDTO, OrderDTO> {
 
     private OrderDAO dao;
 
@@ -67,7 +68,7 @@ public class OrderService implements AbstractService<OrderDTO> {
 
     @Override
     @Transactional
-    public OrderDTO create(OrderDTO dto) {
+    public OrderViewDTO create(OrderDTO dto) {
         Order entity = OrderMapper.toEntity(dto);
         User user = userDAO.read(dto.getUser().getId());
         entity.setUser(user);
@@ -75,40 +76,35 @@ public class OrderService implements AbstractService<OrderDTO> {
                 .getCertificates().stream().map(c -> certificateDAO.read(c.getId())).collect(Collectors.toList());
         entity.setCertificates(certificates);
         entity = dao.create(entity);
-        return OrderMapper.toDto(entity);
+        return OrderMapper.toOrderViewDTO(entity);
     }
 
     @Override
-    public OrderDTO read(int id) {
+    public OrderViewDTO read(int id) {
+
         Order order = dao.read(id);
-        return OrderMapper.toDto(order);
+        return OrderMapper.toOrderViewDTO(order);
     }
 
     @Override
-    public List<OrderDTO> readAll() {
-        List<OrderDTO> dtos;
+    public List<OrderViewDTO> readAll() {
+        List<OrderViewDTO> dtos;
         List<Order> orders = dao.readAll();
-        dtos = orders.stream().map(OrderMapper::toDto).collect(Collectors.toList());
+        dtos = orders.stream().map(OrderMapper::toOrderViewDTO).collect(Collectors.toList());
         return dtos;
     }
 
-    /**
-     * Gets the list of {@link OrderDTO} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link OrderDTO} objects
-     */
-    public List<OrderDTO> readPaginated(Integer page, Integer size) {
-        List<OrderDTO> dtos;
+    @Override
+    public List<OrderViewDTO> readPaginated(Integer page, Integer size) {
+        List<OrderViewDTO> dtos;
         List<Order> entities = dao.readPaginated(page, size);
-        dtos = entities.stream().map(OrderMapper::toDto).collect(Collectors.toList());
+        dtos = entities.stream().map(OrderMapper::toOrderViewDTO).collect(Collectors.toList());
         return dtos;
     }
 
     @Override
     @Transactional
-    public OrderDTO update(OrderDTO dto) {
+    public OrderViewDTO update(OrderDTO dto) {
         Order toUpdate = dao.read(dto.getId());
         if (dto.getUser() != null) {
             User user = userDAO.read(dto.getUser().getId());
@@ -134,12 +130,7 @@ public class OrderService implements AbstractService<OrderDTO> {
         return dao.delete(id);
     }
 
-    /**
-     * Gets a number of last page of objects.
-     *
-     * @param size the size of page
-     * @return the number of last page
-     */
+    @Override
     public int getLastPage(Integer size) {
         return dao.getLastPage(size);
     }
@@ -161,5 +152,18 @@ public class OrderService implements AbstractService<OrderDTO> {
             newCertificates.add(checked);
         }
         return newCertificates;
+    }
+
+    /**
+     * Gets a list of {@link Order} objects by uesr id.
+     *
+     * @param userId the id of user
+     * @return the list of {@link Order} objects
+     */
+    public List<OrderViewDTO> readOrdersByUserId(int userId) {
+        List<OrderViewDTO> dtos;
+        List<Order> orders = dao.readOrdersByUserId(userId);
+        dtos = orders.stream().map(OrderMapper::toOrderViewDTO).collect(Collectors.toList());
+        return dtos;
     }
 }

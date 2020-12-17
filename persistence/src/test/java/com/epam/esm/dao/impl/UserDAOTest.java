@@ -1,24 +1,35 @@
 package com.epam.esm.dao.impl;
 
+import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = UserDAO.class)
+@SpringBootTest(classes = {UserDAO.class, RoleDAO.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class UserDAOTest {
 
     @Autowired
     private UserDAO dao;
+
+    @Autowired
+    private RoleDAO roleDAO;
+
+    @Test
+    @Transactional
+    public void testCreate() {
+        Role role = roleDAO.read("ROLE_USER");
+        User user = new User("user", "passowrd".toCharArray(), "Artsiom", "Chyrkun", LocalDate.now(), role);
+        assertNotNull(dao.create(user));
+    }
 
     @Test
     public void testReadById() {
@@ -28,7 +39,7 @@ class UserDAOTest {
 
     @Test
     public void testReadByName() {
-        User user = dao.read("user1");
+        User user = dao.read("admin");
         assertNotNull(user);
     }
 

@@ -2,6 +2,7 @@ package com.epam.esm.mapper;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.OrderDTO;
+import com.epam.esm.dto.OrderViewDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
@@ -45,11 +46,11 @@ public class OrderMapper {
      * @param entity the {@link Order} object
      * @return the {@link OrderDTO} object
      */
-    public static OrderDTO toDto(Order entity) {
-        OrderDTO dto = new OrderDTO();
+    public static OrderViewDTO toOrderViewDTO(Order entity) {
+        OrderViewDTO dto = new OrderViewDTO();
         dto.setId(entity.getId());
         dto.setCost(entity.getCost());
-        dto.setUser(UserMapper.toDto(entity.getUser()));
+        dto.setUser(UserMapper.toUserViewDTO(entity.getUser()));
         if (entity.getPurchaseDate() != null) {
             DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             dto.setPurchaseDate(entity.getPurchaseDate().format(df));

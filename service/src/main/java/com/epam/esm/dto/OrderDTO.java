@@ -5,7 +5,6 @@ import com.epam.esm.dto.validationmarkers.OrderPostValidation;
 import com.epam.esm.dto.validationmarkers.OrderPutValidation;
 import com.epam.esm.validator.ValidationMessageManager;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.core.Relation;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Digits;
@@ -18,9 +17,7 @@ import java.util.Objects;
 /**
  * Data transfer object of {@link com.epam.esm.entity.Order}.
  */
-@Relation(itemRelation = "order", collectionRelation = "orders")
 public class OrderDTO extends RepresentationModel<OrderDTO> {
-
     @NotNull(groups = {OrderPutValidation.class, DeleteValidation.class}, message = ValidationMessageManager.ID_INVALID)
     @Digits(integer = 10, fraction = 2, message = ValidationMessageManager.ID_INVALID,
             groups = {OrderPutValidation.class, DeleteValidation.class})
@@ -124,7 +121,18 @@ public class OrderDTO extends RepresentationModel<OrderDTO> {
 
     @Override
     public String toString() {
-        return String.format("Order: {id: %d, cost: %f, purchase date: %s, ",
-                getId(), getCost(), purchaseDate);
+        StringBuilder stringOfOrder = new StringBuilder(String.format("Order: {id: %d, cost: %f, purchase date: %s, ",
+                getId(), getCost(), purchaseDate));
+        stringOfOrder.append(String.format("user: %s, ", getUser()));
+        stringOfOrder.append("certificates: ");
+        for (int i = 0; i < getCertificates().size(); i++) {
+            stringOfOrder.append(getCertificates().get(i));
+            if (i == (getCertificates().size() - 1)) {
+                stringOfOrder.append(".");
+            } else {
+                stringOfOrder.append(", ");
+            }
+        }
+        return stringOfOrder.toString();
     }
 }

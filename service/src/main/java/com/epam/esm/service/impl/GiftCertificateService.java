@@ -7,6 +7,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.exception.NoTagException;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
@@ -19,20 +20,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class for interacting with {@link GiftCertificateDAO}. Implements {@link AbstractService}.
  */
 @Service
 @ComponentScan(basePackageClasses = {GiftCertificateDAO.class, TagService.class})
-@Validated
-public class GiftCertificateService implements AbstractService<GiftCertificateDTO> {
+public class GiftCertificateService implements AbstractService<GiftCertificateDTO, GiftCertificateDTO> {
 
     private GiftCertificateDAO dao;
 
@@ -85,19 +86,39 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         return dtos;
     }
 
-    /**
-     * Gets the list of {@link GiftCertificateDTO} objects by parameters.
-     * They are the fields of {@link SearchCriteria} class.
-     *
-     * @param criteria the {@link SearchCriteria} object
-     * @return the list of {@link GiftCertificateDTO} objects
-     */
-    public List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
+    @Override
+    public List<GiftCertificateDTO> readPaginated(Integer page, Integer size) {
+        return readWithParams(new SearchCriteria("", "", "", "name_asc"), page, size);
+    }
+
+
+    private List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
         List<GiftCertificateDTO> dtos;
         SearchCriteriaValidator.isValid(criteria);
         List<GiftCertificate> certificates = dao.readByParams(criteria, page, size);
         dtos = certificates.stream().map(GiftCertificateMapper::toDto).collect(Collectors.toList());
         return dtos;
+    }
+
+    /**
+     * Gets the list of {@link GiftCertificateDTO} objects by parameters.
+     * They are the fields of {@link SearchCriteria} class.
+     *
+     * @param searchCriteria the {@link SearchCriteria} object
+     * @return the list of {@link GiftCertificateDTO} objects
+     */
+    public List<GiftCertificateDTO> readByParams(SearchCriteria searchCriteria, Integer page, Integer size) {
+        List<GiftCertificateDTO> certificates;
+        if (Stream.of(page, size).allMatch(Objects::isNull)) {
+            certificates = readWithParams(searchCriteria, null, null);
+        } else {
+            int lastPage = getLastPage(searchCriteria, size);
+            if (page > lastPage) {
+                throw new ResourceNotFoundException();
+            }
+            certificates = readWithParams(searchCriteria, page, size);
+        }
+        return certificates;
     }
 
     @Override
@@ -152,6 +173,11 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
             }
         }
         return newSetOfTags;
+    }
+
+    @Override
+    public int getLastPage(Integer size) {
+        return getLastPage(new SearchCriteria("", "", "", "name_asc"), size);
     }
 
     /**

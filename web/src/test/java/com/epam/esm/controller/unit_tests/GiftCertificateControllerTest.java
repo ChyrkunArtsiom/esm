@@ -1,14 +1,18 @@
-package com.epam.esm.controller;
+package com.epam.esm.controller.unit_tests;
 
-import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.dto.TagDTO;
+import com.epam.esm.controller.GiftCertificateController;
+import com.epam.esm.dto.*;
 import com.epam.esm.exception.DuplicateCertificateException;
 import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.service.impl.GiftCertificateService;
+import com.epam.esm.service.impl.UserService;
 import com.epam.esm.util.ErrorMessageManager;
 import com.epam.esm.util.SearchCriteria;
+import com.epam.esm.util.jwt.JwtUtilImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -36,6 +41,30 @@ class GiftCertificateControllerTest {
     @MockBean
     private GiftCertificateService service;
 
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private JwtUtilImpl jwtUtil;
+
+    private static AuthenticationUser user;
+    private static String jwt;
+
+    @BeforeAll
+    public static void setUp() {
+        RoleDTO role = new RoleDTO(1, "ROLE_ADMIN");
+        UserDTO userDTO = new UserDTO(1, "admin", "password", "Artsiom", "Chyrkun", "1994-06-18", role);
+        user = new AuthenticationUser(userDTO);
+        jwt = "Bearer test";
+    }
+
+    @BeforeEach
+    public void setUpAuthorizationMock() {
+        Mockito.when(jwtUtil.getUsernameFromToken(Mockito.anyString())).thenReturn(user.getUsername());
+        Mockito.when(userService.loadUserByUsername(Mockito.anyString())).thenReturn(user);
+        Mockito.when(jwtUtil.validateToken(Mockito.anyString(), Mockito.any(UserDetails.class))).thenReturn(true);
+    }
+
     @Test
     public void testPostCertificate() throws Exception {
         GiftCertificateDTO certificateDTO = new GiftCertificateDTO(
@@ -44,7 +73,7 @@ class GiftCertificateControllerTest {
         String json = ow.writeValueAsString(certificateDTO);
         Mockito.when(service.create(Mockito.any(GiftCertificateDTO.class))).thenReturn(certificateDTO);
 
-        mockMvc.perform(post(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(post(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json).header("Authorization", jwt))
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$.name").value("Test certificate"))
                 .andExpect(status().isOk());
@@ -62,7 +91,7 @@ class GiftCertificateControllerTest {
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
         String errorMessage = String.format(manager.getMessage("entityAlreadyExists"), ex.getName());
 
-        mockMvc.perform(post(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(post(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json).header("Authorization", jwt))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.errorMessage").value(errorMessage))
                 .andExpect(status().isConflict());
@@ -74,7 +103,7 @@ class GiftCertificateControllerTest {
                 1, "Test certificate", "Description", BigDecimal.valueOf(1.5), 10, null);
         Mockito.when(service.read(certificateDTO.getId())).thenReturn(certificateDTO);
 
-        mockMvc.perform(get(CERTIFICATES_PATH + "/1"))
+        mockMvc.perform(get(CERTIFICATES_PATH + "/1").header("Authorization", jwt))
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$.name").value(certificateDTO.getName()))
                 .andExpect(jsonPath("$.description").value(certificateDTO.getDescription()))
@@ -90,7 +119,7 @@ class GiftCertificateControllerTest {
         ErrorMessageManager manager = ErrorMessageManager.valueOf(locale);
         String errorMessage = String.format(manager.getMessage("certificateDoesntExist"), ex.getName());
 
-        mockMvc.perform(get(CERTIFICATES_PATH + "/1"))
+        mockMvc.perform(get(CERTIFICATES_PATH + "/1").header("Authorization", jwt))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.errorMessage").value(errorMessage))
                 .andExpect(status().isNotFound());
@@ -104,7 +133,7 @@ class GiftCertificateControllerTest {
                         new GiftCertificateDTO(
                                 2, "Test certificate2", "Description", BigDecimal.valueOf(1.5), 10, null)
                 ));
-        Mockito.when(service.readWithParams(
+        Mockito.when(service.readByParams(
                 Mockito.any(SearchCriteria.class),
                 Mockito.nullable(Integer.class),
                 Mockito.nullable(Integer.class)))
@@ -120,7 +149,7 @@ class GiftCertificateControllerTest {
 
         Mockito.verify(service,
                 Mockito.times(1))
-                .readWithParams(
+                .readByParams(
                         Mockito.any(SearchCriteria.class),
                         Mockito.nullable(Integer.class),
                         Mockito.nullable(Integer.class));
@@ -137,7 +166,7 @@ class GiftCertificateControllerTest {
         String json = ow.writeValueAsString(giftCertificateDTO);
         Mockito.when(service.update(Mockito.any(GiftCertificateDTO.class))).thenReturn(null);
 
-        mockMvc.perform(put(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(put(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json).header("Authorization", jwt))
                 .andExpect(status().isNoContent());
     }
 
@@ -149,7 +178,7 @@ class GiftCertificateControllerTest {
         String json = ow.writeValueAsString(giftCertificateDTO);
         Mockito.when(service.delete(Mockito.any(GiftCertificateDTO.class))).thenReturn(true);
 
-        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json).header("Authorization", jwt))
                 .andExpect(status().isNoContent());
     }
 
@@ -161,14 +190,14 @@ class GiftCertificateControllerTest {
         String json = ow.writeValueAsString(giftCertificateDTO);
         Mockito.when(service.delete(Mockito.any(GiftCertificateDTO.class))).thenReturn(false);
 
-        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(delete(CERTIFICATES_PATH).contentType(MediaType.APPLICATION_JSON).content(json).header("Authorization", jwt))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void testDeleteCertificateByUrlId() throws Exception {
         Mockito.when(service.delete(Mockito.anyInt())).thenReturn(true);
-        mockMvc.perform(delete(CERTIFICATES_PATH + "/1"))
+        mockMvc.perform(delete(CERTIFICATES_PATH + "/1").header("Authorization", jwt))
                 .andExpect(status().isNoContent());
     }
 }

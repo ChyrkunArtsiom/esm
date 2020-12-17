@@ -1,15 +1,16 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.dto.AuthenticationUser;
 import com.epam.esm.dto.OrderDTO;
+import com.epam.esm.dto.OrderViewDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.dto.validationmarkers.DeleteValidation;
 import com.epam.esm.dto.validationmarkers.OrderPostValidation;
 import com.epam.esm.dto.validationmarkers.OrderPutValidation;
-import com.epam.esm.exception.PageParamIsNotPresent;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.handler.EsmExceptionHandler;
 import com.epam.esm.service.impl.OrderService;
+import com.epam.esm.util.AuthorizeValidator;
+import com.epam.esm.util.linkbuilders.OrderLinkBuilder;
+import com.epam.esm.util.linkbuilders.TagLinkBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.hateoas.CollectionModel;
@@ -18,39 +19,50 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Class controller for interacting with {@link OrderDTO} objects.
  */
 @RestController
-@ComponentScan(basePackageClasses = {OrderService.class, EsmExceptionHandler.class})
+@ComponentScan(basePackageClasses = {OrderService.class})
 @RequestMapping("/orders")
 @Validated
-public class OrderController {
+public class OrderController extends AbstractController<OrderService, OrderLinkBuilder, OrderDTO> {
 
-    private OrderService service;
+    private AuthorizeValidator authorizeValidator;
 
-    /**
-     * Sets {@link OrderService} object.
-     *
-     * @param service the {@link OrderService} object
-     */
+    private TagLinkBuilder tagLinkBuilder;
+
+    @Override
     @Autowired
     public void setService(OrderService service) {
-        this.service = service;
+        super.setService(service);
+    }
+
+    @Autowired
+    public void setAuthorizeValidator(AuthorizeValidator authorizeValidator) {
+        this.authorizeValidator = authorizeValidator;
+    }
+
+    @Override
+    @Autowired
+    public void setLinkBuilder(OrderLinkBuilder linkBuilder) {
+        super.setLinkBuilder(linkBuilder);
+    }
+
+    @Autowired
+    public void setTagLinkBuilder(TagLinkBuilder tagLinkBuilder) {
+        this.tagLinkBuilder = tagLinkBuilder;
     }
 
     /**
@@ -60,14 +72,15 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with {@link OrderDTO} object, headers and http status
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/hal+json")
-    public ResponseEntity<OrderDTO> createOrder(@Validated(value = OrderPostValidation.class) @RequestBody OrderDTO dto) {
-        OrderDTO createdOrder = service.create(dto);
+    @PreAuthorize("hasRole('ADMIN') or @authorizeValidator.canPostOrderWithThisUser(#user, #dto)")
+    public ResponseEntity<OrderViewDTO> createOrder(
+            @Validated(value = OrderPostValidation.class) @RequestBody OrderDTO dto,
+            @AuthenticationPrincipal AuthenticationUser user) {
+        OrderViewDTO createdOrder = service.create(dto);
         HttpHeaders headers = new HttpHeaders();
         Link selfLink = linkTo(OrderController.class).slash(createdOrder.getId()).withSelfRel();
         headers.setLocation(selfLink.toUri());
-        createdOrder.add(selfLink);
-        buildUserSelfLink(createdOrder);
-        buildCertificatesSelfLinks(createdOrder);
+        linkBuilder.buildLink(createdOrder);
         return new ResponseEntity<>(createdOrder, headers, HttpStatus.OK);
     }
 
@@ -79,14 +92,27 @@ public class OrderController {
      */
     @RequestMapping(value = "/{orderId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public RepresentationModel<OrderDTO> readOrder(
-            @PathVariable @Positive @Digits(integer = 10, fraction = 0) int orderId) {
-        OrderDTO order = service.read(orderId);
-        Link selfLink = linkTo(OrderController.class).slash(order.getId()).withSelfRel();
-        order.add(selfLink);
-        buildUserSelfLink(order);
-        buildCertificatesSelfLinks(order);
+    @PreAuthorize("hasRole('ADMIN') or @authorizeValidator.hasAccessToOrder(#user, #orderId)")
+    public RepresentationModel<OrderViewDTO> readOrder(
+            @PathVariable @Positive @Digits(integer = 10, fraction = 0) int orderId,
+            @AuthenticationPrincipal AuthenticationUser user) {
+        OrderViewDTO order = service.read(orderId);
+        linkBuilder.buildLink(order);
         return order;
+    }
+
+    @RequestMapping(value = "/{userId}/order", method = RequestMethod.GET, produces = "application/hal+json")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN') or @authorizeValidator.hasAccessToOrderList(#user, #userId)")
+    public CollectionModel readOrdersByUserId(
+            @PathVariable @Positive @Digits(integer = 10, fraction = 0) int userId,
+            @AuthenticationPrincipal AuthenticationUser user) {
+        List<OrderViewDTO> orders;
+        CollectionModel result;
+        orders = service.readOrdersByUserId(userId);
+        linkBuilder.buildLinks(orders);
+        result = CollectionModel.of(orders);
+        return result;
     }
 
     /**
@@ -99,33 +125,9 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readAllOrders(
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
-            @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
+            @RequestParam(value = "size", required = false, defaultValue = "5") @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
-        List<OrderDTO> orders;
-        CollectionModel result;
-        if (Stream.of(page, size).allMatch(Objects::isNull)) {
-            orders = service.readAll();
-            orders = buildSelfLinks(orders);
-            result = CollectionModel.of(orders);
-        } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
-            throw new PageParamIsNotPresent();
-        } else {
-            int lastPage = service.getLastPage(size);
-            if (page > lastPage) {
-                throw new ResourceNotFoundException();
-            }
-            orders = service.readPaginated(page, size);
-            orders = buildSelfLinks(orders);
-            result = CollectionModel.of(orders);
-
-            if (hasPrevious(page)) {
-                result.add(linkTo(methodOn(OrderController.class).readAllOrders(page - 1, size)).withRel("prev"));
-            }
-            if (hasNext(page, size)) {
-                result.add(linkTo(methodOn(OrderController.class).readAllOrders(page + 1, size)).withRel("next"));
-            }
-        }
-        return result;
+        return readPaginatedForController(page, size);
     }
 
     /**
@@ -135,15 +137,13 @@ public class OrderController {
      * @return the {@link ResponseEntity} object with http status
      */
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
-    public ResponseEntity<?> updateOrder(@RequestBody @Validated(value = OrderPutValidation.class) OrderDTO dto) {
-        OrderDTO created = service.update(dto);
+    public ResponseEntity<OrderViewDTO> updateOrder(@RequestBody @Validated(value = OrderPutValidation.class) OrderDTO dto) {
+        OrderViewDTO created = service.update(dto);
         if (created != null) {
             HttpHeaders headers = new HttpHeaders();
             Link selfLink = linkTo(OrderController.class).slash(created.getId()).withSelfRel();
             headers.setLocation(selfLink.toUri());
-            created.add(selfLink);
-            buildUserSelfLink(created);
-            buildCertificatesSelfLinks(created);
+            linkBuilder.buildLink(created);
             return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -191,52 +191,8 @@ public class OrderController {
         List<TagDTO> tags;
         CollectionModel result;
             tags = service.getMostFrequentTags();
-            tags = tags.stream()
-                    .peek(t -> t
-                            .add(linkTo(TagController.class)
-                                    .slash(t.getId())
-                                    .withSelfRel()))
-                    .collect(Collectors.toList());
+            tagLinkBuilder.buildLinks(tags);
             result = CollectionModel.of(tags);
         return result;
-    }
-
-    private List<OrderDTO> buildSelfLinks(List<OrderDTO> orders) {
-        return orders.stream().peek(order -> {
-            order.add(linkTo(OrderController.class).slash(order.getId()).withSelfRel());
-            buildUserSelfLink(order);
-            buildCertificatesSelfLinks(order);
-        }).collect(Collectors.toList());
-    }
-
-    private void buildUserSelfLink(OrderDTO order) {
-        order.getUser().add(linkTo(UserController.class).slash(order.getUser().getId()).withSelfRel());
-    }
-
-    private void buildCertificatesSelfLinks(OrderDTO order) {
-        List<GiftCertificateDTO> certificates = order.getCertificates().stream()
-                .peek(c -> {
-                    c.add(linkTo(GiftCertificateController.class).slash(c.getId()).withSelfRel());
-                    buildTagsSelfLink(c);
-                }).collect(Collectors.toList());
-        order.setCertificates(certificates);
-    }
-
-    private void buildTagsSelfLink(GiftCertificateDTO certificate) {
-        if (certificate.getTags() != null) {
-            Set<TagDTO> tags = certificate.getTags().stream().map(t ->
-                    t.add(linkTo(TagController.class).slash(t.getId()).withSelfRel()))
-                    .collect(Collectors.toSet());
-            certificate.setTags(tags);
-        }
-    }
-
-    private boolean hasNext(int page, int size) {
-        int lastPage = service.getLastPage(size);
-        return page < lastPage;
-    }
-
-    private boolean hasPrevious(int page) {
-        return page > 1;
     }
 }

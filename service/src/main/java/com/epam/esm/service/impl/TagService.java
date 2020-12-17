@@ -6,7 +6,6 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +16,8 @@ import java.util.stream.Collectors;
  * Class for interacting with {@link Tag}. Implements {@link AbstractService}.
  */
 @Service
-@ComponentScan(basePackageClasses = TagDAO.class)
-public class TagService implements AbstractService<TagDTO> {
+/*@ComponentScan(basePackageClasses = TagDAO.class)*/
+public class TagService implements AbstractService<TagDTO, TagDTO> {
 
     private TagDAO dao;
 
@@ -65,13 +64,7 @@ public class TagService implements AbstractService<TagDTO> {
         return dtos;
     }
 
-    /**
-     * Gets the list of {@link TagDTO} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link TagDTO} objects
-     */
+    @Override
     public List<TagDTO> readPaginated(Integer page, Integer size) {
         List<TagDTO> dtos;
         List<Tag> entities = dao.readPaginated(page, size);
@@ -97,12 +90,7 @@ public class TagService implements AbstractService<TagDTO> {
         return dao.delete(id);
     }
 
-    /**
-     * Gets a number of last page of objects.
-     *
-     * @param size the size of page
-     * @return the number of last page
-     */
+    @Override
     public int getLastPage(Integer size) {
         return dao.getLastPage(size);
     }

@@ -1,13 +1,30 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.EncoderConfiguration;
+import com.epam.esm.dao.impl.RoleDAO;
 import com.epam.esm.dao.impl.UserDAO;
+import com.epam.esm.dto.AuthenticationUser;
 import com.epam.esm.dto.UserDTO;
+import com.epam.esm.dto.UserViewDTO;
+import com.epam.esm.dto.models.AuthenticationRequest;
+import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
+import com.epam.esm.exception.BadAuthenticationException;
+import com.epam.esm.exception.NoUserException;
 import com.epam.esm.mapper.UserMapper;
 import com.epam.esm.service.AbstractService;
+import com.epam.esm.util.jwt.JwtUtilImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,51 +33,91 @@ import java.util.stream.Collectors;
  * Class for interacting with {@link com.epam.esm.entity.User}. Implements {@link AbstractService}.
  */
 @Service
-@ComponentScan(basePackageClasses = UserDAO.class)
-public class UserService implements AbstractService<UserDTO> {
+@ComponentScan(basePackageClasses = {UserDAO.class, EncoderConfiguration.class})
+public class UserService implements AbstractService<UserViewDTO, UserDTO>, UserDetailsService {
 
     private UserDAO dao;
+
+    private RoleDAO roleDAO;
+
+    private PasswordEncoder encoder;
+
+    private AuthenticationManager manager;
+
+    private JwtUtilImpl jwtTokenUtil;
+
+    @Autowired
+    public void setJwtTokenUtil(JwtUtilImpl jwtTokenUtil) {
+        this.jwtTokenUtil = jwtTokenUtil;
+    }
 
     @Autowired
     public void setDao(UserDAO dao) {
         this.dao = dao;
     }
 
-    @Override
-    public UserDTO create(UserDTO entity) {
-        throw new UnsupportedOperationException("User is not supported by create method.");
+    @Autowired
+    public void setRoleDAO(RoleDAO roleDAO) {
+        this.roleDAO = roleDAO;
+    }
+
+    @Autowired
+    public void setEncoder(PasswordEncoder encoder) {
+        this.encoder = encoder;
+    }
+
+    @Autowired
+    public void setManager(AuthenticationManager manager) {
+        this.manager = manager;
     }
 
     @Override
-    public UserDTO read(int id) {
+    @Transactional
+    public UserViewDTO create(UserDTO dto) {
+        User user = UserMapper.toEntity(dto);
+        Role role = roleDAO.read("ROLE_USER");
+        user.setRole(role);
+        user.setPassword(encoder.encode(dto.getPassword()).toCharArray());
+        user = dao.create(user);
+        return UserMapper.toUserViewDTO(user);
+    }
+
+    @Override
+    public UserViewDTO read(int id) {
         User user = dao.read(id);
-        return UserMapper.toDto(user);
+        return UserMapper.toUserViewDTO(user);
+    }
+
+    public UserViewDTO readOpenUser(int id) {
+        User user = dao.read(id);
+        return UserMapper.toUserViewDTO(user);
     }
 
     @Override
-    public List<UserDTO> readAll() {
-        List<UserDTO> dtos;
+    public List<UserViewDTO> readAll() {
+        List<UserViewDTO> dtos;
         List<User> entities = dao.readAll();
-        dtos = entities.stream().map(UserMapper::toDto).collect(Collectors.toList());
-        return dtos;
-    }
-
-    /**
-     * Gets the list of {@link UserDTO} objects by page and size.
-     *
-     * @param page the page number
-     * @param size the size
-     * @return the list of {@link UserDTO} objects
-     */
-    public List<UserDTO> readPaginated(Integer page, Integer size) {
-        List<UserDTO> dtos;
-        List<User> entities = dao.readPaginated(page, size);
-        dtos = entities.stream().map(UserMapper::toDto).collect(Collectors.toList());
+        dtos = entities.stream().map(UserMapper::toUserViewDTO).collect(Collectors.toList());
         return dtos;
     }
 
     @Override
-    public UserDTO update(UserDTO entity) {
+    public List<UserViewDTO> readPaginated(Integer page, Integer size) {
+        List<UserViewDTO> dtos;
+        List<User> entities = dao.readPaginated(page, size);
+        dtos = entities.stream().map(UserMapper::toUserViewDTO).collect(Collectors.toList());
+        return dtos;
+    }
+
+    public List<UserViewDTO> readOpenUsersPaginated(Integer page, Integer size) {
+        List<UserViewDTO> dtos;
+        List<User> entities = dao.readPaginated(page, size);
+        dtos = entities.stream().map(UserMapper::toUserViewDTO).collect(Collectors.toList());
+        return dtos;
+    }
+
+    @Override
+    public UserViewDTO update(UserDTO entity) {
         throw new UnsupportedOperationException("User is not supported by update method.");
     }
 
@@ -74,13 +131,31 @@ public class UserService implements AbstractService<UserDTO> {
         throw new UnsupportedOperationException("User is not supported by delete method.");
     }
 
-    /**
-     * Gets a number of last page of objects.
-     *
-     * @param size the size of page
-     * @return the number of last page
-     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        try {
+            User user = dao.read(username);
+            return new AuthenticationUser(UserMapper.toDto(user));
+        } catch (NoUserException ex) {
+            throw new BadAuthenticationException(ex);
+        }
+    }
+
+    @Override
     public int getLastPage(Integer size) {
         return dao.getLastPage(size);
+    }
+
+    public String authorize(AuthenticationRequest request) {
+        try {
+            manager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()));
+            final UserDetails userDetails = loadUserByUsername(request.getUsername());
+            return jwtTokenUtil.generateToken(userDetails);
+        }catch (BadCredentialsException ex) {
+            throw new BadAuthenticationException(ex);
+        }
     }
 }

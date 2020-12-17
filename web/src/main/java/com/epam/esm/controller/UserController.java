@@ -1,45 +1,45 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.AuthenticationUser;
 import com.epam.esm.dto.UserDTO;
-import com.epam.esm.exception.PageParamIsNotPresent;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.handler.EsmExceptionHandler;
+import com.epam.esm.dto.UserViewDTO;
 import com.epam.esm.service.impl.UserService;
+import com.epam.esm.util.AuthorizeValidator;
+import com.epam.esm.util.linkbuilders.UserLinkBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@ComponentScan(basePackageClasses = {UserService.class, EsmExceptionHandler.class})
+@ComponentScan
 @RequestMapping("/users")
 @Validated
-public class UserController {
+public class UserController extends AbstractController<UserService, UserLinkBuilder, UserDTO> {
 
-    private UserService service;
+    private AuthorizeValidator authorizeValidator;
 
-    /**
-     * Sets {@link UserService} object.
-     *
-     * @param service the {@link UserService} object
-     */
     @Autowired
     public void setService(UserService service) {
         this.service = service;
+    }
+
+    @Autowired
+    public void setAuthorizeValidator(AuthorizeValidator authorizeValidator) {
+        this.authorizeValidator = authorizeValidator;
+    }
+
+    @Autowired
+    public void setLinkBuilder(UserLinkBuilder linkBuilder) {
+        this.linkBuilder = linkBuilder;
     }
 
     /**
@@ -50,10 +50,11 @@ public class UserController {
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
-    public RepresentationModel<UserDTO> readUser(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int userId) {
-        UserDTO user = service.read(userId);
-        Link selfLink = linkTo(UserController.class).slash(user.getId()).withSelfRel();
-        user.add(selfLink);
+    @PreAuthorize("hasRole('ADMIN') or @authorizeValidator.hasAccessToProfile(#authUser, #userId)")
+    public RepresentationModel<UserViewDTO> readUser(@PathVariable @Positive @Digits(integer = 10, fraction = 0) int userId,
+                                                     @AuthenticationPrincipal AuthenticationUser authUser) {
+        UserViewDTO user = service.read(userId);
+        linkBuilder.buildLink(user);
         return user;
     }
 
@@ -67,48 +68,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readAllUsers(
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
-            @RequestParam(value = "size", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer size
+            @RequestParam(value = "size", required = false, defaultValue = "5") @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
-        List<UserDTO> users;
-        CollectionModel result;
-        if (Stream.of(page, size).allMatch(Objects::isNull)) {
-            users = service.readAll();
-            users = buildSelfLinks(users);
-            result = CollectionModel.of(users);
-        } else if (Stream.of(page, size).anyMatch(Objects::isNull)) {
-            throw new PageParamIsNotPresent();
-        } else {
-            int lastPage = service.getLastPage(size);
-            if (page > lastPage) {
-                throw new ResourceNotFoundException();
-            }
-            users = service.readPaginated(page, size);
-            users = buildSelfLinks(users);
-            result = CollectionModel.of(users);
-
-            if (hasPrevious(page)) {
-                result.add(linkTo(methodOn(UserController.class).readAllUsers(page - 1, size)).withRel("prev"));
-            }
-            if (hasNext(page, size)) {
-                result.add(linkTo(methodOn(UserController.class).readAllUsers(page + 1, size)).withRel("next"));
-            }
-        }
-        return result;
-    }
-
-    private List<UserDTO> buildSelfLinks(List<UserDTO> tags) {
-        return tags.stream()
-                .map(t -> t
-                        .add(linkTo(UserController.class).slash(t.getId()).withSelfRel()))
-                .collect(Collectors.toList());
-    }
-
-    private boolean hasNext(int page, int size) {
-        int lastPage = service.getLastPage(size);
-        return page < lastPage;
-    }
-
-    private boolean hasPrevious(int page) {
-        return page > 1;
+        return readPaginatedForController(page, size);
     }
 }

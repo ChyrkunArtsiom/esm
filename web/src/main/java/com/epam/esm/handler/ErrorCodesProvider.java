@@ -20,4 +20,5 @@ public class ErrorCodesProvider {
     public final static int EMPTY_PAGE = 404999;
     public final static int PAGE_PARAM_NOT_PRESENT = 400001;
     public final static int INTERNAL_SERVER_ERROR = 500000;
+    public final static int UNAUTHORIZED = 401000;
 }

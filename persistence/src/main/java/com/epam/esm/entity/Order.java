@@ -16,7 +16,7 @@ public class Order {
 
     @Id
     @SequenceGenerator(
-            name = "orders_id_seq", sequenceName = "esm_module2.certificates_id_seq", allocationSize = 1)
+            name = "orders_id_seq", schema = "esm_module2", sequenceName = "orders_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_id_seq")
     private Integer id;
 
