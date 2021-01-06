@@ -48,7 +48,7 @@ public abstract class AbstractController<T extends AbstractService, U extends Li
     public CollectionModel readPaginatedForController(Integer page, Integer size) {
         List<Z> objects;
         CollectionModel result;
-        if (Stream.of(page, size).allMatch(Objects::isNull)) {
+        if (page == null) {
             objects = service.readAll();
             linkBuilder.buildLinks(objects);
             result = CollectionModel.of(objects);

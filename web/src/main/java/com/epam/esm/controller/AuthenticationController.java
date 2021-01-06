@@ -26,20 +26,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  */
 @RestController
 public class AuthenticationController {
-
-    private AuthenticationManager manager;
-    private JwtUtilImpl jwtTokenUtil;
     private UserService service;
-
-    @Autowired
-    public void setManager(AuthenticationManager manager) {
-        this.manager = manager;
-    }
-
-    @Autowired
-    public void setJwtTokenUtil(JwtUtilImpl jwtTokenUtil) {
-        this.jwtTokenUtil = jwtTokenUtil;
-    }
 
     @Autowired
     public void setService(UserService service) {

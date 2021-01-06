@@ -94,7 +94,7 @@ public class OrderViewDTO extends RepresentationModel<OrderViewDTO> {
         if(obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        OrderDTO order = (OrderDTO) obj;
+        OrderViewDTO order = (OrderViewDTO) obj;
         return cost.equals(order.getCost()) && user.equals(order.getUser())
                 && certificates.equals(order.getCertificates());
     }

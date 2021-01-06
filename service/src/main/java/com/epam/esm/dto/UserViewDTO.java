@@ -84,7 +84,7 @@ public class UserViewDTO extends RepresentationModel<UserViewDTO> {
         if(obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        UserDTO user = (UserDTO) obj;
+        UserViewDTO user = (UserViewDTO) obj;
         return getName().equals(user.getName());
     }
 

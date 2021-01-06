@@ -18,7 +18,6 @@ import java.util.function.Function;
  * The class-implementation of {@link JwtUtil}.
  */
 @Service
-@PropertySource("classpath:/jwt.properties")
 public class JwtUtilImpl implements JwtUtil {
 
     private static final String CLAIM_KEY_USER_ID = "userId";

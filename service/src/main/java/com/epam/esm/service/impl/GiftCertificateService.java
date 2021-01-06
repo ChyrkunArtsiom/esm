@@ -109,7 +109,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
      */
     public List<GiftCertificateDTO> readByParams(SearchCriteria searchCriteria, Integer page, Integer size) {
         List<GiftCertificateDTO> certificates;
-        if (Stream.of(page, size).allMatch(Objects::isNull)) {
+        if (page == null) {
             certificates = readWithParams(searchCriteria, null, null);
         } else {
             int lastPage = getLastPage(searchCriteria, size);
