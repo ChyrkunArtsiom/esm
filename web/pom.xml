@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
     <artifactId>web</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <properties>
         <java.version>1.8</java.version>
