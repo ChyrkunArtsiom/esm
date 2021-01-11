@@ -1,6 +1,11 @@
 jwt:
   expiration: 1
   secret: ${ESM_JWT_SECRET:secretsgrgy4t35423rgsrc234gsdqwesecter}
+logging:
+  level:
+    org:
+      hibernate: DEBUG
+    root: DEBUG
 server:
   servlet:
     context-path: /esm
