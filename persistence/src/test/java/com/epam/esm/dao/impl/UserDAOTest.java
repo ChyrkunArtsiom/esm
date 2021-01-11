@@ -54,6 +54,6 @@ class UserDAOTest {
         int page = 1;
         int size = 2;
         List<User> tags = dao.readPaginated(page, size);
-        assertEquals(tags.size(), size);
+        assertEquals(size, tags.size());
     }
 }

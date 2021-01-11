@@ -58,7 +58,7 @@ class GiftCertificateDAOTest {
     @Transactional(readOnly = true)
     public void testReadAll() {
         List<GiftCertificate> certificates = dao.readAll();
-        assertEquals(certificates.size(), 4);
+        assertEquals(4, certificates.size());
     }
 
     @Test
