@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    data: data.sql
+    driverClassName: org.h2.Driver
+    password: 127001
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    username: esm_user
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+jwt:
+  expiration: 2
+  secret: secret

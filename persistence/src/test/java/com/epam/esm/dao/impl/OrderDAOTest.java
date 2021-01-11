@@ -60,7 +60,7 @@ class OrderDAOTest {
         int page = 1;
         int size = 1;
         List<Order> tags = dao.readPaginated(page, size);
-        assertEquals(tags.size(), size);
+        assertEquals(size, tags.size());
     }
 
     @Test
