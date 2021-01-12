@@ -10,6 +10,7 @@
         <relativePath />
     </parent>
     <artifactId>persistence</artifactId>
+
     <packaging>jar</packaging>
 
     <properties>
