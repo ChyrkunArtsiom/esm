@@ -21,7 +21,6 @@ class TagDAOTest {
 
     @Test
     @Transactional
-    @Sql({"classpath:data.sql"})
     public void testCreate() {
         Tag tag = new Tag( "fifth");
         assertNotNull(dao.create(tag));
@@ -35,14 +34,12 @@ class TagDAOTest {
     }
 
     @Test
-    @Sql({"classpath:data.sql"})
     public void testReadAll() {
         List<Tag> tags = dao.readAll();
         assertTrue(tags.size() > 0);
     }
 
     @Test
-    @Sql({"classpath:data.sql"})
     public void testReadByName() {
         Tag tag = dao.read("thirdtag");
         assertNotNull(tag);
@@ -50,7 +47,6 @@ class TagDAOTest {
 
     @Test
     @Transactional
-    @Sql({"classpath:data.sql"})
     public void testDelete() {
         Tag tag = new Tag( "secondtag");
         assertTrue(dao.delete(tag));
@@ -58,13 +54,11 @@ class TagDAOTest {
 
     @Test
     @Transactional
-    @Sql({"classpath:data.sql"})
     public void testDeleteById() {
         assertTrue(dao.delete(1));
     }
 
     @Test
-    @Sql({"classpath:data.sql"})
     public void testReadPaginated() {
         int page = 2;
         int size = 2;
