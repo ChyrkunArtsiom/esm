@@ -18,8 +18,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceConfiguration.class)
-@AutoConfigureDataJpa
-@AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class UserDAOTest {
 

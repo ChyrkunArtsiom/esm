@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /*@SpringBootTest(classes = TagDAO.class)*/
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = PersistenceConfiguration.class)
+@ContextConfiguration(classes = PersistenceTestConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class TagDAOTest {
 
