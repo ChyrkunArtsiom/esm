@@ -17,7 +17,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+/*@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
 class GiftCertificateDAOTest {
 
     @Autowired
@@ -27,8 +27,8 @@ class GiftCertificateDAOTest {
     @Transactional
     public void testCreate() {
         Set<Tag> tags = new HashSet<>();
-        tags.add(new Tag("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"));
-        GiftCertificate certificate = new GiftCertificate("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "test",
+        tags.add(new Tag("TagName"));
+        GiftCertificate certificate = new GiftCertificate("Name", "test",
                 1.0, null, null, 1, tags);
         assertNotNull(dao.create(certificate));
     }

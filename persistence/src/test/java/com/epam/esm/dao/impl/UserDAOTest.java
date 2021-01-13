@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+/*@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
 class UserDAOTest {
 
     @Autowired

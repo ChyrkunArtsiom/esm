@@ -25,9 +25,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceConfiguration.class)
-@ContextConfiguration(classes = PersistenceTestConfiguration.class)
-@Sql({"classpath:data.sql"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+/*@ContextConfiguration(classes = PersistenceTestConfiguration.class)*/
+/*@Sql({"classpath:data.sql"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
 class OrderDAOTest {
 
     @Autowired

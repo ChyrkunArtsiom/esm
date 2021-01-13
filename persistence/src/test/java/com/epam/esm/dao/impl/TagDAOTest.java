@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ContextConfiguration(classes = PersistenceTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+/*@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
 class TagDAOTest {
 
     @Autowired
