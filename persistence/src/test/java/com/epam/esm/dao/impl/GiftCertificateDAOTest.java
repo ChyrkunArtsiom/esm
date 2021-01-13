@@ -6,6 +6,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.util.SearchCriteria;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceConfiguration.class)
+/*@AutoConfigureTestDatabase*/
 /*@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
 class GiftCertificateDAOTest {
 

@@ -17,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -26,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceConfiguration.class)
 /*@ContextConfiguration(classes = PersistenceTestConfiguration.class)*/
-/*@Sql({"classpath:data.sql"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
+/*@Sql({"classpath:data.sql"})*/
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class OrderDAOTest {
 
     @Autowired

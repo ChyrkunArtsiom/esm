@@ -18,11 +18,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*@SpringBootTest(classes = TagDAO.class)*/
-@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = PersistenceConfiguration.class)
+/*@ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = PersistenceTestConfiguration.class)
-/*@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
+@ContextConfiguration(classes = PersistenceTestConfiguration.class)*/
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class TagDAOTest {
 
     @Autowired

@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 @ComponentScan*/
 @Import(PersistenceConfiguration.class)
 public class PersistenceTestConfiguration {
+
     @Bean
     public DataSource getDataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
