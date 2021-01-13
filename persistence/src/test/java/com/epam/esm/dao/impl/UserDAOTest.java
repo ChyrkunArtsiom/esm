@@ -1,15 +1,11 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.PersistenceConfiguration;
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -17,8 +13,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = PersistenceConfiguration.class)
-/*@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)*/
+@SpringBootTest(classes = PersistenceTestConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class UserDAOTest {
 
     @Autowired

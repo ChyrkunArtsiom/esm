@@ -6,8 +6,6 @@ import com.epam.esm.util.linkbuilders.LinkBuilder;
 import org.springframework.hateoas.CollectionModel;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * The abstract class for controllers.
