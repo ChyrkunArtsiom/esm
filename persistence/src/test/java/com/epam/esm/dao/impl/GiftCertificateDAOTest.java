@@ -27,7 +27,7 @@ class GiftCertificateDAOTest {
     @Transactional
     public void testCreate() {
         Set<Tag> tags = new HashSet<>();
-        tags.add(new Tag("fifth"));
+        tags.add(new Tag("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"));
         GiftCertificate certificate = new GiftCertificate("test5", "test",
                 1.0, null, null, 1, tags);
         assertNotNull(dao.create(certificate));
