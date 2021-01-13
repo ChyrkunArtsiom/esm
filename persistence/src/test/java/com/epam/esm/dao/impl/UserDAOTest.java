@@ -1,5 +1,6 @@
 package com.epam.esm.dao.impl;
 
+import com.epam.esm.PersistenceConfiguration;
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import org.junit.jupiter.api.Test;
@@ -14,8 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles("test")
-@SpringBootTest(classes = {UserDAO.class, RoleDAO.class})
+@SpringBootTest(classes = PersistenceConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class UserDAOTest {
 

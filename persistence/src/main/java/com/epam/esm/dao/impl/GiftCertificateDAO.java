@@ -22,8 +22,8 @@ import java.util.List;
  * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
  */
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = GiftCertificate.class)
+/*@EnableAutoConfiguration
+@EntityScan(basePackageClasses = GiftCertificate.class)*/
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     @PersistenceContext

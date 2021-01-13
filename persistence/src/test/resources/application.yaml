@@ -1,3 +1,6 @@
+jwt:
+  expiration: 2
+  secret: testsecret
 logging:
   level:
     org:

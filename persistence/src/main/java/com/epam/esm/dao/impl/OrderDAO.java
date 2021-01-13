@@ -13,8 +13,8 @@ import javax.persistence.*;
 import java.util.List;
 
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = Order.class)
+/*@EnableAutoConfiguration
+@EntityScan(basePackageClasses = Order.class)*/
 public class OrderDAO implements AbstractDAO<Order> {
 
     @PersistenceContext

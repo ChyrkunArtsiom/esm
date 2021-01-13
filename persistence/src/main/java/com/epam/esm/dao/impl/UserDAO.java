@@ -15,8 +15,8 @@ import java.util.List;
  * Class for interacting with{@link User} table in databse. Implements {@link AbstractDAO}.
  */
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = User.class)
+/*@EnableAutoConfiguration
+@EntityScan(basePackageClasses = User.class)*/
 public class UserDAO implements AbstractDAO<User> {
 
     @PersistenceContext

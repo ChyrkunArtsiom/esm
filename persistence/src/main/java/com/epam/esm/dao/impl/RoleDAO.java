@@ -14,8 +14,8 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = Role.class)
+/*@EnableAutoConfiguration
+@EntityScan(basePackageClasses = Role.class)*/
 public class RoleDAO implements AbstractDAO<Role> {
 
     @PersistenceContext
