@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceTestConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Sql("classpath:tag.sql")
 class TagDAOTest {
 
     @Autowired
@@ -39,7 +40,6 @@ class TagDAOTest {
     }
 
     @Test
-    @Sql("classpath:tag.sql")
     public void testReadByName() {
         Tag tag = dao.read("firsttag");
         assertNotNull(tag);
