@@ -1,6 +1,5 @@
 package com.epam.esm.util.jwt;
 
-import com.epam.esm.TestConfiguration;
 import com.epam.esm.dto.AuthenticationUser;
 import com.epam.esm.dto.RoleDTO;
 import com.epam.esm.dto.UserDTO;
