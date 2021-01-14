@@ -13,8 +13,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceTestConfiguration.class)
-@Sql({"classpath:data.sql"})
+
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql({"classpath:data.sql"})
 class TagDAOTest {
 
     @Autowired
