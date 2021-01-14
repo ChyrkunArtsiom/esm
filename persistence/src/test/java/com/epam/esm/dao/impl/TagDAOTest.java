@@ -39,7 +39,7 @@ class TagDAOTest {
     }
 
     @Test
-    @Sql({"classpath:data.sql"})
+/*    @Sql({"classpath:data.sql"})*/
     public void testReadByName() {
         Tag tag = dao.read("thirdtag");
         assertNotNull(tag);
