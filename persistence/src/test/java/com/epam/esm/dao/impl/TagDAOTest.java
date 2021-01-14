@@ -27,21 +27,18 @@ class TagDAOTest {
     }
 
     @Test
-    @Sql({"classpath:data.sql"})
     public void testReadById() {
         Tag tag = dao.read(1);
         assertNotNull(tag);
     }
 
     @Test
-    @Sql({"classpath:schema.sql", "classpath:data.sql"})
     public void testReadAll() {
         List<Tag> tags = dao.readAll();
         assertTrue(tags.size() > 0);
     }
 
     @Test
-/*    @Sql({"classpath:data.sql"})*/
     public void testReadByName() {
         Tag tag = dao.read("thirdtag");
         assertNotNull(tag);
