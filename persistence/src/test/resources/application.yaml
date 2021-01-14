@@ -4,7 +4,7 @@ jwt:
 logging:
   level:
     org:
-      hibernate: INFO
+      hibernate: DEBUG
     root: INFO
 spring:
   datasource:
