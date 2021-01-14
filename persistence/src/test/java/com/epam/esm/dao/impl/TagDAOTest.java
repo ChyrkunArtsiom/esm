@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = PersistenceTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TagDAOTest {
 
     @Autowired
@@ -27,12 +27,14 @@ class TagDAOTest {
     }
 
     @Test
+    @Sql({"classpath:data.sql"})
     public void testReadById() {
         Tag tag = dao.read(1);
         assertNotNull(tag);
     }
 
     @Test
+    @Sql({"classpath:schema.sql", "classpath:data.sql"})
     public void testReadAll() {
         List<Tag> tags = dao.readAll();
         assertTrue(tags.size() > 0);
