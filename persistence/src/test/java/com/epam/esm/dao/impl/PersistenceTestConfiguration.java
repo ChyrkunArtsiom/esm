@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 @Import(PersistenceConfiguration.class)
 public class PersistenceTestConfiguration {
 
-    @Bean
+/*    @Bean
     public DataSource getDataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("org.h2.Driver");
@@ -20,5 +20,5 @@ public class PersistenceTestConfiguration {
         dataSourceBuilder.username("esm_user_for_jenkins");
         dataSourceBuilder.password("127001");
         return dataSourceBuilder.build();
-    }
+    }*/
 }
