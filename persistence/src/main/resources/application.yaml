@@ -4,8 +4,8 @@ jwt:
 logging:
   level:
     org:
-      hibernate: error
-    root: error
+      hibernate: INFO
+    root: INFO
 server:
   servlet:
     context-path: /esm

@@ -4,8 +4,8 @@ jwt:
 logging:
   level:
     org:
-      hibernate: DEBUG
-    root: DEBUG
+      hibernate: INFO
+    root: INFO
 spring:
   datasource:
     driverClassName: org.h2.Driver
