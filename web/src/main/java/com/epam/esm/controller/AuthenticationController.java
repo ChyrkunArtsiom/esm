@@ -42,7 +42,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> createAuthenticationToken(
             @RequestBody AuthenticationRequest authenticationRequest) {
         final String jwt = service.authorize(authenticationRequest);
-        return new ResponseEntity<>(new AuthenticationResponse(jwt + "!!! I AM HERE !!!"), HttpStatus.OK);
+        return new ResponseEntity<>(new AuthenticationResponse(jwt), HttpStatus.OK);
     }
 
     /**
