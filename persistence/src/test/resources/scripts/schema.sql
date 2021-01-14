@@ -1,3 +1,5 @@
+drop schema if exists esm_module2 cascade;
+
 create schema esm_module2;
 
 create table esm_module2.tags

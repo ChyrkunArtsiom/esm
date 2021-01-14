@@ -5,10 +5,9 @@ logging:
   level:
     org:
       hibernate: DEBUG
-    root: INFO
+    root: DEBUG
 spring:
   datasource:
-    data: data.sql
     driverClassName: org.h2.Driver
     password: 127001
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL
@@ -16,5 +15,5 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     show-sql: true
