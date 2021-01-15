@@ -41,7 +41,7 @@ public class AuthenticationController {
             consumes = "application/json", produces = "application/json")
     public ResponseEntity<AuthenticationResponse> createAuthenticationToken(
             @RequestBody AuthenticationRequest authenticationRequest) {
-        final String jwt = service.authorize(authenticationRequest);
+        final String jwt = service.authorize(authenticationRequest) + "TEST";
         return new ResponseEntity<>(new AuthenticationResponse(jwt), HttpStatus.OK);
     }
 
