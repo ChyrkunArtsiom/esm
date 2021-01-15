@@ -7,10 +7,6 @@ pipeline {
                 // Get some code from a GitHub repository
                 git branch: 'module-5', url: 'https://github.com/ChyrkunArtsiom/esm'
 
-                bat "echo %cd%"
-
-                bat "mvn --version"
-
                 // Run Maven
                 bat "mvn clean package"
             }
