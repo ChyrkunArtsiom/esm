@@ -22,6 +22,7 @@ import javax.validation.constraints.Positive;
 @RestController
 @ComponentScan
 @RequestMapping("/users")
+@CrossOrigin(origins = "http://localhost:3000")
 @Validated
 public class UserController extends AbstractController<UserService, UserLinkBuilder, UserDTO> {
 

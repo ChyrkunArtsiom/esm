@@ -45,10 +45,11 @@ public class UserServiceTest {
     public void testCreate() {
         RoleDTO role = new RoleDTO(1, "ROLE_USER");
         UserDTO user = new UserDTO(1, "user", "password", "Artsiom", "Chyrkun", LocalDate.now().toString(), role);
+        UserViewDTO userView = new UserViewDTO(1, "user", "Artsiom", "Chyrkun", LocalDate.now().toString());
         Mockito.when(roleDAO.read(Mockito.anyString())).thenReturn(RoleMapper.toEntity(role));
         Mockito.when(dao.create(Mockito.any(User.class))).thenReturn(UserMapper.toEntity(user));
         Mockito.when(encoder.encode(Mockito.anyString())).thenReturn(user.getPassword());
-        assertEquals(user, service.create(user));
+        assertEquals(userView, service.create(user));
         Mockito.verify(roleDAO, Mockito.times(1)).read(Mockito.anyString());
     }
 

@@ -4,19 +4,17 @@ import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.DuplicateTagException;
 import com.epam.esm.exception.NoTagException;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import com.epam.esm.util.SearchCriteria;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
+import javax.persistence.criteria.*;
 import java.util.List;
 
 /**
  * Class for interacting with{@link Tag} table in databse. Implements {@link AbstractDAO}.
  */
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = Tag.class)
 public class TagDAO implements AbstractDAO<Tag> {
 
     @PersistenceContext
@@ -70,11 +68,27 @@ public class TagDAO implements AbstractDAO<Tag> {
      * @param size the size
      * @return the list of {@link Tag} objects
      */
-    public List<Tag> readPaginated(Integer page, Integer size) {
-        TypedQuery<Tag> query = entityManager.createQuery("SELECT t FROM tags t ORDER BY t.id", Tag.class);
-        query.setFirstResult((page - 1) * size);
-        query.setMaxResults(size);
-        return query.getResultList();
+    public List<Tag> readPaginated(SearchCriteria searchCriteria, Integer page, Integer size) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> query = builder.createQuery(Tag.class);
+        Root<Tag> root = query.from(Tag.class);
+        query.select(root);
+
+        if (searchCriteria.getName() != null) {
+            Predicate predicateForName = builder.like(builder.lower(root.get("name")), "%" + searchCriteria.getName().toLowerCase() + "%");
+            query.where(predicateForName);
+        }
+
+        query.orderBy(builder.asc(root.get("id")));
+        //Pagination
+        TypedQuery<Tag> typedQuery = entityManager.createQuery(query);
+        if (page != null) {
+            typedQuery.setFirstResult((page - 1) * size);
+        }
+        if (size != null) {
+            typedQuery.setMaxResults(size);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
@@ -112,10 +126,25 @@ public class TagDAO implements AbstractDAO<Tag> {
      * @param size the size of page
      * @return the number of last page
      */
-    public int getLastPage(Integer size) {
-        Query query = entityManager.createQuery("SELECT count(t.id) FROM tags t");
-        Long count = (Long)query.getSingleResult();
-        int pages = count.intValue()/size;
+    public int getLastPage(SearchCriteria searchCriteria, Integer size) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        //Outer SELECT COUNT query
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<Tag> tagRoot = query.from(Tag.class);
+        //Inner SELECT query
+        Subquery<Tag> subquery = query.subquery(Tag.class);
+        Root<Tag> innerRoot = subquery.from(Tag.class);
+
+        subquery.select(innerRoot).distinct(true);
+        query.select(builder.count(tagRoot)).where(builder.in(tagRoot).value(subquery));
+
+        if (searchCriteria.getName() != null) {
+            Predicate predicateForName = builder.like(builder.lower(innerRoot.get("name")), "%" + searchCriteria.getName().toLowerCase() + "%");
+            subquery.where(predicateForName);
+        }
+
+        Long count = entityManager.createQuery(query).getSingleResult();
+        int pages = count.intValue() / size;
         if (count % size > 0) {
             pages++;
         }

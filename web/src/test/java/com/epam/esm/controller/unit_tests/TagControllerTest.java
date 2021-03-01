@@ -10,6 +10,7 @@ import com.epam.esm.exception.NoTagException;
 import com.epam.esm.service.impl.TagService;
 import com.epam.esm.service.impl.UserService;
 import com.epam.esm.util.ErrorMessageManager;
+import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.util.jwt.JwtUtilImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -144,10 +145,14 @@ class TagControllerTest {
     }
 
     @Test
-    public void testGetAllTags() throws Exception {
+    public void testGetTagsByParams() throws Exception {
         List<TagDTO> dtos = new ArrayList<>(
                 Arrays.asList(new TagDTO(1, "name1"), new TagDTO(2, "name2")));
-        Mockito.when(service.readAll()).thenReturn(dtos);
+        Mockito.when(service.readByParams(
+                Mockito.any(SearchCriteria.class),
+                Mockito.nullable(Integer.class),
+                Mockito.nullable(Integer.class)))
+                .thenReturn(dtos);
 
 
         mockMvc.perform(get(TAGS_PATH).header("Authorization", jwt))

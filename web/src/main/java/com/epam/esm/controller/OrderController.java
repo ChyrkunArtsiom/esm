@@ -36,6 +36,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @ComponentScan(basePackageClasses = {OrderService.class})
 @RequestMapping("/orders")
+@CrossOrigin(origins = "http://localhost:3000")
 @Validated
 public class OrderController extends AbstractController<OrderService, OrderLinkBuilder, OrderDTO> {
 

@@ -4,8 +4,6 @@ import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.DuplicateUserException;
 import com.epam.esm.exception.NoUserException;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
@@ -15,8 +13,6 @@ import java.util.List;
  * Class for interacting with{@link User} table in databse. Implements {@link AbstractDAO}.
  */
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = User.class)
 public class UserDAO implements AbstractDAO<User> {
 
     @PersistenceContext

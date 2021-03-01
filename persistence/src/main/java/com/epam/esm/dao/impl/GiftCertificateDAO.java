@@ -8,8 +8,6 @@ import com.epam.esm.exception.NoCertificateException;
 import com.epam.esm.sort.SortOrder;
 import com.epam.esm.sort.SortType;
 import com.epam.esm.util.SearchCriteria;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
@@ -22,8 +20,6 @@ import java.util.List;
  * Class for interacting with{@link GiftCertificate} table in database. Implements {@link AbstractDAO}.
  */
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = GiftCertificate.class)
 public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     @PersistenceContext
@@ -169,7 +165,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         buildQuery(innerRoot, subquery, searchCriteria);
 
         Long count = entityManager.createQuery(query).getSingleResult();
-        int pages = count.intValue()/size;
+        int pages = count.intValue() / size;
         if (count % size > 0) {
             pages++;
         }

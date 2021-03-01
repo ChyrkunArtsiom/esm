@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,6 @@ import java.util.function.Function;
  * The class-implementation of {@link JwtUtil}.
  */
 @Service
-@PropertySource("classpath:/jwt.properties")
 public class JwtUtilImpl implements JwtUtil {
 
     private static final String CLAIM_KEY_USER_ID = "userId";

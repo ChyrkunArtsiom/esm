@@ -3,8 +3,6 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.AbstractDAO;
 import com.epam.esm.entity.Role;
 import com.epam.esm.exception.NoRoleException;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -14,8 +12,6 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = Role.class)
 public class RoleDAO implements AbstractDAO<Role> {
 
     @PersistenceContext

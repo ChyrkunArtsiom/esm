@@ -1,0 +1,22 @@
+jwt:
+  expiration: 1
+  secret: ${ESM_JWT_SECRET:secretsgrgy4t35423rgsrc234gsdqwesecter}
+logging:
+  level:
+    org:
+      hibernate: INFO
+    root: INFO
+server:
+  servlet:
+    context-path: /esm
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: ${ESM_DB_PASSWORD:127001}
+    url: ${ESM_DB_URL:jdbc:postgresql://localhost:5432/esm_db}
+    username: ${ESM_DB_USER:esm_user}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true

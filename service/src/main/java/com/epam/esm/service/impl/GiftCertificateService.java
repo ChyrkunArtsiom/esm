@@ -23,10 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Class for interacting with {@link GiftCertificateDAO}. Implements {@link AbstractService}.
@@ -91,7 +89,6 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
         return readWithParams(new SearchCriteria("", "", "", "name_asc"), page, size);
     }
 
-
     private List<GiftCertificateDTO> readWithParams(SearchCriteria criteria, Integer page, Integer size) {
         List<GiftCertificateDTO> dtos;
         SearchCriteriaValidator.isValid(criteria);
@@ -109,7 +106,7 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
      */
     public List<GiftCertificateDTO> readByParams(SearchCriteria searchCriteria, Integer page, Integer size) {
         List<GiftCertificateDTO> certificates;
-        if (Stream.of(page, size).allMatch(Objects::isNull)) {
+        if (page == null) {
             certificates = readWithParams(searchCriteria, null, null);
         } else {
             int lastPage = getLastPage(searchCriteria, size);
@@ -181,10 +178,11 @@ public class GiftCertificateService implements AbstractService<GiftCertificateDT
     }
 
     /**
-     * Gets a number of last page of objects.
+     * Gets a number of the last page of objects.
      *
+     * @param searchCriteria the {@link SearchCriteria} object which holds searching parameters
      * @param size the size of page
-     * @return the number of last page
+     * @return the number of the last page
      */
     public int getLastPage(SearchCriteria searchCriteria, Integer size) {
         return dao.getLastPage(searchCriteria, size);

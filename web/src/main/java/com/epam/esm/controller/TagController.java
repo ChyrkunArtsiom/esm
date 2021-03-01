@@ -4,6 +4,7 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.dto.validationmarkers.DeleteValidation;
 import com.epam.esm.dto.validationmarkers.PostValidation;
 import com.epam.esm.service.impl.TagService;
+import com.epam.esm.util.SearchCriteria;
 import com.epam.esm.util.linkbuilders.TagLinkBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -19,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 /**
@@ -27,19 +32,23 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @ComponentScan(basePackageClasses = {TagService.class})
 @RequestMapping("/tags")
+@CrossOrigin(origins = "http://localhost:3000")
 @Validated
 public class TagController extends AbstractController<TagService, TagLinkBuilder, TagDTO> {
+    private TagService service;
+
+    private TagLinkBuilder linkBuilder;
 
     @Override
     @Autowired
     public void setService(TagService service) {
-        super.setService(service);
+        this.service = service;
     }
 
     @Override
     @Autowired
     public void setLinkBuilder(TagLinkBuilder linkBuilder) {
-        super.setLinkBuilder(linkBuilder);
+        this.linkBuilder = linkBuilder;
     }
 
     /**
@@ -73,18 +82,36 @@ public class TagController extends AbstractController<TagService, TagLinkBuilder
     }
 
     /**
-     * Gets all {@link TagDTO} objects.
+     * Gets all {@link TagDTO} objects by parameters.
      *
+     * @param name           the name
+     * @param page           the page
+     * @param size           the size
      * @return the list of {@link TagDTO} objects.
      */
     @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
-    @GetMapping(params = {"page", "size"})
     @ResponseStatus(HttpStatus.OK)
-    public CollectionModel readAllTags(
+    public CollectionModel readTagsByParams(
+            @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "5") @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
-        return readPaginatedForController(page, size);
+        List<TagDTO> tags;
+        CollectionModel result;
+        SearchCriteria searchCriteria = new SearchCriteria(null, name, null, null);
+        tags = service.readByParams(searchCriteria, page, size);
+        linkBuilder.buildLinks(tags);
+        result = CollectionModel.of(tags);
+        if (Stream.of(page, size).noneMatch(Objects::isNull)) {
+            int lastPage = service.getLastPage(searchCriteria, size);
+            if (hasPrevious(page)) {
+                linkBuilder.buildPreviousPageLink(result, name, page, size);
+            }
+            if (hasNext(page, lastPage)) {
+                linkBuilder.buildNextPageLink(result, name, page, size);
+            }
+        }
+        return result;
     }
 
     /**
@@ -115,5 +142,13 @@ public class TagController extends AbstractController<TagService, TagLinkBuilder
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    private boolean hasNext(int page, int lastPage) {
+        return page < lastPage;
+    }
+
+    private boolean hasPrevious(int page) {
+        return page > 1;
     }
 }

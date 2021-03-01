@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -15,8 +16,10 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = GiftCertificateDAO.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@SpringBootTest(classes = PersistenceTestConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
+        scripts = {"classpath:scripts/schema.sql", "classpath:scripts/data.sql"})
 class GiftCertificateDAOTest {
 
     @Autowired
@@ -26,8 +29,8 @@ class GiftCertificateDAOTest {
     @Transactional
     public void testCreate() {
         Set<Tag> tags = new HashSet<>();
-        tags.add(new Tag("fifth"));
-        GiftCertificate certificate = new GiftCertificate("test5", "test",
+        tags.add(new Tag("TagName"));
+        GiftCertificate certificate = new GiftCertificate("Name", "test",
                 1.0, null, null, 1, tags);
         assertNotNull(dao.create(certificate));
     }
@@ -58,7 +61,7 @@ class GiftCertificateDAOTest {
     @Transactional(readOnly = true)
     public void testReadAll() {
         List<GiftCertificate> certificates = dao.readAll();
-        assertEquals(certificates.size(), 4);
+        assertEquals(4, certificates.size());
     }
 
     @Test

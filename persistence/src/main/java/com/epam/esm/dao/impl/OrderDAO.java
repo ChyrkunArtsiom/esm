@@ -5,16 +5,12 @@ import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.NoOrderException;
 import com.epam.esm.exception.OrderHasDuplicateCertificatesException;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Repository
-@EnableAutoConfiguration
-@EntityScan(basePackageClasses = Order.class)
 public class OrderDAO implements AbstractDAO<Order> {
 
     @PersistenceContext

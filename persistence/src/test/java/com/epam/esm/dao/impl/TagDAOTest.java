@@ -1,18 +1,23 @@
 package com.epam.esm.dao.impl;
 
+import com.epam.esm.PersistenceConfiguration;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.util.SearchCriteria;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = TagDAO.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@SpringBootTest(classes = PersistenceConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
+        scripts = {"classpath:scripts/schema.sql", "classpath:scripts/data.sql"})
 class TagDAOTest {
 
     @Autowired
@@ -38,8 +43,15 @@ class TagDAOTest {
     }
 
     @Test
+    public void testReadByParams() {
+        SearchCriteria criteria = new SearchCriteria(null , "FIRST", null, null);
+        List<Tag> tags = dao.readPaginated(criteria, 1, 5);
+        assertEquals(1, tags.size());
+    }
+
+    @Test
     public void testReadByName() {
-        Tag tag = dao.read("firsttag");
+        Tag tag = dao.read("thirdtag");
         assertNotNull(tag);
     }
 
@@ -60,7 +72,7 @@ class TagDAOTest {
     public void testReadPaginated() {
         int page = 2;
         int size = 2;
-        List<Tag> tags = dao.readPaginated(page, size);
-        assertEquals(tags.size(), size);
+        List<Tag> tags = dao.readPaginated(new SearchCriteria("", "", "", "name_asc"), page, size);
+        assertEquals(size, tags.size());
     }
 }

@@ -2,6 +2,7 @@ package com.epam.esm.util.linkbuilders;
 
 import com.epam.esm.controller.TagController;
 import com.epam.esm.dto.TagDTO;
+import com.epam.esm.util.SearchCriteria;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -32,11 +33,19 @@ public class TagLinkBuilder implements LinkBuilder<TagDTO> {
 
     @Override
     public void buildPreviousPageLink(CollectionModel target, int page, int size) {
-        target.add(linkTo(methodOn(TagController.class).readAllTags(page - 1, size)).withRel("prev"));
+        target.add(linkTo(methodOn(TagController.class).readTagsByParams(null, page - 1, size)).withRel("prev").expand());
     }
 
     @Override
     public void buildNextPageLink(CollectionModel target, int page, int size) {
-        target.add(linkTo(methodOn(TagController.class).readAllTags(page + 1, size)).withRel("next"));
+        target.add(linkTo(methodOn(TagController.class).readTagsByParams(null, page + 1, size)).withRel("next").expand());
+    }
+
+    public void buildPreviousPageLink(CollectionModel target, String name, int page, int size) {
+        target.add(linkTo(methodOn(TagController.class).readTagsByParams(name, page - 1, size)).withRel("prev").expand());
+    }
+
+    public void buildNextPageLink(CollectionModel target, String name, int page, int size) {
+        target.add(linkTo(methodOn(TagController.class).readTagsByParams(name, page + 1, size)).withRel("next").expand());
     }
 }

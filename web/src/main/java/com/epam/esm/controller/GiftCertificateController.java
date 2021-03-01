@@ -32,6 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  */
 @RestController
 @ComponentScan(basePackageClasses = {GiftCertificateService.class})
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/certificates")
 @Validated
 public class GiftCertificateController {
@@ -89,7 +90,6 @@ public class GiftCertificateController {
     /**
      * Gets {@link GiftCertificateDTO} objects by parameters.
      *
-     * @param searchCriteria the Search parameters
      * @param page           the page
      * @param size           the size
      * @return the list of {@link GiftCertificateDTO} objects.
@@ -97,22 +97,26 @@ public class GiftCertificateController {
     @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel readCertificatesByParams(
-            SearchCriteria searchCriteria,
+            @RequestParam(value = "tag", required = false) String tag,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "page", required = false) @Positive @Digits(integer = 4, fraction = 0) Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "5") @Positive @Digits(integer = 4, fraction = 0) Integer size
     ) {
         List<GiftCertificateDTO> certificates;
         CollectionModel result;
+        SearchCriteria searchCriteria = new SearchCriteria(tag, name, description, sort);
         certificates = service.readByParams(searchCriteria, page, size);
         linkBuilder.buildLinks(certificates);
         result = CollectionModel.of(certificates);
         if (Stream.of(page, size).noneMatch(Objects::isNull)) {
             int lastPage = service.getLastPage(searchCriteria, size);
             if (hasPrevious(page)) {
-                linkBuilder.buildPreviousPageLink(result, searchCriteria, page, size);
+                linkBuilder.buildPreviousPageLink(result, tag, name, description, sort, page, size);
             }
             if (hasNext(page, lastPage)) {
-                linkBuilder.buildNextPageLink(result, searchCriteria, page, size);
+                linkBuilder.buildNextPageLink(result, tag, name, description, sort, page, size);
             }
         }
         return result;
@@ -177,5 +181,4 @@ public class GiftCertificateController {
     private boolean hasPrevious(int page) {
         return page > 1;
     }
-
 }
