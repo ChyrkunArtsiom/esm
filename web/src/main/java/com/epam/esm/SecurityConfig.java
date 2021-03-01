@@ -55,12 +55,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .cors().and()
                 .csrf().disable()
 
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .exceptionHandling().and()
 
                 .authorizeRequests()
+
                 .antMatchers("/authenticate", "/signup").permitAll()
 
                 .antMatchers(HttpMethod.GET, "/certificates/**").permitAll()
@@ -75,6 +77,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/orders/*", "/orders/*/order").hasAnyRole("USER", "ADMIN")
                 .antMatchers(HttpMethod.POST, "/orders").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/orders/**").hasRole("ADMIN")
+
+                .antMatchers("/**").permitAll()
 
                 .anyRequest().authenticated()
 

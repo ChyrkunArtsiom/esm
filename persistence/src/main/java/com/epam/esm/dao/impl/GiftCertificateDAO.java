@@ -165,7 +165,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
         buildQuery(innerRoot, subquery, searchCriteria);
 
         Long count = entityManager.createQuery(query).getSingleResult();
-        int pages = count.intValue()/size;
+        int pages = count.intValue() / size;
         if (count % size > 0) {
             pages++;
         }

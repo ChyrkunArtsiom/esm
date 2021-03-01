@@ -25,7 +25,9 @@ public class SearchCriteria {
         this.tag = tag;
         this.name = name;
         this.description = description;
-        setSort(sort);
+        if (sort != null && !sort.isEmpty()) {
+            setSort(sort);
+        }
     }
 
     public String getTag() {

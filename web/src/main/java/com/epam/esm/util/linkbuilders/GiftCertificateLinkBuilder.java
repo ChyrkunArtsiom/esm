@@ -41,26 +41,28 @@ public class GiftCertificateLinkBuilder implements LinkBuilder<GiftCertificateDT
     @Override
     public void buildPreviousPageLink(CollectionModel target, int page, int size) {
         target.add(linkTo(methodOn(GiftCertificateController.class)
-                .readCertificatesByParams(null, page - 1, size))
+                .readCertificatesByParams(null, null, null, null, page - 1, size))
                 .withRel("prev"));
     }
 
     @Override
     public void buildNextPageLink(CollectionModel target, int page, int size) {
         target.add(linkTo(methodOn(GiftCertificateController.class)
-                .readCertificatesByParams(null,page + 1, size))
+                .readCertificatesByParams(null, null, null, null,page + 1, size))
                 .withRel("next"));
     }
 
-    public void buildPreviousPageLink(CollectionModel target, SearchCriteria searchCriteria, int page, int size) {
+    public void buildPreviousPageLink(CollectionModel target, String tag, String name, String description, String sort, int page, int size) {
         target.add(linkTo(methodOn(GiftCertificateController.class)
-                .readCertificatesByParams(searchCriteria,page - 1, size))
-                .withRel("prev"));
+                .readCertificatesByParams(tag, name ,description, sort,page - 1, size))
+                .withRel("prev")
+                .expand());
     }
 
-    public void buildNextPageLink(CollectionModel target, SearchCriteria searchCriteria, int page, int size) {
+    public void buildNextPageLink(CollectionModel target, String tag, String name, String description, String sort, int page, int size) {
         target.add(linkTo(methodOn(GiftCertificateController.class)
-                .readCertificatesByParams(searchCriteria,page + 1, size))
-                .withRel("next"));
+                .readCertificatesByParams(tag, name, description, sort,page + 1, size))
+                .withRel("next")
+                .expand());
     }
 }

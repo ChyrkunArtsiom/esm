@@ -4,6 +4,7 @@ import com.epam.esm.dao.impl.TagDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.TagMapper;
+import com.epam.esm.util.SearchCriteria;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,10 +53,24 @@ class TagServiceTest {
         int size = 2;
         List<Tag> entities = new ArrayList<>(
                 Arrays.asList(new Tag("name1"), new Tag("name2")));
-        Mockito.when(dao.readPaginated(page, size)).thenReturn(entities);
+        Mockito.when(dao.readPaginated(Mockito.any(SearchCriteria.class), Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(entities);
 
         List<TagDTO> tags = service.readPaginated(page, size);
-        Mockito.verify(dao, Mockito.times(1)).readPaginated(page, size);
+        Mockito.verify(dao, Mockito.times(1)).readPaginated(Mockito.any(SearchCriteria.class), Mockito.any(Integer.class), Mockito.any(Integer.class));
+        assertEquals(tags.size(), size);
+    }
+
+    @Test void readByParams() {
+        int page = 1;
+        int size = 2;
+        List<Tag> entities = new ArrayList<>(
+                Arrays.asList(new Tag("name1"), new Tag("name2")));
+        Mockito.when(dao.readPaginated(Mockito.any(SearchCriteria.class), Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(entities);
+        Mockito.when(dao.getLastPage(Mockito.any(SearchCriteria.class), Mockito.anyInt())).thenReturn(1);
+
+        SearchCriteria searchCriteria = new SearchCriteria(null, "name", null, null);
+        List<TagDTO> tags = service.readByParams(searchCriteria, page, size);
+        Mockito.verify(dao, Mockito.times(1)).readPaginated(Mockito.any(SearchCriteria.class), Mockito.any(Integer.class), Mockito.any(Integer.class));
         assertEquals(tags.size(), size);
     }
 
