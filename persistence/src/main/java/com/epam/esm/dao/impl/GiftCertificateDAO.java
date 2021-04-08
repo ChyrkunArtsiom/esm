@@ -174,7 +174,7 @@ public class GiftCertificateDAO implements AbstractDAO<GiftCertificate> {
 
     private <T extends AbstractQuery<GiftCertificate>> void buildQuery(Root<GiftCertificate> root, T query, SearchCriteria searchCriteria) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        Join<GiftCertificate, Tag> tags = root.join("tags");
+        Join<GiftCertificate, Tag> tags = root.join("tags", JoinType.LEFT);
         List<Predicate> predicates = new ArrayList<>();
         //WHERE clause for certificate name
         if (searchCriteria.getName() != null) {

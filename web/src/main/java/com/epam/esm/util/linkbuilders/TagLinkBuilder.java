@@ -1,5 +1,6 @@
 package com.epam.esm.util.linkbuilders;
 
+import com.epam.esm.controller.GiftCertificateController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.util.SearchCriteria;
@@ -41,11 +42,20 @@ public class TagLinkBuilder implements LinkBuilder<TagDTO> {
         target.add(linkTo(methodOn(TagController.class).readTagsByParams(null, page + 1, size)).withRel("next").expand());
     }
 
+    @Override
+    public void buildLastPageLink(CollectionModel target, int lastPage, int size) {
+        target.add(linkTo(methodOn(TagController.class).readTagsByParams(null, lastPage, size)).withRel("last").expand());
+    }
+
     public void buildPreviousPageLink(CollectionModel target, String name, int page, int size) {
         target.add(linkTo(methodOn(TagController.class).readTagsByParams(name, page - 1, size)).withRel("prev").expand());
     }
 
     public void buildNextPageLink(CollectionModel target, String name, int page, int size) {
         target.add(linkTo(methodOn(TagController.class).readTagsByParams(name, page + 1, size)).withRel("next").expand());
+    }
+
+    public void buildLastPageLink(CollectionModel target, String name, int lastPage, int size) {
+        target.add(linkTo(methodOn(TagController.class).readTagsByParams(name, lastPage, size)).withRel("last").expand());
     }
 }

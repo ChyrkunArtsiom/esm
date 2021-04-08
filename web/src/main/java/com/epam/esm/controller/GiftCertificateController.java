@@ -118,6 +118,7 @@ public class GiftCertificateController {
             if (hasNext(page, lastPage)) {
                 linkBuilder.buildNextPageLink(result, tag, name, description, sort, page, size);
             }
+            linkBuilder.buildLastPageLink(result, tag, name, description, sort, lastPage, size);
         }
         return result;
     }

@@ -65,6 +65,7 @@ public abstract class AbstractController<T extends AbstractService, U extends Li
             if (hasNext(service, page, size)) {
                 linkBuilder.buildNextPageLink(result, page, size);
             }
+            linkBuilder.buildLastPageLink(result, lastPage, size);
         }
         return result;
     }

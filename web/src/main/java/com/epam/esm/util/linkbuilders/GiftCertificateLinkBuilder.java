@@ -52,6 +52,14 @@ public class GiftCertificateLinkBuilder implements LinkBuilder<GiftCertificateDT
                 .withRel("next"));
     }
 
+    @Override
+    public void buildLastPageLink(CollectionModel target, int lastPage, int size) {
+        target.add(linkTo(methodOn(GiftCertificateController.class)
+                .readCertificatesByParams(null, null, null, null, lastPage, size))
+                .withRel("last")
+                .expand());
+    }
+
     public void buildPreviousPageLink(CollectionModel target, String tag, String name, String description, String sort, int page, int size) {
         target.add(linkTo(methodOn(GiftCertificateController.class)
                 .readCertificatesByParams(tag, name ,description, sort,page - 1, size))
@@ -63,6 +71,13 @@ public class GiftCertificateLinkBuilder implements LinkBuilder<GiftCertificateDT
         target.add(linkTo(methodOn(GiftCertificateController.class)
                 .readCertificatesByParams(tag, name, description, sort,page + 1, size))
                 .withRel("next")
+                .expand());
+    }
+
+    public void buildLastPageLink(CollectionModel target, String tag, String name, String description, String sort, int lastPage, int size) {
+        target.add(linkTo(methodOn(GiftCertificateController.class)
+                .readCertificatesByParams(tag, name, description, sort,lastPage, size))
+                .withRel("last")
                 .expand());
     }
 }

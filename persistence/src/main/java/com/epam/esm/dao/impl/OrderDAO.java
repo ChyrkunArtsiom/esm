@@ -128,12 +128,34 @@ public class OrderDAO implements AbstractDAO<Order> {
      * Gets a list of {@link Order} objects by uesr id.
      *
      * @param userId the id of user
+     * @param page the page number
+     * @param size the size
      * @return the list of {@link Order} objects
      */
-    public List<Order> readOrdersByUserId(int userId) {
+    public List<Order> readOrdersByUserId(int userId, Integer page, Integer size) {
         TypedQuery<Order> query = entityManager.createQuery(
                 "SELECT o FROM orders o WHERE o.user.id =:user_id ORDER BY o.id", Order.class);
         query.setParameter("user_id", userId);
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
         return query.getResultList();
+    }
+
+    /**
+     * Gets a number of last page of objects for a specific user.
+     *
+     * @param userId the id of user
+     * @param size the size
+     * @return the number of last page
+     */
+    public int getLastPageForUser(int userId, Integer size) {
+        Query query = entityManager.createQuery("SELECT count(o) FROM orders o WHERE o.user.id =:user_id");
+        query.setParameter("user_id", userId);
+        Long count = (Long)query.getSingleResult();
+        int pages = count.intValue()/size;
+        if (count % size > 0) {
+            pages++;
+        }
+        return pages;
     }
 }

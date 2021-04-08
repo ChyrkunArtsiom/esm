@@ -42,4 +42,13 @@ public interface LinkBuilder<T extends RepresentationModel> {
      * @param size   the size
      */
     void buildNextPageLink(CollectionModel target, int page, int size);
+
+    /**
+     * Builds a link for the last page.
+     *
+     * @param target the target
+     * @param page   the page
+     * @param size   the size
+     */
+    void buildLastPageLink(CollectionModel target, int lastPage, int size);
 }

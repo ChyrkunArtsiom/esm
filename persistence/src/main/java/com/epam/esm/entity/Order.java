@@ -1,5 +1,7 @@
 package com.epam.esm.entity;
 
+import org.apache.commons.math3.util.Precision;
+
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -130,20 +132,21 @@ public class Order {
 
     @PrePersist
     public void onPrePersist() {
-        Double cost = 0.0;
+        double cost = 0.0;
         OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.setPurchaseDate(currentTime);
         for (GiftCertificate certificate : this.getCertificates()) {
             cost = cost + certificate.getPrice();
         }
-        this.setCost(cost);
+        this.setCost(Precision.round(cost, 2));
     }
 
     @PreUpdate
     public void onPreUpdate() {
+        double cost = 0.0;
         for (GiftCertificate certificate : this.getCertificates()) {
             cost = cost + certificate.getPrice();
         }
-        this.setCost(cost);
+        this.setCost(Precision.round(cost, 2));
     }
 }

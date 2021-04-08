@@ -160,10 +160,21 @@ public class OrderService implements AbstractService<OrderViewDTO, OrderDTO> {
      * @param userId the id of user
      * @return the list of {@link Order} objects
      */
-    public List<OrderViewDTO> readOrdersByUserId(int userId) {
+    public List<OrderViewDTO> readOrdersByUserId(int userId, Integer page, Integer size) {
         List<OrderViewDTO> dtos;
-        List<Order> orders = dao.readOrdersByUserId(userId);
+        List<Order> orders = dao.readOrdersByUserId(userId, page, size);
         dtos = orders.stream().map(OrderMapper::toOrderViewDTO).collect(Collectors.toList());
         return dtos;
+    }
+
+    /**
+     * Gets a number of last page of objects for a specific user.
+     *
+     * @param userId the id of user
+     * @param size the size
+     * @return the number of last page
+     */
+    public int getLastPageForUser(int userId, Integer size) {
+        return dao.getLastPageForUser(userId, size);
     }
 }

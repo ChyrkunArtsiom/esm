@@ -88,11 +88,6 @@ public class UserService implements AbstractService<UserViewDTO, UserDTO>, UserD
         return UserMapper.toUserViewDTO(user);
     }
 
-    public UserViewDTO readOpenUser(int id) {
-        User user = dao.read(id);
-        return UserMapper.toUserViewDTO(user);
-    }
-
     @Override
     public List<UserViewDTO> readAll() {
         List<UserViewDTO> dtos;

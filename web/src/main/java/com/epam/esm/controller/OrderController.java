@@ -107,12 +107,22 @@ public class OrderController extends AbstractController<OrderService, OrderLinkB
     @PreAuthorize("hasRole('ADMIN') or @authorizeValidator.hasAccessToOrderList(#user, #userId)")
     public CollectionModel readOrdersByUserId(
             @PathVariable @Positive @Digits(integer = 10, fraction = 0) int userId,
+            @RequestParam(value = "page", required = false, defaultValue = "1") @Positive @Digits(integer = 4, fraction = 0) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = "5") @Positive @Digits(integer = 4, fraction = 0) Integer size,
             @AuthenticationPrincipal AuthenticationUser user) {
         List<OrderViewDTO> orders;
         CollectionModel result;
-        orders = service.readOrdersByUserId(userId);
+        orders = service.readOrdersByUserId(userId, page, size);
         linkBuilder.buildLinks(orders);
         result = CollectionModel.of(orders);
+        int lastPage = service.getLastPageForUser(userId, size);
+        if (hasPrevious(page)) {
+            linkBuilder.buildPreviousPageLinkForUser(result, userId, page, size, user);
+        }
+        if (hasNext(page, lastPage)) {
+            linkBuilder.buildNextPageLinkForUser(result, userId, page, size, user);
+        }
+        linkBuilder.buildLastPageLinkForUser(result, userId, lastPage, size, user);
         return result;
     }
 
@@ -195,5 +205,13 @@ public class OrderController extends AbstractController<OrderService, OrderLinkB
             tagLinkBuilder.buildLinks(tags);
             result = CollectionModel.of(tags);
         return result;
+    }
+
+    private boolean hasNext(int page, int lastPage) {
+        return page < lastPage;
+    }
+
+    private boolean hasPrevious(int page) {
+        return page > 1;
     }
 }

@@ -1,5 +1,6 @@
 package com.epam.esm.util.linkbuilders;
 
+import com.epam.esm.controller.GiftCertificateController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.dto.UserViewDTO;
@@ -36,5 +37,10 @@ public class UserLinkBuilder implements LinkBuilder<UserViewDTO> {
     @Override
     public void buildNextPageLink(CollectionModel target, int page, int size) {
 
+    }
+
+    @Override
+    public void buildLastPageLink(CollectionModel target, int lastPage, int size) {
+        target.add(linkTo(methodOn(UserController.class).readAllUsers(lastPage, size)).withRel("last"));
     }
 }

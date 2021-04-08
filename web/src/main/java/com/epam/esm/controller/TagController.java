@@ -110,6 +110,7 @@ public class TagController extends AbstractController<TagService, TagLinkBuilder
             if (hasNext(page, lastPage)) {
                 linkBuilder.buildNextPageLink(result, name, page, size);
             }
+            linkBuilder.buildLastPageLink(result, name, lastPage, size);
         }
         return result;
     }

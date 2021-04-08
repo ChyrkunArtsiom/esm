@@ -1,6 +1,7 @@
 package com.epam.esm.util.linkbuilders;
 
 import com.epam.esm.controller.OrderController;
+import com.epam.esm.dto.AuthenticationUser;
 import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.dto.OrderViewDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,28 @@ public class OrderLinkBuilder implements LinkBuilder<OrderViewDTO> {
     @Override
     public void buildNextPageLink(CollectionModel target, int page, int size) {
         target.add(linkTo(methodOn(OrderController.class).readAllOrders(page + 1, size)).withRel("next"));
+    }
+
+    @Override
+    public void buildLastPageLink(CollectionModel target, int lastPage, int size) {
+        target.add(linkTo(methodOn(OrderController.class).readAllOrders(lastPage, size)).withRel("last"));
+    }
+
+    public void buildPreviousPageLinkForUser(CollectionModel target, int userId, int page, int size,
+                                             AuthenticationUser user) {
+        target.add(linkTo(methodOn(OrderController.class)
+                .readOrdersByUserId(userId, page - 1, size, user)).withRel("prev"));
+    }
+
+    public void buildNextPageLinkForUser(CollectionModel target, int userId, int page, int size,
+                                         AuthenticationUser user) {
+        target.add(linkTo(methodOn(OrderController.class)
+                .readOrdersByUserId(userId, page + 1, size, user)).withRel("next"));
+    }
+
+    public void buildLastPageLinkForUser(CollectionModel target, int userId, int lastPage, int size,
+                                         AuthenticationUser user) {
+        target.add(linkTo(methodOn(OrderController.class)
+                .readOrdersByUserId(userId, lastPage, size, user)).withRel("last"));
     }
 }
